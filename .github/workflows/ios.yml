@@ -72,11 +72,21 @@ jobs:
         TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
         PROFILE_NAME: ${{ secrets.IOS_PROVISIONING_PROFILE_NAME }}
       run: |
-        # Inject explicit Team ID, Manual signing, and Provisioning Profile name directly to project config
-        sed -i '' "s/DEVELOPMENT_TEAM = \"\";/DEVELOPMENT_TEAM = $TEAM_ID;/g" ios/athr.xcodeproj/project.pbxproj
-        sed -i '' "s/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g" ios/athr.xcodeproj/project.pbxproj
-        sed -i '' "s/PROVISIONING_PROFILE_SPECIFIER = \"\";/PROVISIONING_PROFILE_SPECIFIER = \"$PROFILE_NAME\";/g" ios/athr.xcodeproj/project.pbxproj
-        sed -i '' "s/CODE_SIGN_IDENTITY = \"iPhone Developer\";/CODE_SIGN_IDENTITY = \"Apple Distribution\";/g" ios/athr.xcodeproj/project.pbxproj
+        python3 -c "
+        import os, re
+        path = 'ios/athr.xcodeproj/project.pbxproj'
+        team = os.environ.get('TEAM_ID', '')
+        prof = os.environ.get('PROFILE_NAME', '')
+        with open(path, 'r') as f:
+            txt = f.read()
+        txt = re.sub(r'DEVELOPMENT_TEAM = [^;]*;', f'DEVELOPMENT_TEAM = {team};', txt)
+        txt = re.sub(r'CODE_SIGN_STYLE = [^;]*;', 'CODE_SIGN_STYLE = Manual;', txt)
+        txt = re.sub(r'PROVISIONING_PROFILE_SPECIFIER = [^;]*;', f'PROVISIONING_PROFILE_SPECIFIER = \"{prof}\";', txt)
+        txt = re.sub(r'CODE_SIGN_IDENTITY = [^;]*;', 'CODE_SIGN_IDENTITY = \"Apple Distribution\";', txt)
+        with open(path, 'w') as f:
+            f.write(txt)
+        print('Successfully injected signing settings via Python!')
+        "
 
     - name: Create ExportOptions.plist
       env:
