@@ -54,9 +54,13 @@ jobs:
           security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
           security list-keychain -d user -s $KEYCHAIN_PATH
 
-          # Install the Provisioning Profile in the standard library folder
+          # Extract the UUID from the Provisioning Profile
+          PROFILE_UUID=$(security cms -D -i $PP_PATH | grep -A1 UUID | grep string | awk -F'>|<' '{print $3}')
+          echo "PROFILE_UUID=$PROFILE_UUID" >> $GITHUB_ENV
+
+          # Install the Provisioning Profile using the UUID as the filename
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/$PROFILE_UUID.mobileprovision
 
       - name: Generate Native iOS Directory (Expo Prebuild)
         run: npx expo prebuild --platform ios --no-install
@@ -107,6 +111,7 @@ jobs:
                      -archivePath $RUNNER_TEMP/athr.xcarchive \
                      DEVELOPMENT_TEAM="$TEAM_ID" \
                      PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
+                     PROVISIONING_PROFILE="$PROFILE_UUID" \
                      CODE_SIGN_STYLE="Manual" \
                      CODE_SIGN_IDENTITY="Apple Distribution" \
                      archive
