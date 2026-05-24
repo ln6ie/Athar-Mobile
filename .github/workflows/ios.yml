@@ -54,6 +54,9 @@ jobs:
           security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
           security list-keychain -d user -s $KEYCHAIN_PATH
 
+          # Grant codesign access to the certificate to prevent CI hanging
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "temporary_password" $KEYCHAIN_PATH
+
           # Extract the UUID from the Provisioning Profile
           PROFILE_UUID=$(security cms -D -i $PP_PATH | grep -A1 UUID | grep string | awk -F'>|<' '{print $3}')
           echo "Extracted UUID: $PROFILE_UUID"
@@ -88,11 +91,11 @@ jobs:
               <string>$TEAM_ID</string>
               <key>provisioningProfiles</key>
               <dict>
-                  <key>com.athar.app</key>
+                  <key>com.athar.iq.app</key>
                   <string>$PROFILE_UUID</string>
               </dict>
               <key>signingCertificate</key>
-              <string>iOS Distribution</string>
+              <string>Apple Distribution</string>
               <key>signingStyle</key>
               <string>manual</string>
           </dict>
@@ -113,6 +116,7 @@ jobs:
                      DEVELOPMENT_TEAM="$TEAM_ID" \
                      PROVISIONING_PROFILE_SPECIFIER="$PROFILE_UUID" \
                      PROVISIONING_PROFILE="$PROFILE_UUID" \
+                     PRODUCT_BUNDLE_IDENTIFIER="com.athar.iq.app" \
                      CODE_SIGN_STYLE="Manual" \
                      CODE_SIGN_IDENTITY="Apple Distribution" \
                      archive

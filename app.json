@@ -14,8 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.athar.app"
-    },
+   "bundleIdentifier": "com.athar.iq.app"},
     "android": {
       "package": "com.athar.app",
       "adaptiveIcon": {
