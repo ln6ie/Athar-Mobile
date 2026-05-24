@@ -2,7 +2,7 @@
   "expo": {
     "name": "أثر",
     "slug": "athar",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -14,7 +14,11 @@
     },
     "ios": {
       "supportsTablet": true,
-   "bundleIdentifier": "com.athar.iq.app"},
+      "bundleIdentifier": "com.athar.iq.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
     "android": {
       "package": "com.athar.app",
       "adaptiveIcon": {

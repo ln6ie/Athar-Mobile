@@ -5,6 +5,9 @@ on:
     branches: ["main"]
   workflow_dispatch: # Allows manual trigger
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     runs-on: macos-latest
@@ -119,6 +122,7 @@ jobs:
                      PRODUCT_BUNDLE_IDENTIFIER="com.athar.iq.app" \
                      CODE_SIGN_STYLE="Manual" \
                      CODE_SIGN_IDENTITY="Apple Distribution" \
+                     CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
                      archive
 
           xcodebuild -exportArchive \
