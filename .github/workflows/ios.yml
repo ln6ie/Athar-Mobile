@@ -73,10 +73,10 @@ jobs:
         PROFILE_NAME: ${{ secrets.IOS_PROVISIONING_PROFILE_NAME }}
       run: |
         # Inject explicit Team ID, Manual signing, and Provisioning Profile name directly to project config
-        sed -i '' "s/DEVELOPMENT_TEAM = \"\";/DEVELOPMENT_TEAM = $TEAM_ID;/g" ios/athar.xcodeproj/project.pbxproj
-        sed -i '' "s/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g" ios/athar.xcodeproj/project.pbxproj
-        sed -i '' "s/PROVISIONING_PROFILE_SPECIFIER = \"\";/PROVISIONING_PROFILE_SPECIFIER = \"$PROFILE_NAME\";/g" ios/athar.xcodeproj/project.pbxproj
-        sed -i '' "s/CODE_SIGN_IDENTITY = \"iPhone Developer\";/CODE_SIGN_IDENTITY = \"Apple Distribution\";/g" ios/athar.xcodeproj/project.pbxproj
+        sed -i '' "s/DEVELOPMENT_TEAM = \"\";/DEVELOPMENT_TEAM = $TEAM_ID;/g" ios/athr.xcodeproj/project.pbxproj
+        sed -i '' "s/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g" ios/athr.xcodeproj/project.pbxproj
+        sed -i '' "s/PROVISIONING_PROFILE_SPECIFIER = \"\";/PROVISIONING_PROFILE_SPECIFIER = \"$PROFILE_NAME\";/g" ios/athr.xcodeproj/project.pbxproj
+        sed -i '' "s/CODE_SIGN_IDENTITY = \"iPhone Developer\";/CODE_SIGN_IDENTITY = \"Apple Distribution\";/g" ios/athr.xcodeproj/project.pbxproj
 
     - name: Create ExportOptions.plist
       env:
@@ -108,15 +108,15 @@ jobs:
     - name: Build Archive & IPA via xcodebuild
       run: |
         cd ios
-        xcodebuild -workspace athar.xcworkspace \
-                   -scheme athar \
+        xcodebuild -workspace athr.xcworkspace \
+                   -scheme athr \
                    -configuration Release \
                    -sdk iphoneos \
-                   -archivePath $RUNNER_TEMP/athar.xcarchive \
+                   -archivePath $RUNNER_TEMP/athr.xcarchive \
                    archive
         
         xcodebuild -exportArchive \
-                   -archivePath $RUNNER_TEMP/athar.xcarchive \
+                   -archivePath $RUNNER_TEMP/athr.xcarchive \
                    -exportOptionsPlist ExportOptions.plist \
                    -exportPath $RUNNER_TEMP/build
 
