@@ -5,13 +5,14 @@ import { useFeedStore } from '../store/useFeedStore';
 import { AnonymousAvatar } from '../components/AnonymousAvatar';
 import { TOKENS } from '../constants/tokens';
 import { useTheme } from '../hooks/useTheme';
+import { Logo } from '../components/Logo';
 
 interface NotificationsScreenProps {
   onClose: () => void;
 }
 
 export const NotificationsScreen: React.FC<NotificationsScreenProps> = ({ onClose }) => {
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const { notifications, isLoadingNotifications, notificationsError, fetchNotifications } = useFeedStore();
 
   useEffect(() => {
@@ -69,7 +70,7 @@ export const NotificationsScreen: React.FC<NotificationsScreenProps> = ({ onClos
         </View>
       ) : notificationsError ? (
         <View style={styles.centerContainer}>
-          <View style={[styles.errorCard, { backgroundColor: isDark ? 'rgba(239, 68, 68, 0.1)' : '#FEF2F2', borderColor: colors.feedback.error }]}>
+          <View style={[styles.errorCard, { backgroundColor: colors.background.input, borderColor: colors.feedback.error }]}>
             <Text style={[styles.errorText, { color: colors.feedback.error }]}>{notificationsError}</Text>
           </View>
           <TouchableOpacity onPress={fetchNotifications} style={[styles.retryButton, { backgroundColor: colors.brand.gold }]} activeOpacity={0.8}>
@@ -79,13 +80,7 @@ export const NotificationsScreen: React.FC<NotificationsScreenProps> = ({ onClos
       ) : notifications.length === 0 ? (
         <View style={styles.centerContainer}>
           <View style={styles.concentricContainer}>
-            <View style={[styles.ringOuter3, { borderColor: isDark ? 'rgba(71, 85, 105, 0.3)' : 'rgba(156, 163, 175, 0.15)' }]}>
-              <View style={[styles.ringOuter2, { borderColor: isDark ? 'rgba(71, 85, 105, 0.5)' : 'rgba(156, 163, 175, 0.3)' }]}>
-                <View style={[styles.ringOuter1, { borderColor: isDark ? 'rgba(71, 85, 105, 0.7)' : 'rgba(156, 163, 175, 0.5)' }]}>
-                  <View style={[styles.coreMuted, { backgroundColor: colors.text.disabled }]} />
-                </View>
-              </View>
-            </View>
+            <Logo size={90} />
           </View>
           <Text style={[styles.emptyTitle, { color: colors.text.primary }]}>لا توجد تنبيهات جديدة</Text>
           <Text style={[styles.emptySubtitle, { color: colors.text.secondary }]}>

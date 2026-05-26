@@ -29,78 +29,83 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
   };
 
   return (
-    <View style={[styles.card, { borderBottomColor: colors.border.muted }]}>
-      <TouchableWithoutFeedback onPress={handleCardPress}>
-        <View>
-          {/* Header with Anonymous Name and time */}
-          <View style={styles.header}>
-            <Text style={[styles.anonymousName, { color: colors.brand.gold }]}>
-              {post.anonymousName}
-            </Text>
-            <Text style={[styles.timeText, { color: colors.text.disabled }]}>
-              {formattedDate}
-            </Text>
-          </View>
-
-          {/* Main post text content - Clean, black, minimal */}
-          <Text 
-            style={[
-              styles.content,
-              { textAlign: isArabic ? 'right' : 'left', color: colors.text.primary }
-            ]}
-          >
-            {post.content}
+    <TouchableWithoutFeedback onPress={handleCardPress}>
+      <View style={[styles.card, { borderBottomColor: colors.border.muted }]}>
+        {/* Header: Anonymous Name + Time */}
+        <View style={styles.header}>
+          <Text style={[styles.anonymousName, { color: colors.brand.gold }]}>
+            {post.anonymousName}
+          </Text>
+          <Text style={[styles.timeText, { color: colors.text.disabled }]}>
+            {formattedDate}
           </Text>
         </View>
-      </TouchableWithoutFeedback>
 
-      {/* Bottom like counter - Clean and minimal */}
-      <View style={styles.footer}>
-        <TouchableOpacity
-          onPress={() => onLike(post.id)}
-          style={styles.likeContainer}
-          activeOpacity={0.7}
+        {/* Post content */}
+        <Text
+          style={[
+            styles.content,
+            { textAlign: isArabic ? 'right' : 'left', color: colors.text.primary },
+          ]}
         >
-          {/* Custom concentric trace ripple indicator */}
-          <View style={[
-            styles.rippleOuterRing,
-            post.isLiked 
-              ? { borderColor: colors.brand.gold, backgroundColor: isDark ? 'rgba(59, 130, 246, 0.12)' : 'rgba(0, 85, 165, 0.08)' } 
-              : { borderColor: colors.border.muted }
-          ]}>
-            <View style={[
-              styles.rippleInnerDot,
-              post.isLiked 
-                ? { backgroundColor: colors.brand.gold, width: 7, height: 7, borderRadius: 3.5 } 
-                : { backgroundColor: colors.text.disabled, width: 3, height: 3, borderRadius: 1.5 }
-            ]} />
-          </View>
-          <Text style={[
-            styles.likeCountText,
-            post.isLiked 
-              ? { color: colors.brand.gold, fontWeight: 'bold' } 
-              : { color: colors.text.secondary }
-          ]}>
-            {post.likesCount}
-          </Text>
-        </TouchableOpacity>
-
-        <Text style={[styles.expiryText, { color: colors.text.disabled }]}>
-          ينتهي الأثر بعد 24 ساعة
+          {post.content}
         </Text>
+
+        {/* Footer: Like + Expiry */}
+        <View style={styles.footer}>
+          <TouchableOpacity
+            onPress={() => onLike(post.id)}
+            style={styles.likeContainer}
+            activeOpacity={0.7}
+          >
+            <View
+              style={[
+                styles.rippleOuterRing,
+                post.isLiked
+                  ? {
+                      borderColor: colors.brand.gold,
+                      backgroundColor: isDark
+                        ? 'rgba(59, 130, 246, 0.12)'
+                        : 'rgba(0, 85, 165, 0.08)',
+                    }
+                  : { borderColor: colors.border.muted },
+              ]}
+            >
+              <View
+                style={[
+                  styles.rippleInnerDot,
+                  post.isLiked
+                    ? { backgroundColor: colors.brand.gold, width: 7, height: 7, borderRadius: 3.5 }
+                    : { backgroundColor: colors.text.disabled, width: 3, height: 3, borderRadius: 1.5 },
+                ]}
+              />
+            </View>
+            <Text
+              style={[
+                styles.likeCountText,
+                post.isLiked
+                  ? { color: colors.brand.gold, fontWeight: 'bold' }
+                  : { color: colors.text.secondary },
+              ]}
+            >
+              {post.likesCount}
+            </Text>
+          </TouchableOpacity>
+
+          <Text style={[styles.expiryText, { color: colors.text.disabled }]}>
+            ينتهي الأثر بعد 24 ساعة
+          </Text>
+        </View>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 };
 
-
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: 'transparent',
-    paddingVertical: 18,
-    paddingHorizontal: 0,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    paddingHorizontal: 6,
+    paddingVertical: 6,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   header: {
     flexDirection: 'row',
@@ -109,18 +114,15 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   anonymousName: {
-    color: '#0055A5',
     fontWeight: 'bold',
     fontSize: 13,
     lineHeight: 18,
   },
   timeText: {
-    color: '#9CA3AF',
     fontSize: 10,
     lineHeight: 14,
   },
   content: {
-    color: '#000000',
     fontSize: 15,
     lineHeight: 23,
     fontWeight: 'normal',
@@ -143,43 +145,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  rippleOuterRingActive: {
-    borderColor: '#0055A5',
-    backgroundColor: 'rgba(0, 85, 165, 0.1)',
-  },
-  rippleOuterRingInactive: {
-    borderColor: '#E5E7EB',
-    backgroundColor: 'transparent',
-  },
-  rippleInnerDot: {
-    // Base style if needed, but active/inactive have complete dimensions
-  },
-  rippleInnerDotActive: {
-    width: 7,
-    height: 7,
-    borderRadius: 3.5,
-    backgroundColor: '#0055A5',
-  },
-  rippleInnerDotInactive: {
-    width: 3,
-    height: 3,
-    borderRadius: 1.5,
-    backgroundColor: '#9CA3AF',
-  },
+  rippleInnerDot: {},
   likeCountText: {
     fontSize: 12,
     marginLeft: 6,
     lineHeight: 18,
   },
-  likeCountTextActive: {
-    color: '#0055A5',
-    fontWeight: 'bold',
-  },
-  likeCountTextInactive: {
-    color: '#6B7280',
-  },
   expiryText: {
-    color: '#9CA3AF',
     fontSize: 10,
     lineHeight: 14,
   },

@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { View, FlatList, ActivityIndicator, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Text, TouchableOpacity, Modal } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNetInfo } from '@react-native-community/netinfo';
 import * as Haptics from 'expo-haptics';
 import { useFeedStore } from '../store/useFeedStore';
 import { useTheme } from '../hooks/useTheme';
 import { PostCard } from '../components/PostCard';
+import { BellIcon } from '../components/BellIcon';
+import { NotificationsScreen } from '../screens/NotificationsScreen';
 import { LoadingState, EmptyState, ErrorState } from '../components/StateContainers';
 import { useGlobalStyles } from '../styles/globalStyles';
 import { TOKENS } from '../constants/tokens';
+import { GlassicView } from '../components/GlassicView';
+import { FlashList } from '@shopify/flash-list';
 
 export const FeedScreen: React.FC = () => {
   const { 
@@ -20,13 +24,15 @@ export const FeedScreen: React.FC = () => {
     fetchFeed, 
     toggleLike,
     activeTab,
-    setActiveTab
+    setActiveTab,
+    unreadLikesCount
   } = useFeedStore();
   const insets = useSafeAreaInsets();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const globalStyles = useGlobalStyles();
   const { isConnected } = useNetInfo();
 
+  const [modalVisible, setModalVisible] = useState(false);
   const isOffline = isConnected === false;
 
   useEffect(() => {
@@ -72,23 +78,41 @@ export const FeedScreen: React.FC = () => {
     return <ErrorState message={error} onRetry={() => fetchFeed(true)} />;
   }
 
-  const tabWrapperBg = colors.background.input;
-  const activeTabBg = colors.background.default;
+  const tabWrapperBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
+  const activeTabBg = isDark ? 'rgba(255, 255, 255, 0.12)' : '#FFFFFF';
   const tabTextColor = colors.text.secondary;
   const activeTabTextColor = colors.brand.gold;
-  const borderColor = colors.border.muted;
 
   return (
     <View style={globalStyles.container}>
       {/* Floating Top Tabs Container */}
-      <View style={[
-        styles.tabsContainer,
-        { 
-          paddingTop: Math.max(insets.top, 10), 
-          backgroundColor: colors.background.default,
-          borderBottomColor: borderColor 
-        }
-      ]}>
+      <GlassicView
+        cornerRadius={0}
+        style={[
+          styles.tabsContainer,
+          { 
+            paddingTop: Math.max(insets.top, 10),
+            borderBottomWidth: 0
+          }
+        ]}
+      >
+        {/* Left Side: Transparent Notification Bell */}
+        <TouchableOpacity
+          onPress={() => setModalVisible(true)}
+          style={[globalStyles.bellButton, { marginRight: 16 }]}
+          activeOpacity={0.7}
+        >
+          <BellIcon color={colors.brand.gold} />
+          {unreadLikesCount > 0 && (
+            <View style={globalStyles.badgeContainer}>
+              <Text style={globalStyles.badgeText}>
+                {unreadLikesCount > 9 ? '9+' : unreadLikesCount}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
+
+        {/* Right Side: Segmented Tabs */}
         <View style={[styles.tabsWrapper, { backgroundColor: tabWrapperBg }]}>
           <TouchableOpacity
             style={[styles.tabButton, activeTab === 'trending' && [styles.activeTabButton, { backgroundColor: activeTabBg }]]}
@@ -109,7 +133,7 @@ export const FeedScreen: React.FC = () => {
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </GlassicView>
 
       {/* Offline Banner below the floating tabs */}
       {isOffline && (
@@ -122,13 +146,13 @@ export const FeedScreen: React.FC = () => {
       )}
 
       {/* Cardless Clean List Feed */}
-      <FlatList
+      <FlashList
         data={posts}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <PostCard 
-            post={item} 
-            onLike={toggleLike} 
+          <PostCard
+            post={item}
+            onLike={toggleLike}
           />
         )}
         contentContainerStyle={[
@@ -148,6 +172,15 @@ export const FeedScreen: React.FC = () => {
           ) : null
         }
       />
+
+      {/* Notification Screen Overlay */}
+      <Modal
+        animationType="slide"
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <NotificationsScreen onClose={() => setModalVisible(false)} />
+      </Modal>
     </View>
   );
 };

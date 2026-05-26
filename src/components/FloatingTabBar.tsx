@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { TOKENS } from '../constants/tokens';
 import { useTheme } from '../hooks/useTheme';
+import { GlassicView } from './GlassicView';
 
 interface FloatingTabBarProps {
   activeTab: 'feed' | 'profile';
@@ -33,11 +34,15 @@ export const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
         </View>
       </TouchableOpacity>
 
-      {/* Left side: Floating Tab Bar Card (Special Buttons) */}
-      <View style={[
-        styles.leftTabCard, 
-        { backgroundColor: colors.brand.gold, shadowColor: colors.brand.gold }
-      ]}>
+      {/* Left side: Floating Tab Bar Card */}
+      <GlassicView
+        cornerRadius={28}
+        glassEffectStyle="regular"
+        style={[
+          styles.leftTabCard,
+          { marginRight: 16 }
+        ]}
+      >
         {/* Home Tab */}
         <TouchableOpacity
           onPress={() => onChangeTab('feed')}
@@ -51,16 +56,16 @@ export const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
           <View style={styles.homeIconContainer}>
             <View style={[
               styles.homeRoofSolid,
-              { borderBottomColor: activeTab === 'feed' ? '#FFFFFF' : 'rgba(255, 255, 255, 0.6)' }
+              { borderBottomColor: activeTab === 'feed' ? colors.brand.gold : colors.text.secondary }
             ]} />
             <View style={[
               styles.homeBodySolid,
-              { backgroundColor: activeTab === 'feed' ? '#FFFFFF' : 'rgba(255, 255, 255, 0.6)' }
+              { backgroundColor: activeTab === 'feed' ? colors.brand.gold : colors.text.secondary }
             ]} />
           </View>
           <Text style={[
             styles.tabLabel,
-            activeTab === 'feed' ? styles.tabLabelActive : styles.tabLabelInactive
+            activeTab === 'feed' ? { color: colors.brand.gold } : { color: colors.text.secondary }
           ]}>
             الرئيسية
           </Text>
@@ -79,21 +84,21 @@ export const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
           <View style={styles.profileIconContainer}>
             <View style={[
               styles.profileHeadSolid,
-              { backgroundColor: activeTab === 'profile' ? '#FFFFFF' : 'rgba(255, 255, 255, 0.6)' }
+              { backgroundColor: activeTab === 'profile' ? colors.brand.gold : colors.text.secondary }
             ]} />
             <View style={[
               styles.profileShouldersSolid,
-              { backgroundColor: activeTab === 'profile' ? '#FFFFFF' : 'rgba(255, 255, 255, 0.6)' }
+              { backgroundColor: activeTab === 'profile' ? colors.brand.gold : colors.text.secondary }
             ]} />
           </View>
           <Text style={[
             styles.tabLabel,
-            activeTab === 'profile' ? styles.tabLabelActive : styles.tabLabelInactive
+            activeTab === 'profile' ? { color: colors.brand.gold } : { color: colors.text.secondary }
           ]}>
             الملف الشخصي
           </Text>
         </TouchableOpacity>
-      </View>
+      </GlassicView>
     </View>
   );
 };
@@ -151,26 +156,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   leftTabCard: {
-    flex: 1, // Fill remaining space on the left
+    flex: 1,
     height: 56,
-    borderRadius: 28, // Exactly 100% rounded corners for navigation pill
-    backgroundColor: TOKENS.colors.brand.gold, // Solid royal blue brand color, no transparency!
-    borderWidth: 0, // Solid background needs no borders
-    borderColor: 'transparent',
-    flexDirection: 'row-reverse', // Arabic RTL button alignment
+    borderRadius: 28,
+    flexDirection: 'row-reverse',
     justifyContent: 'space-around',
     alignItems: 'center',
     paddingHorizontal: 8,
-    marginRight: 16, // Perfect 16px visual spacing gap from the Add button
+    marginRight: 16,
+    // iOS 26: UIGlassEffect applies its own material elevation automatically.
+    // Manual shadows conflict with the native glass surface rendering.
     ...Platform.select({
-      ios: {
-        shadowColor: TOKENS.colors.brand.gold,
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.22,
-        shadowRadius: 10,
-      },
       android: {
-        elevation: 6,
+        elevation: 3,
       },
     }),
   },
@@ -184,7 +182,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   tabButtonActive: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)', // Premium semi-transparent white highlight
+    backgroundColor: 'rgba(128, 128, 128, 0.08)', // Dynamic neutral highlight for transparent backgrounds
   },
   tabLabel: {
     fontSize: 9, // Slightly smaller and extremely premium

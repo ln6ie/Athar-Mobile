@@ -146,6 +146,35 @@ export const getGlobalStyles = (colors: typeof LIGHT_COLORS) =>
       textAlign: 'center',
       lineHeight: 32,
     },
+    bellButton: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: 'transparent',
+      justifyContent: 'center',
+      alignItems: 'center',
+      position: 'relative',
+    },
+    badgeContainer: {
+      position: 'absolute',
+      top: -2,
+      right: -2,
+      backgroundColor: colors.feedback.error,
+      minWidth: 14,
+      height: 14,
+      borderRadius: 7,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 2,
+      borderWidth: 1,
+      borderColor: '#FFFFFF',
+    },
+    badgeText: {
+      color: '#FFFFFF',
+      fontSize: 8,
+      fontWeight: 'bold',
+      lineHeight: 10,
+    },
   });
 
 export const useGlobalStyles = () => {
