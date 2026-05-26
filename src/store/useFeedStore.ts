@@ -18,6 +18,8 @@ interface FeedState {
   notifications: Notification[];
   isLoadingNotifications: boolean;
   notificationsError: string | null;
+  activeTab: 'recent' | 'trending';
+  setActiveTab: (tab: 'recent' | 'trending') => void;
   fetchFeed: (reset?: boolean, silent?: boolean) => Promise<void>;
   createPost: (content: string) => Promise<void>;
   toggleLike: (postId: string) => Promise<void>;
@@ -42,6 +44,8 @@ export const useFeedStore = create<FeedState>()(
       notifications: [],
       isLoadingNotifications: false,
       notificationsError: null,
+      activeTab: 'recent',
+      setActiveTab: (tab) => set({ activeTab: tab }),
 
       initializeFeed: async () => {
         // Zustand persist handles hydration automatically from AsyncStorage
@@ -49,7 +53,7 @@ export const useFeedStore = create<FeedState>()(
       },
 
       fetchFeed: async (reset = false, silent = false) => {
-        const { nextCursor, posts, isLoading, isLoadingMore, isRefreshing, isFetchingFeed } = get();
+        const { nextCursor, posts, isLoading, isLoadingMore, isRefreshing, isFetchingFeed, activeTab } = get();
         if (isLoading || isLoadingMore || isRefreshing || isFetchingFeed) return;
         if (!reset && !nextCursor) return;
 
@@ -66,8 +70,8 @@ export const useFeedStore = create<FeedState>()(
         }
 
         try {
-          const cursorParam = reset ? '' : (nextCursor ? `?cursor=${nextCursor}` : '');
-          const response = await api.get(`/posts/feed${cursorParam}`);
+          const cursorParam = reset ? '' : (nextCursor ? `&cursor=${nextCursor}` : '');
+          const response = await api.get(`/posts/feed?sort=${activeTab}${cursorParam}`);
           const { posts: newPosts, nextCursor: newCursor } = response.data;
 
           const mergedPosts = reset ? newPosts : [...posts, ...newPosts];

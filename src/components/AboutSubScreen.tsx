@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Header } from './Header';
+import { Logo } from './Logo';
 import { useTheme } from '../hooks/useTheme';
 
 interface AboutSubScreenProps {
@@ -8,17 +9,15 @@ interface AboutSubScreenProps {
 }
 
 export const AboutSubScreen: React.FC<AboutSubScreenProps> = ({ onBack }) => {
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.default }]}>
       <Header title="حول تطبيق أثر" subtitle="" leftText="رجوع" onLeftPress={onBack} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Static Large Concentric Ripple Icon */}
+        {/* Unified Programmatic Concentric Ripple Logo */}
         <View style={styles.iconWrapper}>
-          <View style={[styles.rippleOuterRing, { borderColor: colors.brand.gold, backgroundColor: isDark ? 'rgba(59, 130, 246, 0.08)' : 'rgba(0, 85, 165, 0.06)' }]}>
-            <View style={[styles.rippleInnerDot, { backgroundColor: colors.brand.gold }]} />
-          </View>
+          <Logo size={80} />
         </View>
         
         <View style={styles.card}>
