@@ -92,9 +92,10 @@ export const FeedScreen: React.FC = () => {
       ]}>
         <Header />
         {isOffline && (
-          <View style={[styles.offlineBanner, { backgroundColor: 'rgba(212, 175, 55, 0.12)', borderBottomColor: 'rgba(212, 175, 55, 0.2)' }]}>
+          <View style={styles.offlineBanner}>
+            <View style={styles.offlineIndicator} />
             <Text style={styles.offlineText}>
-              أنت تتصفح في وضع عدم الاتصال
+              أنت تتصفح في وضع عدم الاتصال بالإنترنت حالياً
             </Text>
           </View>
         )}
@@ -113,7 +114,7 @@ export const FeedScreen: React.FC = () => {
         )}
         contentContainerStyle={[
           styles.listContent,
-          { paddingTop: insets.top + 56 + (isOffline ? 32 : 0) }
+          { paddingTop: insets.top + 56 + (isOffline ? 38 : 0) }
         ]}
         refreshing={isConnected !== false && isRefreshing}
         onRefresh={isConnected !== false ? handleRefresh : undefined}
@@ -144,17 +145,28 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   offlineBanner: {
-    height: 32,
+    height: 38,
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#FEF3C7', // Tailwind amber-100
     borderBottomWidth: 1,
+    borderBottomColor: '#FDE68A', // Tailwind amber-200
+    paddingHorizontal: 16,
     width: '100%',
   },
+  offlineIndicator: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#D97706', // Tailwind amber-600
+    marginHorizontal: 8,
+  },
   offlineText: {
-    fontSize: 12,
+    fontSize: 12.5,
     fontWeight: '600',
-    textAlign: 'center',
-    color: '#B8860B',
+    color: '#92400E', // Tailwind amber-800
+    letterSpacing: 0.3,
   },
   listContent: {
     paddingHorizontal: 24,

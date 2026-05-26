@@ -230,6 +230,7 @@ export const useFeedStore = create<FeedState>()(
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({
         posts: state.posts,
+        unreadLikesCount: state.unreadLikesCount,
       }),
     }
   )
