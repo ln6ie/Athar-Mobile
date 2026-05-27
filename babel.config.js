@@ -3,11 +3,14 @@ module.exports = function (api) {
   
   const isProd = process.env.NODE_ENV === 'production';
 
+  const plugins = [];
+  
+  if (isProd) {
+    plugins.push(require.resolve('babel-plugin-transform-remove-console'));
+  }
+
   return {
-    presets: [
-      ["babel-preset-expo", { jsxImportSource: "nativewind" }],
-      "nativewind/babel",
-    ],
-    plugins: isProd ? ['transform-remove-console'] : [],
+    presets: ["babel-preset-expo"],
+    plugins,
   };
 };
