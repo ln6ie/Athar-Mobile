@@ -13,6 +13,8 @@ import { PrivacySubScreen } from '../components/PrivacySubScreen';
 import { AnonymousAvatar } from '../components/AnonymousAvatar';
 import { ThemeSelector } from '../components/ThemeSelector';
 import { useProfileStyles } from '../styles/ProfileStyles';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { GlassicView } from '../components/GlassicView';
 
 export const ProfileScreen: React.FC = () => {
   const { user, logout, deleteAccount } = useAuthStore();
@@ -29,7 +31,6 @@ export const ProfileScreen: React.FC = () => {
   const myPosts = posts.filter((post) => post.anonymousName === anonymousName);
   const likedPosts = posts.filter((post) => post.isLiked);
   const displayedPosts = activeTab === 'my-posts' ? myPosts : likedPosts;
-  const userTitle = likedPosts.length >= 5 ? 'مكتشف أثر نشط' : 'مستكشف أثر جديد';
 
   const handleLogout = () => {
     Alert.alert(
@@ -86,14 +87,14 @@ export const ProfileScreen: React.FC = () => {
                 </View>
 
                 <View style={styles.profileInfoColumn}>
-                  <Text style={styles.profileName}>{anonymousName}</Text>
+                  <Text style={styles.profileName} numberOfLines={1} ellipsizeMode="tail">
+                    {anonymousName}
+                  </Text>
                   
                   <View style={styles.profileMetaRow}>
-                    <Text style={styles.profileTitle}>{userTitle}</Text>
-                    
                     <View style={styles.inlineStatsBox}>
                       <Text style={styles.statVal}>{myPosts.length}</Text>
-                      <Text style={styles.statLabel}>أثر منشور</Text>
+                      <Text style={styles.statLabel}>منشور</Text>
                     </View>
                   </View>
 
@@ -109,9 +110,7 @@ export const ProfileScreen: React.FC = () => {
                 <View style={styles.optionRightContainer}>
                   <Text style={styles.optionLabel}>تغيير البريد الإلكتروني</Text>
                   <View style={styles.optionIconWrapper}>
-                    <View style={styles.emailIconBody} />
-                    <View style={styles.emailIconFlapLeft} />
-                    <View style={styles.emailIconFlapRight} />
+                    <Ionicons name="mail" size={20} color={colors.brand.gold} />
                   </View>
                 </View>
               </TouchableOpacity>
@@ -121,9 +120,7 @@ export const ProfileScreen: React.FC = () => {
                 <View style={styles.optionRightContainer}>
                   <Text style={styles.optionLabel}>مراسلة الدعم الفني</Text>
                   <View style={styles.optionIconWrapper}>
-                    <View style={styles.supportIconBubble}>
-                      <View style={styles.supportIconTail} />
-                    </View>
+                    <Ionicons name="chatbubbles" size={20} color={colors.brand.gold} />
                   </View>
                 </View>
               </TouchableOpacity>
@@ -133,10 +130,7 @@ export const ProfileScreen: React.FC = () => {
                 <View style={styles.optionRightContainer}>
                   <Text style={styles.optionLabel}>سياسة الخصوصية</Text>
                   <View style={styles.optionIconWrapper}>
-                    <View style={styles.shieldIconContainer}>
-                      <View style={styles.shieldIconShape} />
-                      <View style={styles.shieldIconLine} />
-                    </View>
+                    <Ionicons name="shield-checkmark" size={20} color={colors.brand.gold} />
                   </View>
                 </View>
               </TouchableOpacity>
@@ -146,10 +140,7 @@ export const ProfileScreen: React.FC = () => {
                 <View style={styles.optionRightContainer}>
                   <Text style={styles.optionLabel}>عن التطبيق والفكرة</Text>
                   <View style={styles.optionIconWrapper}>
-                    <View style={styles.infoIconCircle}>
-                      <View style={styles.infoIconDot} />
-                      <View style={styles.infoIconLine} />
-                    </View>
+                    <Ionicons name="information-circle" size={20} color={colors.brand.gold} />
                   </View>
                 </View>
               </TouchableOpacity>
@@ -159,33 +150,29 @@ export const ProfileScreen: React.FC = () => {
                 <View style={styles.optionRightContainer}>
                   <Text style={styles.optionLabelRed}>تسجيل الخروج</Text>
                   <View style={styles.optionIconWrapper}>
-                    <View style={styles.logoutIconContainer}>
-                      <View style={styles.logoutIconDoor} />
-                      <View style={styles.logoutIconArrowStem} />
-                      <View style={styles.logoutIconArrowHeadTop} />
-                      <View style={styles.logoutIconArrowHeadBottom} />
-                    </View>
+                    <Ionicons name="log-out" size={20} color="#DC2626" />
                   </View>
                 </View>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.optionRow} onPress={handleDeleteAccount}>
+              <TouchableOpacity style={[styles.optionRow, styles.lastOptionRow]} onPress={handleDeleteAccount}>
                 <Text style={styles.chevronRed}>‹</Text>
                 <View style={styles.optionRightContainer}>
                   <Text style={styles.optionLabelRed}>حذف الحساب بشكل نهائي</Text>
                   <View style={styles.optionIconWrapper}>
-                    <View style={styles.deleteIconContainer}>
-                      <View style={styles.deleteIconLid} />
-                      <View style={styles.deleteIconCan} />
-                    </View>
+                    <Ionicons name="trash" size={20} color="#DC2626" />
                   </View>
                 </View>
               </TouchableOpacity>
 
-              <ThemeSelector minimal />
             </View>
 
-            <View style={styles.tabContainer}>
+            <ThemeSelector />
+
+            <GlassicView
+              cornerRadius={20}
+              style={styles.tabContainer}
+            >
               <TouchableOpacity
                 style={[styles.tabToggle, activeTab === 'my-posts' && styles.tabToggleActive]}
                 onPress={() => setActiveTab('my-posts')}
@@ -205,7 +192,7 @@ export const ProfileScreen: React.FC = () => {
                   المفضلة
                 </Text>
               </TouchableOpacity>
-            </View>
+            </GlassicView>
           </View>
         }
         ListEmptyComponent={
@@ -226,7 +213,7 @@ export const ProfileScreen: React.FC = () => {
       />
 
       {activeSubScreen !== 'main' && (
-        <Modal visible animationType="slide" presentationStyle="fullScreen" statusBarTranslucent onRequestClose={() => setActiveSubScreen('main')}>
+        <Modal visible animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setActiveSubScreen('main')}>
           {activeSubScreen === 'change-email' && <ChangeEmailSubScreen currentEmail={userEmail} onBack={() => setActiveSubScreen('main')} />}
           {activeSubScreen === 'support' && <SupportSubScreen currentEmail={userEmail} onBack={() => setActiveSubScreen('main')} />}
           {activeSubScreen === 'privacy' && <PrivacySubScreen onBack={() => setActiveSubScreen('main')} />}

@@ -80,12 +80,12 @@ export const SupportSubScreen: React.FC<SupportSubScreenProps> = ({ currentEmail
             placeholderTextColor={colors.text.disabled}
           />
 
-          <Text style={[styles.label, { color: colors.text.primary }]}>رقم الواتساب (مع رمز الدولة)</Text>
+          <Text style={[styles.label, { color: colors.text.primary }]}>رقم الواتساب</Text>
           <TextInput
             style={textInputStyle}
             value={whatsapp}
             onChangeText={(txt) => { setWhatsapp(txt); setError(null); }}
-            placeholder="مثال: +966500000000"
+            placeholder="077********"
             keyboardType="phone-pad"
             placeholderTextColor={colors.text.disabled}
           />
@@ -111,14 +111,7 @@ export const SupportSubScreen: React.FC<SupportSubScreenProps> = ({ currentEmail
             {loading ? (
               <ActivityIndicator color="#FFFFFF" size="small" />
             ) : (
-              <View style={styles.buttonContent}>
-                <Text style={styles.submitText}>إرسال الرسالة</Text>
-                <View style={styles.iconContainer}>
-                  <View style={styles.envelopeBody} />
-                  <View style={styles.envelopeFlapLeft} />
-                  <View style={styles.envelopeFlapRight} />
-                </View>
-              </View>
+              <Text style={styles.submitText}>إرسال الرسالة</Text>
             )}
           </TouchableOpacity>
         </View>

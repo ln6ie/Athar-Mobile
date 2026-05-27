@@ -12,6 +12,8 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../hooks/useTheme';
+import { GlassicView } from './GlassicView';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 interface PostModalProps {
   visible: boolean;
@@ -70,47 +72,66 @@ export const PostModal: React.FC<PostModalProps> = ({ visible, onClose, onSubmit
     <Modal 
       visible={visible} 
       animationType="slide" 
-      presentationStyle="fullScreen" 
-      statusBarTranslucent 
+      presentationStyle="pageSheet" 
       onRequestClose={onClose}
     >
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : undefined} 
         style={[styles.container, { backgroundColor: colors.background.default }]}
       >
-        {/* Full-screen top header */}
+        {/* Sheet Top Header */}
         <View style={[styles.header, { 
-          paddingTop: Math.max(insets.top, 12), 
+          paddingTop: Math.max(insets.top, 16), 
           borderBottomColor: colors.border.muted 
         }]}>
-          {/* Cancel button */}
-          <TouchableOpacity onPress={onClose} activeOpacity={0.7}>
-            <Text style={[styles.cancelText, { color: colors.text.secondary }]}>إلغاء</Text>
-          </TouchableOpacity>
+          {/* Left Side: Publish button inside a glass capsule */}
+          <View style={styles.leftSideContainer}>
+            <GlassicView
+              cornerRadius={18}
+              style={[
+                styles.publishGlassBtn,
+                isPublishDisabled && styles.publishGlassBtnDisabled
+              ]}
+            >
+              <TouchableOpacity 
+                onPress={handlePublish}
+                disabled={isPublishDisabled}
+                style={styles.publishTapArea}
+                activeOpacity={0.8}
+              >
+                {isSubmitting ? (
+                  <ActivityIndicator size="small" color={colors.brand.gold} />
+                ) : (
+                  <Text style={[
+                    styles.publishButtonText, 
+                    { color: colors.brand.gold },
+                    isPublishDisabled && { color: colors.text.disabled }
+                  ]}>نشر</Text>
+                )}
+              </TouchableOpacity>
+            </GlassicView>
+          </View>
 
-          {/* Title */}
-          <Text style={[styles.headerTitle, { color: colors.text.primary }]}>أثر جديد</Text>
+          {/* Center: Title */}
+          <View style={styles.headerTitleContainer}>
+            <Text style={[styles.headerTitle, { color: colors.text.primary }]}> بوست جديد</Text>
+          </View>
 
-          {/* Publish button */}
-          <TouchableOpacity 
-            onPress={handlePublish}
-            disabled={isPublishDisabled}
-            style={[
-              styles.publishButton, 
-              { backgroundColor: colors.brand.gold },
-              isPublishDisabled && { backgroundColor: isDark ? colors.background.input : '#F3F4F6' }
-            ]}
-            activeOpacity={0.8}
-          >
-            {isSubmitting ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
-            ) : (
-              <Text style={[
-                styles.publishButtonText, 
-                isPublishDisabled && { color: colors.text.disabled }
-              ]}>نشر</Text>
-            )}
-          </TouchableOpacity>
+          {/* Right Side: Circular Glass Close X button */}
+          <View style={styles.rightSideContainer}>
+            <GlassicView
+              cornerRadius={18}
+              style={styles.closeIconButton}
+            >
+              <TouchableOpacity 
+                onPress={onClose}
+                style={styles.closeTapArea}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="close" size={20} color={colors.brand.gold} />
+              </TouchableOpacity>
+            </GlassicView>
+          </View>
         </View>
 
         {/* Input container */}
@@ -118,7 +139,7 @@ export const PostModal: React.FC<PostModalProps> = ({ visible, onClose, onSubmit
           <TextInput
             ref={inputRef}
             multiline
-            placeholder="اكتب أثراً يخلد هنا..."
+            placeholder="اكتب فكرتك هنا..."
             placeholderTextColor={colors.text.disabled}
             value={content}
             onChangeText={(txt) => { 
@@ -139,7 +160,7 @@ export const PostModal: React.FC<PostModalProps> = ({ visible, onClose, onSubmit
         }]}>
           <View style={styles.infoContainer}>
             <Text style={[styles.anonymousNote, { color: colors.text.disabled }]}>
-              سيظهر الأثر مجهول الهوية بالكامل
+              سينشر بحسابك مجهول الهوية بالكامل
             </Text>
             <Text style={[
               styles.counterText, 
@@ -172,24 +193,56 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     borderBottomWidth: 1,
   },
-  cancelText: {
-    fontSize: 15,
-    fontWeight: '500',
+  leftSideContainer: {
+    width: 70,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+  },
+  rightSideContainer: {
+    width: 70,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+  },
+  headerTitleContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerTitle: {
     fontSize: 16,
     fontWeight: 'bold',
   },
-  publishButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    minWidth: 64,
+  closeIconButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  closeTapArea: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  publishGlassBtn: {
+    height: 36,
+    minWidth: 64,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  publishGlassBtnDisabled: {
+    opacity: 0.5,
+  },
+  publishTapArea: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+  },
   publishButtonText: {
-    color: '#FFFFFF',
     fontWeight: 'bold',
     fontSize: 13,
   },

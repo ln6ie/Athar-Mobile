@@ -24,39 +24,30 @@ export const PrivacySubScreen: React.FC<PrivacySubScreenProps> = ({ onBack }) =>
           <View style={styles.bulletItem}>
             <Text style={[styles.bulletSymbol, { color: colors.brand.gold }]}>•</Text>
             <Text style={[styles.bulletText, { color: colors.text.secondary }]}>
-              تظهر جميع المنشورات (الآثار) باسم مستعار هندسي ثابت غير قابل للتتبع إلى عنوان بريدك الحقيقي.
+              تظهر جميع المنشورات باسم مستعار هندسي ثابت غير قابل للتتبع إلى عنوان بريدك الحقيقي.
             </Text>
           </View>
 
           <View style={styles.bulletItem}>
             <Text style={[styles.bulletSymbol, { color: colors.brand.gold }]}>•</Text>
             <Text style={[styles.bulletText, { color: colors.text.secondary }]}>
-              يتم مسح كافة المنشورات والآثار نهائياً وتلقائياً من خوادمنا ومن التطبيق بعد مرور 24 ساعة بالضبط من نشرها.
+              يتم مسح كافة المنشورات نهائياً وتلقائياً من خوادمنا ومن التطبيق بعد مرور 24 ساعة بالضبط من نشرها.
             </Text>
           </View>
 
           <View style={styles.bulletItem}>
             <Text style={[styles.bulletSymbol, { color: colors.brand.gold }]}>•</Text>
             <Text style={[styles.bulletText, { color: colors.text.secondary }]}>
-              لا نقوم بالاحتفاظ بأي سجلات أو تاريخ للمنشورات بعد زوال أثرها. زوال الأثر يعني زواله نهائياً من خوادم النظام.
+              لا نقوم بالاحتفاظ بأي سجلات أو تاريخ للمنشورات بعد زوالها. زوال المنشور يعني زواله نهائياً من خوادم النظام.
             </Text>
           </View>
 
           <View style={styles.bulletItem}>
             <Text style={[styles.bulletSymbol, { color: colors.brand.gold }]}>•</Text>
             <Text style={[styles.bulletText, { color: colors.text.secondary }]}>
-              نستخدم أحدث تقنيات التشفير القياسية ورموز التحقق الثنائية لضمان تأمين جلسة تصفحك وتأمين حسابك.
+              نستخدم أحدث تقنيات التشفير ورموز التحقق لضمان تأمين جلسة تصفحك وتأمين حسابك.
             </Text>
           </View>
-        </View>
-
-        <View style={[styles.infoBox, { 
-          backgroundColor: isDark ? 'rgba(59, 130, 246, 0.08)' : 'rgba(0, 85, 165, 0.05)',
-          borderColor: isDark ? 'rgba(59, 130, 246, 0.15)' : 'rgba(0, 85, 165, 0.1)'
-        }]}>
-          <Text style={[styles.infoText, { color: colors.brand.gold }]}>
-            أنت في أمان تام داخل أثر، عبّر عما تود قوله ودع أثرك يمر في سلام.
-          </Text>
         </View>
       </ScrollView>
     </View>

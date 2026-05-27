@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking } from 'react-native';
 import { Header } from './Header';
 import { Logo } from './Logo';
 import { useTheme } from '../hooks/useTheme';
@@ -11,9 +11,15 @@ interface AboutSubScreenProps {
 export const AboutSubScreen: React.FC<AboutSubScreenProps> = ({ onBack }) => {
   const { colors } = useTheme();
 
+  const handleOpenInstagram = () => {
+    Linking.openURL('https://instagram.com/elcom.lab').catch((err) =>
+      console.error('Failed to open Instagram URL', err)
+    );
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background.default }]}>
-      <Header title="حول تطبيق أثر" subtitle="" leftText="رجوع" onLeftPress={onBack} />
+      <Header title="حول التطبيق " subtitle="" leftText="رجوع" onLeftPress={onBack} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Unified Programmatic Concentric Ripple Logo */}
         <View style={styles.iconWrapper}>
@@ -22,10 +28,10 @@ export const AboutSubScreen: React.FC<AboutSubScreenProps> = ({ onBack }) => {
         
         <View style={styles.card}>
           <Text style={[styles.conceptText, { color: colors.text.secondary }]}>
-            تطبيق <Text style={[styles.brandText, { color: colors.brand.gold }]}>أثر</Text> هو منصة وجدانية راقية تتيح للمستخدمين تدوين ونشر خواطرهم ورسائلهم للعالم بكامل الخصوصية والسرية دون الكشف عن هويتهم الحقيقية.
+            تطبيق <Text style={[styles.brandText, { color: colors.brand.gold }]}>أثر</Text> هو منصة بسيطة تتيح لك نشر ومشاركة أفكارك، آرائك، أو أي شيء يخطر ببالك بكامل الخصوصية والسرية دون الكشف عن هويتك الحقيقية.
           </Text>
           <Text style={[styles.conceptText, { color: colors.text.secondary }]}>
-            يترك كل مستخدم أثراً فريداً (تموجاً) يختفي تماماً وتزول بصمته من جدار الأثر العام بعد مرور 24 ساعة، تاركاً ذكرى ملهمة تعبر الفضاء الرقمي بهدوء وسكينة.
+            يختفي كل منشور تلقائياً ونهائياً من التطبيق ومن خوادمنا بعد مرور 24 ساعة بالضبط على نشره.
           </Text>
         </View>
 
@@ -34,14 +40,14 @@ export const AboutSubScreen: React.FC<AboutSubScreenProps> = ({ onBack }) => {
           <View style={[styles.divider, { backgroundColor: colors.border.muted }]} />
           
           <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, { color: colors.text.disabled }]}>المبرمج المطور:</Text>
+            <Text style={[styles.infoLabel, { color: colors.text.secondary }]}>المبرمج والمطور:</Text>
             <Text style={[styles.infoValue, { color: colors.text.primary }]}>عبدالله كريم</Text>
           </View>
 
-          <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, { color: colors.text.disabled }]}>حساب الإنستغرام:</Text>
-            <Text style={[styles.infoValue, styles.linkText, { color: colors.brand.gold }]}>elcom.lab</Text>
-          </View>
+          <TouchableOpacity style={styles.infoRow} onPress={handleOpenInstagram} activeOpacity={0.7}>
+            <Text style={[styles.infoLabel, { color: colors.text.secondary }]}>حساب الإنستغرام:</Text>
+            <Text style={[styles.infoValue, styles.linkText, { color: colors.brand.gold }]}>@elcom.lab</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </View>

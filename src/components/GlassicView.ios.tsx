@@ -31,24 +31,24 @@ export const GlassicView: React.FC<GlassicViewProps> = ({
           styles.fallbackContainer,
           {
             borderRadius: cornerRadius,
-            borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)',
+            backgroundColor: isDark ? 'rgba(12, 24, 48, 0.45)' : 'rgba(230, 242, 255, 0.38)',
+            borderColor: isDark ? 'rgba(59, 130, 246, 0.18)' : 'rgba(0, 85, 165, 0.14)',
+            borderWidth: 1.2,
           },
           style,
         ]}
       >
         <BlurView
-          intensity={75}
+          intensity={80}
           tint={isDark ? 'dark' : 'light'}
           style={[StyleSheet.absoluteFill, { borderRadius: cornerRadius }]}
         />
-        <View style={styles.content}>{children}</View>
+        {children}
       </View>
     );
   }
 
   // iOS 26+: UIGlassEffect حقيقي من Apple
-  // Architecture: GlassView كـ absolute background + View للـ children فوقه
-  // السبب: GlassView هو surface layer، والـ children تُوضع كـ overlay
   return (
     <View style={[styles.container, style]}>
       <GlassView
@@ -57,7 +57,7 @@ export const GlassicView: React.FC<GlassicViewProps> = ({
         isInteractive={isInteractive}
         tintColor={tintColor}
       />
-      <View style={styles.content}>{children}</View>
+      {children}
     </View>
   );
 };
@@ -68,16 +68,10 @@ const styles = StyleSheet.create({
     // overflow MUST NOT be 'hidden' — UIGlassEffect needs to see what's behind
     // the surface to compute the refraction/blur correctly.
   },
-  content: {
-    // Absolute fill ensures children always fill the container
-    // regardless of whether the parent uses height or flex.
-    ...StyleSheet.absoluteFillObject,
-    flexDirection: 'inherit' as any,
-    alignItems: 'inherit' as any,
-    justifyContent: 'inherit' as any,
-  },
   fallbackContainer: {
+    position: 'relative',
     borderWidth: 1,
     overflow: 'hidden',
   },
 });
+

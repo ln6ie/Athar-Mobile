@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useAuthStore } from './src/store/useAuthStore';
 import { useFeedStore } from './src/store/useFeedStore';
 import { useThemeStore } from './src/store/useThemeStore';
@@ -14,12 +16,13 @@ import { PostModal } from './src/components/PostModal';
 import { forceArabicLayout } from './src/utils/rtl';
 import { IntroScreen } from './src/screens/IntroScreen';
 
+const Tab = createBottomTabNavigator();
+
 export default function App() {
   const { isAuthenticated, isInitialized, initialize } = useAuthStore();
   const { initializeTheme } = useThemeStore();
   const { colors, isDark } = useTheme();
   const { createPost, initializeFeed } = useFeedStore();
-  const [activeTab, setActiveTab] = useState<'feed' | 'profile'>('feed');
   const [modalVisible, setModalVisible] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
 
@@ -50,19 +53,34 @@ export default function App() {
     <SafeAreaProvider>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       {isAuthenticated ? (
-        <View style={[styles.container, { backgroundColor: colors.background.default }]}>
-          {activeTab === 'feed' ? <FeedScreen /> : <ProfileScreen />}
-          <FloatingTabBar 
-            activeTab={activeTab} 
-            onChangeTab={setActiveTab} 
-            onAddPress={() => setModalVisible(true)}
-          />
-          <PostModal
-            visible={modalVisible}
-            onClose={() => setModalVisible(false)}
-            onSubmit={createPost}
-          />
-        </View>
+        <NavigationContainer>
+          <View style={[styles.container, { backgroundColor: colors.background.default }]}>
+            <Tab.Navigator
+              tabBar={(props) => {
+                const currentRouteName = props.state.routeNames[props.state.index];
+                return (
+                  <FloatingTabBar
+                    activeTab={currentRouteName === 'feed' ? 'feed' : 'profile'}
+                    onChangeTab={(tab) => props.navigation.navigate(tab)}
+                    onAddPress={() => setModalVisible(true)}
+                  />
+                );
+              }}
+              screenOptions={{
+                headerShown: false,
+              }}
+            >
+              <Tab.Screen name="feed" component={FeedScreen} />
+              <Tab.Screen name="profile" component={ProfileScreen} />
+            </Tab.Navigator>
+            
+            <PostModal
+              visible={modalVisible}
+              onClose={() => setModalVisible(false)}
+              onSubmit={createPost}
+            />
+          </View>
+        </NavigationContainer>
       ) : (
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background.default }]}>
           <LoginScreen onSuccess={() => {}} />
@@ -77,4 +95,3 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
-

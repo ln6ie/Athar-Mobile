@@ -6,6 +6,8 @@ import { AnonymousAvatar } from '../components/AnonymousAvatar';
 import { TOKENS } from '../constants/tokens';
 import { useTheme } from '../hooks/useTheme';
 import { Logo } from '../components/Logo';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { GlassicView } from '../components/GlassicView';
 
 interface NotificationsScreenProps {
   onClose: () => void;
@@ -44,22 +46,22 @@ export const NotificationsScreen: React.FC<NotificationsScreenProps> = ({ onClos
           
           {/* Center: Title & Subtitle */}
           <View style={styles.headerTitleContainer}>
-            <Text style={[styles.headerTitleText, { color: colors.text.primary }]}>التنبيهات والأثر</Text>
-            <Text style={[styles.headerSubtitleText, { color: colors.text.disabled }]}>من تفاعل مع منشوراتك</Text>
+            <Text style={[styles.headerTitleText, { color: colors.text.primary }]}>الاشعارات و التنبيهات </Text>
           </View>
           
           {/* Right Side: Gold Back Button */}
-          <TouchableOpacity 
-            onPress={onClose}
-            style={[styles.backButton, { backgroundColor: colors.background.input }]}
-            activeOpacity={0.7}
+          <GlassicView
+            cornerRadius={18}
+            style={styles.backButton}
           >
-            <View style={styles.arrowContainer}>
-              <View style={[styles.arrowStem, { backgroundColor: colors.brand.gold }]} />
-              <View style={[styles.arrowWingTop, { backgroundColor: colors.brand.gold }]} />
-              <View style={[styles.arrowWingBottom, { backgroundColor: colors.brand.gold }]} />
-            </View>
-          </TouchableOpacity>
+            <TouchableOpacity 
+              onPress={onClose}
+              style={{ width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="close" size={20} color={colors.brand.gold} />
+            </TouchableOpacity>
+          </GlassicView>
         </View>
       </View>
 
@@ -84,7 +86,6 @@ export const NotificationsScreen: React.FC<NotificationsScreenProps> = ({ onClos
           </View>
           <Text style={[styles.emptyTitle, { color: colors.text.primary }]}>لا توجد تنبيهات جديدة</Text>
           <Text style={[styles.emptySubtitle, { color: colors.text.secondary }]}>
-            أثرك هادئ حالياً. تفاعل مع الآخرين وانشر موضوعات ملهمة لتترك أثراً تفاعلياً!
           </Text>
         </View>
       ) : (
@@ -188,16 +189,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  arrowContainer: {
-    width: 20,
-    height: 20,
-    position: 'relative',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  arrowStem: { position: 'absolute', width: 14, height: 3.5, borderRadius: 2, left: 2 },
-  arrowWingTop: { position: 'absolute', width: 8, height: 3.5, borderRadius: 2, transform: [{ rotate: '45deg' }], top: 5, right: 4 },
-  arrowWingBottom: { position: 'absolute', width: 8, height: 3.5, borderRadius: 2, transform: [{ rotate: '-45deg' }], bottom: 5, right: 4 },
 });
 
 

@@ -73,7 +73,7 @@ export const ChangeEmailSubScreen: React.FC<ChangeEmailSubScreenProps> = ({ curr
             style={[styles.input, { backgroundColor: colors.background.input, color: colors.text.primary, borderColor: colors.border.muted }]}
             value={email}
             onChangeText={(txt) => { setEmail(txt); setError(null); }}
-            placeholder="new-email@example.com"
+            placeholder="البريد الجديد"
             keyboardType="email-address"
             autoCapitalize="none"
             placeholderTextColor={colors.text.disabled}
@@ -88,13 +88,7 @@ export const ChangeEmailSubScreen: React.FC<ChangeEmailSubScreenProps> = ({ curr
             {loading ? (
               <ActivityIndicator color="#FFFFFF" size="small" />
             ) : (
-              <View style={styles.buttonContent}>
-                <Text style={styles.saveText}>حفظ البريد الجديد</Text>
-                <View style={styles.iconContainer}>
-                  <View style={styles.checkShort} />
-                  <View style={styles.checkLong} />
-                </View>
-              </View>
+              <Text style={styles.saveText}>حفظ </Text>
             )}
           </TouchableOpacity>
         </View>
@@ -129,29 +123,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  saveText: { color: '#FFFFFF', fontSize: 14, fontWeight: 'bold', marginRight: 8 },
-  buttonContent: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center' },
-  iconContainer: { width: 16, height: 16, position: 'relative', justifyContent: 'center', alignItems: 'center' },
-  checkShort: {
-    position: 'absolute',
-    width: 6,
-    height: 3,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 1.5,
-    transform: [{ rotate: '45deg' }],
-    bottom: 5,
-    left: 2,
-  },
-  checkLong: {
-    position: 'absolute',
-    width: 12,
-    height: 3,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 1.5,
-    transform: [{ rotate: '-45deg' }],
-    bottom: 7,
-    right: 1,
-  },
+  saveText: { color: '#FFFFFF', fontSize: 14, fontWeight: 'bold' },
   errorBox: { borderWidth: 1, borderRadius: 12, padding: 16, marginBottom: 20 },
   errorText: { fontSize: 12, textAlign: 'center', lineHeight: 18 },
   successBox: { borderWidth: 1, borderRadius: 12, padding: 16, marginBottom: 20 },

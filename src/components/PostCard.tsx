@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { View, Text, TouchableOpacity, TouchableWithoutFeedback, StyleSheet } from 'react-native';
+import React, { useRef, useEffect } from 'react';
+import { View, Text, TouchableOpacity, TouchableWithoutFeedback, StyleSheet, Animated } from 'react-native';
 import { Post } from '../types';
 import { isArabicText } from '../utils/rtl';
 import { useTheme } from '../hooks/useTheme';
@@ -18,6 +18,28 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
   });
 
   const lastTapRef = useRef<number>(0);
+  
+  // Animated value for clean and light bounce pulse animation
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (post.isLiked) {
+      Animated.sequence([
+        Animated.timing(scaleAnim, {
+          toValue: 1.3,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          friction: 4,
+          tension: 40,
+          useNativeDriver: true,
+        })
+      ]).start();
+    }
+  }, [post.isLiked]);
+
   const handleCardPress = () => {
     const now = Date.now();
     const DOUBLE_PRESS_DELAY = 300;
@@ -58,17 +80,22 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
             style={styles.likeContainer}
             activeOpacity={0.7}
           >
-            <View
+            <Animated.View
               style={[
                 styles.rippleOuterRing,
                 post.isLiked
                   ? {
                       borderColor: colors.brand.gold,
-                      backgroundColor: isDark
-                        ? 'rgba(59, 130, 246, 0.12)'
-                        : 'rgba(0, 85, 165, 0.08)',
+                      backgroundColor: isDark ? '#2C2C2E' : '#FFFFFF',
+                      borderWidth: isDark ? 1 : 0.5,
+                      shadowColor: '#000000',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.08,
+                      shadowRadius: 4,
+                      elevation: 2,
                     }
                   : { borderColor: colors.border.muted },
+                { transform: [{ scale: scaleAnim }] }
               ]}
             >
               <View
@@ -79,7 +106,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
                     : { backgroundColor: colors.text.disabled, width: 3, height: 3, borderRadius: 1.5 },
                 ]}
               />
-            </View>
+            </Animated.View>
             <Text
               style={[
                 styles.likeCountText,

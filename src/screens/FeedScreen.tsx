@@ -78,28 +78,53 @@ export const FeedScreen: React.FC = () => {
     return <ErrorState message={error} onRetry={() => fetchFeed(true)} />;
   }
 
-  const tabWrapperBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
-  const activeTabBg = isDark ? 'rgba(255, 255, 255, 0.12)' : '#FFFFFF';
+  const tabWrapperBg = isDark ? '#000000' : colors.background.input;
+  const activeTabStyle = [
+    styles.activeTabButton,
+    {
+      backgroundColor: isDark ? '#2C2C2E' : '#FFFFFF',
+      borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
+      borderWidth: isDark ? 1 : 0.5,
+    }
+  ];
   const tabTextColor = colors.text.secondary;
   const activeTabTextColor = colors.brand.gold;
 
   return (
     <View style={globalStyles.container}>
-      {/* Floating Top Tabs Container */}
-      <GlassicView
-        cornerRadius={0}
-        style={[
-          styles.tabsContainer,
-          { 
-            paddingTop: Math.max(insets.top, 10),
-            borderBottomWidth: 0
-          }
-        ]}
-      >
-        {/* Left Side: Transparent Notification Bell */}
+      {/* Floating Top Header Row */}
+      <View style={[styles.topHeaderRow, { top: insets.top + 8 }]}>
+        {/* Centered Glass Capsule for Tabs */}
+        <GlassicView
+          cornerRadius={22}
+          style={styles.centeredTabsCard}
+        >
+          <View style={[styles.tabsWrapper, { backgroundColor: tabWrapperBg }]}>
+            <TouchableOpacity
+              style={[styles.tabButton, activeTab === 'trending' && activeTabStyle]}
+              onPress={() => handleTabChange('trending')}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.tabText, { color: tabTextColor }, activeTab === 'trending' && [styles.activeTabText, { color: activeTabTextColor }]]}>
+                الرائجة
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tabButton, activeTab === 'recent' && activeTabStyle]}
+              onPress={() => handleTabChange('recent')}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.tabText, { color: tabTextColor }, activeTab === 'recent' && [styles.activeTabText, { color: activeTabTextColor }]]}>
+                الحديثة
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </GlassicView>
+
+        {/* Floating Bell Button on the side (completely independent, no card) */}
         <TouchableOpacity
           onPress={() => setModalVisible(true)}
-          style={[globalStyles.bellButton, { marginRight: 16 }]}
+          style={styles.sideNotificationButton}
           activeOpacity={0.7}
         >
           <BellIcon color={colors.brand.gold} />
@@ -111,33 +136,11 @@ export const FeedScreen: React.FC = () => {
             </View>
           )}
         </TouchableOpacity>
-
-        {/* Right Side: Segmented Tabs */}
-        <View style={[styles.tabsWrapper, { backgroundColor: tabWrapperBg }]}>
-          <TouchableOpacity
-            style={[styles.tabButton, activeTab === 'trending' && [styles.activeTabButton, { backgroundColor: activeTabBg }]]}
-            onPress={() => handleTabChange('trending')}
-            activeOpacity={0.8}
-          >
-            <Text style={[styles.tabText, { color: tabTextColor }, activeTab === 'trending' && [styles.activeTabText, { color: activeTabTextColor }]]}>
-              الرائجة
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tabButton, activeTab === 'recent' && [styles.activeTabButton, { backgroundColor: activeTabBg }]]}
-            onPress={() => handleTabChange('recent')}
-            activeOpacity={0.8}
-          >
-            <Text style={[styles.tabText, { color: tabTextColor }, activeTab === 'recent' && [styles.activeTabText, { color: activeTabTextColor }]]}>
-              الحديثة
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </GlassicView>
+      </View>
 
       {/* Offline Banner below the floating tabs */}
       {isOffline && (
-        <View style={[styles.offlineBanner, { top: insets.top + 62 }]}>
+        <View style={[styles.offlineBanner, { top: insets.top + 70 }]}>
           <View style={styles.offlineIndicator} />
           <Text style={styles.offlineText}>
             أنت تتصفح في وضع عدم الاتصال بالإنترنت حالياً
@@ -157,7 +160,7 @@ export const FeedScreen: React.FC = () => {
         )}
         contentContainerStyle={[
           styles.listContent,
-          { paddingTop: insets.top + 62 + (isOffline ? 38 : 0) }
+          { paddingTop: insets.top + 74 + (isOffline ? 38 : 0) }
         ]}
         refreshing={isConnected !== false && isRefreshing}
         onRefresh={isConnected !== false ? handleRefresh : undefined}
@@ -177,6 +180,7 @@ export const FeedScreen: React.FC = () => {
       <Modal
         animationType="slide"
         visible={modalVisible}
+        presentationStyle="pageSheet"
         onRequestClose={() => setModalVisible(false)}
       >
         <NotificationsScreen onClose={() => setModalVisible(false)} />
@@ -186,24 +190,27 @@ export const FeedScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  tabsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingBottom: 12,
-    zIndex: 10,
+  topHeaderRow: {
     position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    borderBottomWidth: 1,
+    left: 16,
+    right: 16,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  centeredTabsCard: {
+    width: 170,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    padding: 3,
   },
   tabsWrapper: {
-    flexDirection: 'row',
-    borderRadius: 24,
-    padding: 4,
+    flexDirection: 'row-reverse',
     flex: 1,
+    borderRadius: 20,
+    overflow: 'hidden',
   },
   tabButton: {
     flex: 1,
@@ -259,6 +266,15 @@ const styles = StyleSheet.create({
   },
   loaderFooter: {
     paddingVertical: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sideNotificationButton: {
+    position: 'absolute',
+    left: 0,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
   },

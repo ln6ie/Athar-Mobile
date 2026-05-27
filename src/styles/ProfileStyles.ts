@@ -2,15 +2,24 @@ import { StyleSheet } from 'react-native';
 import { TOKENS, LIGHT_COLORS } from '../constants/tokens';
 import { useTheme } from '../hooks/useTheme';
 
-export const getProfileStyles = (colors: typeof LIGHT_COLORS) =>
+export const getProfileStyles = (colors: typeof LIGHT_COLORS, isDark: boolean = false) =>
   StyleSheet.create({
     listContent: { padding: 24, paddingBottom: 140 },
     profileHeaderCard: {
       alignItems: 'stretch',
       paddingVertical: 16,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.border.muted,
-      marginBottom: 8,
+      paddingHorizontal: 16,
+      backgroundColor: colors.background.card,
+      borderRadius: 24,
+      borderWidth: 1,
+      borderColor: colors.border.muted,
+      marginBottom: 12,
+      marginTop: 8,
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: isDark ? 0 : 0.04,
+      shadowRadius: 12,
+      elevation: 2,
     },
     profileMainRow: { flexDirection: 'row-reverse', alignItems: 'center', width: '100%', paddingVertical: 8 },
     profileInfoColumn: { flex: 1, alignItems: 'flex-start' },
@@ -31,17 +40,6 @@ export const getProfileStyles = (colors: typeof LIGHT_COLORS) =>
     },
     avatarText: { color: '#FFFFFF', fontSize: 28, fontWeight: 'bold', lineHeight: 34 },
     profileName: { fontSize: 18, fontWeight: 'bold', color: colors.text.primary, lineHeight: 24, textAlign: 'right' },
-    profileTitle: {
-      fontSize: 10,
-      color: colors.brand.gold,
-      fontWeight: '600',
-      backgroundColor: 'rgba(0, 85, 165, 0.08)',
-      paddingHorizontal: 8,
-      paddingVertical: 3,
-      borderRadius: TOKENS.borderRadius.full,
-      lineHeight: 14,
-      overflow: 'hidden',
-    },
     inlineStatsBox: {
       flexDirection: 'row-reverse',
       alignItems: 'center',
@@ -56,12 +54,17 @@ export const getProfileStyles = (colors: typeof LIGHT_COLORS) =>
     profileEmail: { fontSize: 11, color: colors.text.secondary, marginTop: 6, lineHeight: 16, textAlign: 'right' },
     optionsCard: {
       backgroundColor: colors.background.card,
-      borderRadius: 16,
+      borderRadius: 24,
       borderWidth: 1,
       borderColor: colors.border.muted,
       padding: 16,
       marginTop: 8,
       marginBottom: 8,
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: isDark ? 0 : 0.04,
+      shadowRadius: 12,
+      elevation: 2,
     },
     optionsTitle: { fontSize: 12, fontWeight: 'bold', color: colors.brand.gold, textAlign: 'right', marginBottom: 12 },
     optionRow: {
@@ -93,54 +96,38 @@ export const getProfileStyles = (colors: typeof LIGHT_COLORS) =>
     emptyIconDot: { width: 20, height: 20, borderRadius: 10, backgroundColor: colors.brand.gold },
     emptyTitle: { fontSize: 16, fontWeight: 'bold', color: colors.text.primary, marginBottom: 8, lineHeight: 24 },
     emptyDescription: { fontSize: 12, color: colors.text.secondary, textAlign: 'center', lineHeight: 20 },
-    tabContainer: { flexDirection: 'row-reverse', backgroundColor: colors.background.input, borderRadius: 24, padding: 4, marginTop: 28, marginBottom: 16 },
+    tabContainer: {
+      flexDirection: 'row-reverse',
+      backgroundColor: isDark ? '#000000' : colors.background.input,
+      borderRadius: 24,
+      padding: 4,
+      marginTop: 28,
+      marginBottom: 16,
+    },
     tabToggle: { flex: 1, paddingVertical: 10, borderRadius: 20, alignItems: 'center' },
-    tabToggleActive: { backgroundColor: colors.background.card, shadowColor: '#000000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 },
+    tabToggleActive: {
+      backgroundColor: isDark ? '#2C2C2E' : '#FFFFFF',
+      borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
+      borderWidth: isDark ? 1 : 0.5,
+      borderRadius: 20,
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 4,
+      elevation: 2,
+    },
     tabToggleText: { fontSize: 13, fontWeight: '600', color: colors.text.secondary },
     tabToggleTextActive: { color: colors.brand.gold, fontWeight: 'bold' },
     
-    // Custom Dense Vector Icon styles
+    // Icon styles
     optionRightContainer: { flexDirection: 'row', alignItems: 'center' },
     optionIconWrapper: { width: 24, height: 24, justifyContent: 'center', alignItems: 'center', marginLeft: 12 },
-    emailIconBody: { width: 18, height: 12, borderWidth: 2.2, borderColor: colors.brand.gold, borderRadius: 2 },
-    emailIconFlapLeft: { position: 'absolute', width: 8, height: 2.2, backgroundColor: colors.brand.gold, transform: [{ rotate: '30deg' }], top: 8.5, left: 4 },
-    emailIconFlapRight: { position: 'absolute', width: 8, height: 2.2, backgroundColor: colors.brand.gold, transform: [{ rotate: '-30deg' }], top: 8.5, right: 4 },
-    supportIconBubble: { width: 18, height: 13, borderWidth: 2.2, borderColor: colors.brand.gold, borderRadius: 3.5, position: 'relative' },
-    supportIconTail: {
-      position: 'absolute',
-      width: 5,
-      height: 5,
-      borderWidth: 2.2,
-      borderColor: colors.brand.gold,
-      borderTopWidth: 0,
-      borderRightWidth: 0,
-      bottom: -3.5,
-      right: 3,
-      transform: [{ rotate: '-45deg' }],
-      backgroundColor: 'transparent',
-    },
-    shieldIconContainer: { width: 18, height: 16, position: 'relative', alignItems: 'center', justifyContent: 'center' },
-    shieldIconShape: { width: 14, height: 14, borderWidth: 2.2, borderColor: colors.brand.gold, borderBottomLeftRadius: 6, borderBottomRightRadius: 6, borderTopLeftRadius: 2.5, borderTopRightRadius: 2.5 },
-    shieldIconLine: { position: 'absolute', width: 2.2, height: 6, backgroundColor: colors.brand.gold, top: 5 },
-    infoIconCircle: { width: 17, height: 17, borderRadius: 8.5, borderWidth: 2.2, borderColor: colors.brand.gold, justifyContent: 'center', alignItems: 'center' },
-    infoIconDot: { width: 2.5, height: 2.5, borderRadius: 1.25, backgroundColor: colors.brand.gold, marginBottom: 2 },
-    infoIconLine: { width: 2.5, height: 4.5, backgroundColor: colors.brand.gold, borderRadius: 1 },
-    deleteIconContainer: { width: 18, height: 16, position: 'relative', justifyContent: 'center', alignItems: 'center' },
-    deleteIconCan: { width: 13, height: 11, borderWidth: 2.2, borderColor: '#DC2626', borderRadius: 2, marginTop: 2 },
-    deleteIconLid: { position: 'absolute', width: 16, height: 2.2, backgroundColor: '#DC2626', top: 1, borderRadius: 1 },
-    
-    // Custom Vector Logout Icon styles
-    logoutIconContainer: { width: 18, height: 16, position: 'relative', justifyContent: 'center', alignItems: 'center' },
-    logoutIconDoor: { position: 'absolute', right: 2, top: 1, bottom: 1, width: 8, borderWidth: 2.2, borderColor: '#DC2626', borderLeftWidth: 0, borderTopRightRadius: 2, borderBottomRightRadius: 2 },
-    logoutIconArrowStem: { position: 'absolute', left: 1, width: 10, height: 2.2, backgroundColor: '#DC2626' },
-    logoutIconArrowHeadTop: { position: 'absolute', left: 1, width: 6, height: 2.2, backgroundColor: '#DC2626', transform: [{ rotate: '-45deg' }], top: 4.5 },
-    logoutIconArrowHeadBottom: { position: 'absolute', left: 1, width: 6, height: 2.2, backgroundColor: '#DC2626', transform: [{ rotate: '45deg' }], bottom: 4.5 },
   });
 
 export const useProfileStyles = () => {
-  const { colors } = useTheme();
-  return getProfileStyles(colors);
+  const { colors, isDark } = useTheme();
+  return getProfileStyles(colors, isDark);
 };
 
-export const styles = getProfileStyles(LIGHT_COLORS);
+export const styles = getProfileStyles(LIGHT_COLORS, false);
 

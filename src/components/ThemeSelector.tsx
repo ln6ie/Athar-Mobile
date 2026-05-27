@@ -8,7 +8,7 @@ interface ThemeSelectorProps {
 }
 
 export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ minimal = false }) => {
-  const { themeMode, setThemeMode, colors } = useTheme();
+  const { themeMode, setThemeMode, colors, isDark } = useTheme();
 
   const options: { mode: ThemeMode; label: string }[] = [
     { mode: 'dark', label: 'داكن' },
@@ -17,13 +17,29 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ minimal = false })
   ];
 
   return (
-    <View style={[
-      !minimal ? styles.container : [styles.minimalContainer, { borderTopColor: colors.border.muted }],
-      !minimal && { backgroundColor: colors.background.card, borderColor: colors.border.muted }
-    ]}>
+    <View
+      style={
+        !minimal
+          ? [
+              styles.container,
+              {
+                backgroundColor: colors.background.card,
+                borderRadius: 24,
+                borderWidth: 1,
+                borderColor: colors.border.muted,
+                shadowColor: '#000000',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: isDark ? 0 : 0.04,
+                shadowRadius: 12,
+                elevation: 2,
+              },
+            ]
+          : [styles.minimalContainer, { borderTopColor: colors.border.muted }]
+      }
+    >
       <Text style={[styles.title, { color: colors.brand.gold }]}>مظهر التطبيق</Text>
       
-      <View style={[styles.segmentContainer, { backgroundColor: colors.background.input }]}>
+      <View style={[styles.segmentContainer, { backgroundColor: isDark ? '#000000' : colors.background.input }]}>
         {options.map((opt) => {
           const isActive = themeMode === opt.mode;
           return (
@@ -31,7 +47,14 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ minimal = false })
               key={opt.mode}
               style={[
                 styles.segmentButton,
-                isActive && [styles.activeSegmentButton, { backgroundColor: colors.background.card }]
+                isActive && [
+                  styles.activeSegmentButton,
+                  {
+                    backgroundColor: isDark ? '#2C2C2E' : colors.background.card,
+                    borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
+                    borderWidth: isDark ? 1 : 0.5,
+                  }
+                ]
               ]}
               onPress={() => setThemeMode(opt.mode)}
               activeOpacity={0.8}
@@ -56,8 +79,6 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ minimal = false })
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 16,
-    borderWidth: 1,
     padding: 16,
     marginTop: 8,
     marginBottom: 8,

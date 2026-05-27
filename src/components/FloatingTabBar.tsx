@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { TOKENS } from '../constants/tokens';
 import { useTheme } from '../hooks/useTheme';
 import { GlassicView } from './GlassicView';
@@ -15,7 +16,21 @@ export const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
   onChangeTab, 
   onAddPress 
 }) => {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
+
+  const activeTabStyle = [
+    styles.tabButtonActive,
+    {
+      backgroundColor: isDark ? '#2C2C2E' : '#FFFFFF',
+      borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
+      borderWidth: isDark ? 1 : 0.5,
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 4,
+      elevation: 2,
+    }
+  ];
 
   return (
     <View style={styles.outerContainer}>
@@ -48,21 +63,15 @@ export const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
           onPress={() => onChangeTab('feed')}
           style={[
             styles.tabButton,
-            activeTab === 'feed' && styles.tabButtonActive
+            activeTab === 'feed' && activeTabStyle
           ]}
           activeOpacity={0.8}
         >
-          {/* Custom dense vector Home icon drawn with CSS */}
-          <View style={styles.homeIconContainer}>
-            <View style={[
-              styles.homeRoofSolid,
-              { borderBottomColor: activeTab === 'feed' ? colors.brand.gold : colors.text.secondary }
-            ]} />
-            <View style={[
-              styles.homeBodySolid,
-              { backgroundColor: activeTab === 'feed' ? colors.brand.gold : colors.text.secondary }
-            ]} />
-          </View>
+          <Ionicons 
+            name={activeTab === 'feed' ? 'home' : 'home-outline'} 
+            size={24} 
+            color={activeTab === 'feed' ? colors.brand.gold : colors.text.secondary} 
+          />
           <Text style={[
             styles.tabLabel,
             activeTab === 'feed' ? { color: colors.brand.gold } : { color: colors.text.secondary }
@@ -76,21 +85,15 @@ export const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
           onPress={() => onChangeTab('profile')}
           style={[
             styles.tabButton,
-            activeTab === 'profile' && styles.tabButtonActive
+            activeTab === 'profile' && activeTabStyle
           ]}
           activeOpacity={0.8}
         >
-          {/* Custom dense vector Profile icon drawn with CSS */}
-          <View style={styles.profileIconContainer}>
-            <View style={[
-              styles.profileHeadSolid,
-              { backgroundColor: activeTab === 'profile' ? colors.brand.gold : colors.text.secondary }
-            ]} />
-            <View style={[
-              styles.profileShouldersSolid,
-              { backgroundColor: activeTab === 'profile' ? colors.brand.gold : colors.text.secondary }
-            ]} />
-          </View>
+          <Ionicons 
+            name={activeTab === 'profile' ? 'person' : 'person-outline'} 
+            size={24} 
+            color={activeTab === 'profile' ? colors.brand.gold : colors.text.secondary} 
+          />
           <Text style={[
             styles.tabLabel,
             activeTab === 'profile' ? { color: colors.brand.gold } : { color: colors.text.secondary }
@@ -197,43 +200,4 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.6)', // Muted semi-transparent white for inactive tabs
   },
   // CSS Vector Drawing Styles
-  homeIconContainer: {
-    width: 28,
-    height: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  homeRoofSolid: {
-    width: 0,
-    height: 0,
-    borderStyle: 'solid',
-    borderLeftWidth: 10,
-    borderRightWidth: 10,
-    borderBottomWidth: 9,
-    borderLeftColor: 'transparent',
-    borderRightColor: 'transparent',
-  },
-  homeBodySolid: {
-    width: 14,
-    height: 9,
-    marginTop: -0.5,
-  },
-  profileIconContainer: {
-    width: 28,
-    height: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  profileHeadSolid: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginBottom: 2,
-  },
-  profileShouldersSolid: {
-    width: 18,
-    height: 7,
-    borderTopLeftRadius: 9,
-    borderTopRightRadius: 9,
-  },
 });

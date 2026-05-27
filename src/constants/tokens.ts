@@ -1,54 +1,65 @@
+import { Platform, PlatformColor, ColorValue } from 'react-native';
+
+// مساعد جلب ألوان النظام مباشرة من UIKit لنظام iOS 26
+// مع توفير لون بديل (Fallback) للأندرويد والويب للحفاظ على دقة التصميم وتجنب أخطاء التشغيل.
+const getNativeColor = (iosName: string, fallback: string): ColorValue => {
+  return Platform.select({
+    ios: PlatformColor(iosName),
+    default: fallback as any,
+  }) as ColorValue;
+};
+
 export const LIGHT_COLORS = {
   background: {
-    default: '#FFFFFF',
-    card: '#FFFFFF',
-    input: '#F3F4F6',
+    default: getNativeColor('systemGroupedBackground', '#F2F2F7'), // لون خلفية النظام المجمعة
+    card: getNativeColor('secondarySystemGroupedBackground', '#FFFFFF'), // لون خلفية البطاقات الفرعية بالنظام
+    input: getNativeColor('systemGray6', '#E5E5EA'), // لون الإدخال الرمادي الفاخر للنظام
   },
   brand: {
-    gold: '#0055A5',
+    gold: getNativeColor('systemBlue', '#0055A5'), // اللون الرئيسي للتطبيق (أزرق ملكي متوافق مع نظام Apple)
     goldMuted: '#1A365D',
   },
   feedback: {
-    error: '#EF4444',
-    success: '#10B981',
-    warning: '#F59E0B',
-    info: '#3B82F6',
+    error: getNativeColor('systemRed', '#EF4444'),
+    success: getNativeColor('systemGreen', '#10B981'),
+    warning: getNativeColor('systemOrange', '#F59E0B'),
+    info: getNativeColor('systemBlue', '#3B82F6'),
   },
   text: {
-    primary: '#000000',
-    secondary: '#4B5563',
-    disabled: '#9CA3AF',
+    primary: getNativeColor('label', '#000000'), // لون النصوص الرئيسية للنظام
+    secondary: getNativeColor('secondaryLabel', '#3A3A3C'), // لون النصوص الفرعية بالنظام
+    disabled: getNativeColor('placeholderText', '#8E8E93'), // لون نصوص التلميح بالنظام
   },
   border: {
-    muted: '#E5E7EB',
-    focus: '#0055A5',
+    muted: getNativeColor('separator', '#D1D1D6'), // لون الفواصل الرسمي المعتمد من Apple
+    focus: getNativeColor('systemBlue', '#0055A5'),
   }
 };
 
 export const DARK_COLORS = {
   background: {
-    default: '#0B0F19',
-    card: '#131A2C',
-    input: '#1E293B',
+    default: getNativeColor('systemGroupedBackground', '#000000'), // لون خلفية النظام المجمعة الداكنة (أسود ناصع)
+    card: getNativeColor('secondarySystemGroupedBackground', '#1C1C1E'), // لون خلفية البطاقات الفرعية الداكنة
+    input: getNativeColor('systemGray6', '#2C2C2E'),
   },
   brand: {
-    gold: '#3B82F6',
+    gold: getNativeColor('systemBlue', '#3B82F6'),
     goldMuted: '#60A5FA',
   },
   feedback: {
-    error: '#EF4444',
-    success: '#10B981',
-    warning: '#F59E0B',
-    info: '#3B82F6',
+    error: getNativeColor('systemRed', '#EF4444'),
+    success: getNativeColor('systemGreen', '#10B981'),
+    warning: getNativeColor('systemOrange', '#F59E0B'),
+    info: getNativeColor('systemBlue', '#3B82F6'),
   },
   text: {
-    primary: '#F8FAFC',
-    secondary: '#94A3B8',
-    disabled: '#475569',
+    primary: getNativeColor('label', '#FFFFFF'),
+    secondary: getNativeColor('secondaryLabel', '#AEAEB2'),
+    disabled: getNativeColor('placeholderText', '#636366'),
   },
   border: {
-    muted: '#1E293B',
-    focus: '#3B82F6',
+    muted: getNativeColor('separator', '#38383A'),
+    focus: getNativeColor('systemBlue', '#3B82F6'),
   }
 };
 

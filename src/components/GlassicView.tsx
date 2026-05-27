@@ -13,13 +13,24 @@ export const GlassicView: React.FC<GlassicViewProps> = ({
   const { isDark } = useTheme();
 
   return (
-    <View style={[styles.container, { borderRadius: cornerRadius }, style]}>
+    <View
+      style={[
+        styles.container,
+        {
+          borderRadius: cornerRadius,
+          backgroundColor: isDark ? 'rgba(12, 24, 48, 0.45)' : 'rgba(230, 242, 255, 0.38)',
+          borderColor: isDark ? 'rgba(59, 130, 246, 0.18)' : 'rgba(0, 85, 165, 0.14)',
+          borderWidth: 1.2,
+        },
+        style,
+      ]}
+    >
       <BlurView
-        intensity={75}
+        intensity={80}
         tint={isDark ? 'dark' : 'light'}
         style={[StyleSheet.absoluteFill, { borderRadius: cornerRadius }]}
       />
-      <View style={styles.content}>{children}</View>
+      {children}
     </View>
   );
 };
@@ -28,12 +39,6 @@ const styles = StyleSheet.create({
   container: {
     position: 'relative',
     overflow: 'hidden',
-  },
-  content: {
-    ...StyleSheet.absoluteFillObject,
-    flexDirection: 'inherit' as any,
-    alignItems: 'inherit' as any,
-    justifyContent: 'inherit' as any,
   },
 });
 
