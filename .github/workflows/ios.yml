@@ -112,11 +112,11 @@ jobs:
         run: |
           cd ios
           echo "Using Profile UUID: $PROFILE_UUID"
-          xcodebuild -workspace athar.xcworkspace \
-                     -scheme athar \
+          xcodebuild -workspace Athar.xcworkspace \
+                     -scheme Athar \
                      -configuration Release \
                      -sdk iphoneos \
-                     -archivePath $RUNNER_TEMP/athar.xcarchive \
+                     -archivePath $RUNNER_TEMP/Athar.xcarchive \
                      DEVELOPMENT_TEAM="$TEAM_ID" \
                      PROVISIONING_PROFILE_SPECIFIER="$PROFILE_UUID" \
                      PROVISIONING_PROFILE="$PROFILE_UUID" \
@@ -127,7 +127,7 @@ jobs:
                      archive
 
           xcodebuild -exportArchive \
-                     -archivePath $RUNNER_TEMP/athar.xcarchive \
+                     -archivePath $RUNNER_TEMP/Athar.xcarchive \
                      -exportOptionsPlist ExportOptions.plist \
                      -exportPath $RUNNER_TEMP/build
 
