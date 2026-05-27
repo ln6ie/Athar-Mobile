@@ -1,13 +1,22 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import {
-  GlassView,
-  isGlassEffectAPIAvailable,
-  isLiquidGlassAvailable,
-} from 'expo-glass-effect';
 import { GlassicViewProps } from './GlassicView.types';
 import { useTheme } from '../hooks/useTheme';
 import { BlurView } from 'expo-blur';
+
+// Safe dynamic fallbacks for Expo Go and standard builds without expo-glass-effect compiled in
+let GlassView: any = View;
+let isGlassEffectAPIAvailable = () => false;
+let isLiquidGlassAvailable = () => false;
+
+try {
+  const GlassEffectModule = require('expo-glass-effect');
+  GlassView = GlassEffectModule.GlassView || View;
+  isGlassEffectAPIAvailable = GlassEffectModule.isGlassEffectAPIAvailable || (() => false);
+  isLiquidGlassAvailable = GlassEffectModule.isLiquidGlassAvailable || (() => false);
+} catch (e) {
+  console.warn('[GlassicView] expo-glass-effect is not available, falling back to expo-blur.', e);
+}
 
 export const GlassicView: React.FC<GlassicViewProps> = ({
   children,

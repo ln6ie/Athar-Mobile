@@ -11,7 +11,10 @@ interface ConfigState {
 }
 
 // Semantic versioning comparison: returns true if current < minimum
-const isVersionOlder = (current: string, minimum: string): boolean => {
+const isVersionOlder = (current: any, minimum: any): boolean => {
+  if (typeof current !== 'string' || typeof minimum !== 'string') {
+    return false;
+  }
   const currentParts = current.split('.').map(num => parseInt(num, 10) || 0);
   const minParts = minimum.split('.').map(num => parseInt(num, 10) || 0);
 
@@ -32,11 +35,12 @@ export const useConfigStore = create<ConfigState>((set) => ({
     try {
       const currentVersion = Constants.expoConfig?.version || Application.nativeApplicationVersion || '1.0.0';
       console.log('[useConfigStore] Checking app version. Local:', currentVersion);
+      
       const response = await api.get('/config/version');
-      const { minAndroidVersion, minIosVersion, storeUrlAndroid, storeUrlIos } = response.data;
+      const { minAndroidVersion, minIosVersion, storeUrlAndroid, storeUrlIos } = response?.data || {};
 
-      const minVersion = Platform.OS === 'ios' ? minIosVersion : minAndroidVersion;
-      const targetStoreUrl = Platform.OS === 'ios' ? storeUrlIos : storeUrlAndroid;
+      const minVersion = (Platform.OS === 'ios' ? minIosVersion : minAndroidVersion) || '1.0.0';
+      const targetStoreUrl = (Platform.OS === 'ios' ? storeUrlIos : storeUrlAndroid) || '';
 
       console.log('[useConfigStore] Version comparison. Local:', currentVersion, 'Min required:', minVersion);
 

@@ -6,6 +6,9 @@ import { Post, Notification } from '../types';
 import { useAuthStore } from './useAuthStore';
 import { EncryptionService } from '../services/encryption';
 
+// Safe in-memory storage fallback for environments where AsyncStorage native module is null (e.g. unbuilt Expo clients)
+const memoryStorage = new Map<string, string>();
+
 interface FeedState {
   posts: Post[];
   nextCursor: string | null;
@@ -234,21 +237,56 @@ export const useFeedStore = create<FeedState>()(
       name: 'athar-feed-storage',
       storage: createJSONStorage(() => ({
         getItem: async (name: string) => {
-          const value = await AsyncStorage.getItem(name);
-          if (!value) return null;
           try {
-            return EncryptionService.decrypt(value);
+            let value: string | null = null;
+            try {
+              value = await AsyncStorage.getItem(name);
+            } catch (storageErr) {
+              value = memoryStorage.get(name) || null;
+            }
+            if (!value) return null;
+
+            const trimmed = value.trim();
+            // If it starts with '{', it is plaintext JSON from a previous version.
+            // Return it directly so it doesn't fail decryption. It will be encrypted on the next setItem.
+            if (trimmed.startsWith('{')) {
+              console.log('[useFeedStore] Detected plaintext storage. Upgrading smoothly.');
+              return value;
+            }
+
+            const decrypted = EncryptionService.decrypt(value);
+            // Verify the decrypted content is valid JSON before handing it to Zustand to prevent SyntaxError crashes
+            JSON.parse(decrypted);
+            return decrypted;
           } catch (e) {
-            console.error('Failed to decrypt storage for name:', name, e);
+            console.error('[useFeedStore] Failed to decrypt or parse storage for name:', name, e);
+            // Clear corrupted/plaintext storage to prevent startup crash loop
+            try {
+              await AsyncStorage.removeItem(name);
+            } catch (clearErr) {
+              memoryStorage.delete(name);
+            }
             return null;
           }
         },
         setItem: async (name: string, value: string) => {
-          const encryptedValue = EncryptionService.encrypt(value);
-          await AsyncStorage.setItem(name, encryptedValue);
+          try {
+            const encryptedValue = EncryptionService.encrypt(value);
+            try {
+              await AsyncStorage.setItem(name, encryptedValue);
+            } catch (storageErr) {
+              memoryStorage.set(name, encryptedValue);
+            }
+          } catch (e) {
+            console.error('[useFeedStore] Failed to encrypt or save storage for name:', name, e);
+          }
         },
         removeItem: async (name: string) => {
-          await AsyncStorage.removeItem(name);
+          try {
+            await AsyncStorage.removeItem(name);
+          } catch (e) {
+            memoryStorage.delete(name);
+          }
         },
       })),
       partialize: (state) => ({
@@ -258,4 +296,3 @@ export const useFeedStore = create<FeedState>()(
     }
   )
 );
-
