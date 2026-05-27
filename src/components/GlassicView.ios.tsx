@@ -7,6 +7,7 @@ import {
 } from 'expo-glass-effect';
 import { GlassicViewProps } from './GlassicView.types';
 import { useTheme } from '../hooks/useTheme';
+import { BlurView } from 'expo-blur';
 
 export const GlassicView: React.FC<GlassicViewProps> = ({
   children,
@@ -16,13 +17,13 @@ export const GlassicView: React.FC<GlassicViewProps> = ({
   isInteractive = false,
   tintColor,
 }) => {
+  const { isDark } = useTheme();
+
   // التحقق المزدوج: هل النظام يدعم Liquid Glass؟ وهل الـ API يعمل؟
   const canUseGlass =
     isLiquidGlassAvailable() && isGlassEffectAPIAvailable();
 
-  const { isDark } = useTheme();
-
-  // iOS < 26 أو أي جهاز لا يدعم UIGlassEffect (مثل Expo Go) → View عادي بخلفية زجاجية محاكية متناسقة للحفاظ على الحواف
+  // iOS < 26 أو أي جهاز لا يدعم UIGlassEffect (مثل Expo Go) → تأثير بلور زجاجي أنيق وحقيقي باستخدام expo-blur
   if (!canUseGlass) {
     return (
       <View
@@ -30,13 +31,17 @@ export const GlassicView: React.FC<GlassicViewProps> = ({
           styles.fallbackContainer,
           {
             borderRadius: cornerRadius,
-            backgroundColor: isDark ? 'rgba(19, 26, 44, 0.85)' : 'rgba(255, 255, 255, 0.85)',
             borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)',
           },
           style,
         ]}
       >
-        {children}
+        <BlurView
+          intensity={75}
+          tint={isDark ? 'dark' : 'light'}
+          style={[StyleSheet.absoluteFill, { borderRadius: cornerRadius }]}
+        />
+        <View style={styles.content}>{children}</View>
       </View>
     );
   }

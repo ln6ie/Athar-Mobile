@@ -1,37 +1,39 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
+import { BlurView } from 'expo-blur';
 import { GlassicViewProps } from './GlassicView.types';
 import { useTheme } from '../hooks/useTheme';
 
-// Android / Web: View عادي مع خلفية زجاجية محاكية متناسقة
+// أندرويد / ويب: تأثير بلور زجاجي حقيقي باستخدام expo-blur
 export const GlassicView: React.FC<GlassicViewProps> = ({
   children,
   style,
   cornerRadius = 24,
 }) => {
-  const { colors, isDark } = useTheme();
+  const { isDark } = useTheme();
 
   return (
-    <View
-      style={[
-        styles.fallbackContainer,
-        {
-          borderRadius: cornerRadius,
-          backgroundColor: isDark ? 'rgba(19, 26, 44, 0.85)' : 'rgba(255, 255, 255, 0.85)',
-          borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)',
-        },
-        style,
-      ]}
-    >
-      {children}
+    <View style={[styles.container, { borderRadius: cornerRadius }, style]}>
+      <BlurView
+        intensity={75}
+        tint={isDark ? 'dark' : 'light'}
+        style={[StyleSheet.absoluteFill, { borderRadius: cornerRadius }]}
+      />
+      <View style={styles.content}>{children}</View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  fallbackContainer: {
-    borderWidth: 1,
+  container: {
+    position: 'relative',
     overflow: 'hidden',
+  },
+  content: {
+    ...StyleSheet.absoluteFillObject,
+    flexDirection: 'inherit' as any,
+    alignItems: 'inherit' as any,
+    justifyContent: 'inherit' as any,
   },
 });
 
