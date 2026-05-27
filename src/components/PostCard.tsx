@@ -179,19 +179,19 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
   return (
     <TouchableWithoutFeedback onPress={handleCardPress}>
       <View style={[styles.card, { borderBottomColor: colors.border.muted }]}>
-        {/* Header: Anonymous Name + Menu + Time */}
+        {/* Header: Name + Time on right, Menu on left */}
         <View style={styles.header}>
           <View style={{ flexDirection: 'row-reverse', alignItems: 'center' }}>
             <Text style={[styles.anonymousName, { color: colors.brand.gold, marginLeft: 8 }]}>
               {post.anonymousName}
             </Text>
-            <TouchableOpacity onPress={handleMenuPress} style={{ padding: 4 }} activeOpacity={0.6}>
-              <Ionicons name="ellipsis-horizontal" size={16} color={colors.text.secondary} />
-            </TouchableOpacity>
+            <Text style={[styles.timeText, { color: colors.text.disabled }]}>
+              {formattedDate}
+            </Text>
           </View>
-          <Text style={[styles.timeText, { color: colors.text.disabled }]}>
-            {formattedDate}
-          </Text>
+          <TouchableOpacity onPress={handleMenuPress} style={{ padding: 4 }} activeOpacity={0.6}>
+            <Ionicons name="ellipsis-horizontal" size={16} color={colors.text.secondary} />
+          </TouchableOpacity>
         </View>
 
         {/* Post content */}
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   header: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 8,
