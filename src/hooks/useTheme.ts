@@ -15,7 +15,7 @@ export function useTheme() {
     // مزامنة واجهة الألوان للنظام البرمجي لـ iOS/Android ديناميكياً
     // هذا يضمن قيام PlatformColor بحل الألوان الصحيحة دون تعارض في المظهر المجموعي
     if (themeMode === 'system') {
-      Appearance.setColorScheme('unspecified');
+      Appearance.setColorScheme(null);
     } else {
       Appearance.setColorScheme(themeMode);
     }

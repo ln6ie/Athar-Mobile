@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ColorValue } from 'react-native';
 
 interface BellIconProps {
-  color?: string;
+  color?: ColorValue;
 }
 
 export const BellIcon: React.FC<BellIconProps> = ({ color = '#0055A5' }) => {
