@@ -93,7 +93,6 @@ export const NotificationsScreen: React.FC<NotificationsScreenProps> = ({ onClos
         <FlashList
           data={notifications}
           keyExtractor={(item) => item.id}
-          estimatedItemSize={110}
           renderItem={({ item }) => (
             <View style={[styles.notificationCard, { borderBottomColor: colors.border.muted }]}>
               <View style={styles.avatarWrapper}>

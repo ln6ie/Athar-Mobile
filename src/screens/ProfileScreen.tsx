@@ -90,7 +90,6 @@ export const ProfileScreen: React.FC = () => {
       <FlashList
         data={displayedData}
         keyExtractor={(item) => `profile-${item.id}`}
-        estimatedItemSize={140}
         onRefresh={() => {
           if (activeTab === 'my-posts') {
             fetchMyPosts();

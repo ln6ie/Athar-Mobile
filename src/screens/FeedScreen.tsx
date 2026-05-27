@@ -156,7 +156,6 @@ export const FeedScreen: React.FC = () => {
       <FlashList
         data={listData}
         keyExtractor={(item) => item.id}
-        estimatedItemSize={140}
         renderItem={({ item }) => {
           if (isSkeletonLoading) {
             return <PostCardSkeleton />;
