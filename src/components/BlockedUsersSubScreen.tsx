@@ -30,7 +30,7 @@ export const BlockedUsersSubScreen: React.FC<BlockedUsersSubScreenProps> = ({ on
           </View>
           <Text style={[styles.emptyTitle, { color: colors.text.primary }]}>لا يوجد مستخدمون محظورون</Text>
           <Text style={[styles.emptyDescription, { color: colors.text.secondary }]}>
-            قائمتك خالية من المحظورين حالياً. جميع منشورات المستخدمين تظهر في جدار الأثر الخاص بك.
+            قائمتك خالية من المحظورين حالياً. جميع منشورات المستخدمين تظهر لديك.
           </Text>
         </View>
       ) : (
