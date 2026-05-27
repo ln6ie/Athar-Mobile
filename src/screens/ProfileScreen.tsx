@@ -212,7 +212,7 @@ export const ProfileScreen: React.FC = () => {
                 activeOpacity={0.8}
               >
                 <Text style={[styles.tabToggleText, activeTab === 'my-posts' && styles.tabToggleTextActive]}>
-                  آثاري
+                  منشوراتي
                 </Text>
               </TouchableOpacity>
 

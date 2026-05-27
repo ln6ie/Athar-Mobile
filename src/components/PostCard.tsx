@@ -1,8 +1,11 @@
 import React, { useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, TouchableWithoutFeedback, StyleSheet, Animated } from 'react-native';
+import { View, Text, TouchableOpacity, TouchableWithoutFeedback, StyleSheet, Animated, Alert } from 'react-native';
 import { Post } from '../types';
 import { isArabicText } from '../utils/rtl';
 import { useTheme } from '../hooks/useTheme';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { useAuthStore } from '../store/useAuthStore';
+import { useFeedStore } from '../store/useFeedStore';
 
 interface PostCardProps {
   post: Post;
@@ -21,6 +24,80 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
   
   // Animated value for clean and light bounce pulse animation
   const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const currentUser = useAuthStore((state) => state.user);
+  const blockUser = useFeedStore((state) => state.blockUser);
+  const reportPost = useFeedStore((state) => state.reportPost);
+  const deletePost = useFeedStore((state) => state.deletePost);
+
+  const isOwnPost = currentUser?.anonymousName === post.anonymousName;
+
+  const handleMenuPress = () => {
+    if (isOwnPost) {
+      Alert.alert(
+        'خيارات المنشور',
+        'هل ترغب في حذف هذا الأثر نهائياً وفوراً؟',
+        [
+          { text: 'إلغاء', style: 'cancel' },
+          {
+            text: 'حذف المنشور فوراً',
+            style: 'destructive',
+            onPress: async () => {
+              try {
+                await deletePost(post.id);
+                Alert.alert('تم', 'تم حذف منشورك بنجاح.');
+              } catch (err) {
+                Alert.alert('خطأ', 'تعذر حذف المنشور حالياً.');
+              }
+            }
+          }
+        ],
+        { cancelable: true }
+      );
+    } else {
+      Alert.alert(
+        'خيارات المنشور',
+        'الرجاء اختيار أحد الإجراءات التالية للمساعدة في الحفاظ على مجتمع آمن:',
+        [
+          { text: 'إلغاء', style: 'cancel' },
+          {
+            text: 'إبلاغ عن محتوى غير لائق',
+            style: 'destructive',
+            onPress: async () => {
+              try {
+                await reportPost(post.id);
+                Alert.alert('شكرًا لك', 'تم استلام الإبلاغ بنجاح، وسيتخذ فريق الدعم الإجراء المناسب خلال 24 ساعة.');
+              } catch (err) {
+                Alert.alert('خطأ', 'تعذر إرسال الإبلاغ حالياً.');
+              }
+            }
+          },
+          {
+            text: 'حظر هذا الكاتب',
+            style: 'destructive',
+            onPress: () => {
+              Alert.alert(
+                'تأكيد الحظر',
+                `هل أنت متأكد من رغبتك في حظر ${post.anonymousName}؟ لن تظهر لك أي منشورات منه مجدداً.`,
+                [
+                  { text: 'إلغاء', style: 'cancel' },
+                  {
+                    text: 'نعم، حظره',
+                    style: 'destructive',
+                    onPress: async () => {
+                      await blockUser(post.anonymousName);
+                      Alert.alert('تم الحظر', 'تم حظر المستخدم بنجاح ولن تظهر لك أي من مشاركاته.');
+                    }
+                  }
+                ]
+              );
+            }
+          }
+        ],
+        { cancelable: true }
+      );
+    }
+  };
 
   useEffect(() => {
     if (post.isLiked) {
@@ -102,11 +179,16 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
   return (
     <TouchableWithoutFeedback onPress={handleCardPress}>
       <View style={[styles.card, { borderBottomColor: colors.border.muted }]}>
-        {/* Header: Anonymous Name + Time */}
+        {/* Header: Anonymous Name + Menu + Time */}
         <View style={styles.header}>
-          <Text style={[styles.anonymousName, { color: colors.brand.gold }]}>
-            {post.anonymousName}
-          </Text>
+          <View style={{ flexDirection: 'row-reverse', alignItems: 'center' }}>
+            <Text style={[styles.anonymousName, { color: colors.brand.gold, marginLeft: 8 }]}>
+              {post.anonymousName}
+            </Text>
+            <TouchableOpacity onPress={handleMenuPress} style={{ padding: 4 }} activeOpacity={0.6}>
+              <Ionicons name="ellipsis-horizontal" size={16} color={colors.text.secondary} />
+            </TouchableOpacity>
+          </View>
           <Text style={[styles.timeText, { color: colors.text.disabled }]}>
             {formattedDate}
           </Text>

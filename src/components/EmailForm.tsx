@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useGlobalStyles } from '../styles/globalStyles';
 import { useTheme } from '../hooks/useTheme';
@@ -20,6 +20,7 @@ export const EmailForm: React.FC<EmailFormProps> = ({
 }) => {
   const globalStyles = useGlobalStyles();
   const { colors } = useTheme();
+  const [agreed, setAgreed] = useState(false);
 
   return (
     <View>
@@ -39,17 +40,41 @@ export const EmailForm: React.FC<EmailFormProps> = ({
       />
 
       {error ? (
-        <Text style={{ color: colors.feedback.error, fontSize: 12, textAlign: 'right', marginBottom: 16, fontWeight: '600' }}>
+        <Text style={{ color: colors.feedback.error, fontSize: 12, textAlign: 'right', marginBottom: 12, fontWeight: '600' }}>
           {error}
         </Text>
       ) : null}
 
+      {/* EULA Agreement Checkbox for Apple UGC Guideline 1.2 Compliance */}
+      <TouchableOpacity 
+        onPress={() => setAgreed(!agreed)} 
+        style={{ flexDirection: 'row-reverse', alignItems: 'center', marginVertical: 14, paddingHorizontal: 2 }}
+        activeOpacity={0.8}
+      >
+        <View style={{
+          width: 18,
+          height: 18,
+          borderRadius: 4,
+          borderWidth: 1.5,
+          borderColor: agreed ? colors.brand.gold : '#D1D5DB',
+          backgroundColor: agreed ? colors.brand.gold : 'transparent',
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginLeft: 8
+        }}>
+          {agreed ? <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: 'bold' }}>✓</Text> : null}
+        </View>
+        <Text style={{ fontSize: 11, color: colors.text.secondary, flex: 1, textAlign: 'right', lineHeight: 16 }}>
+          أوافق على شروط الاستخدام <Text style={{ color: colors.brand.gold, fontWeight: 'bold' }}>(EULA)</Text> وأقر بأنه لا تهاون مع أي محتوى مسيء أو مستخدمين مسيئين.
+        </Text>
+      </TouchableOpacity>
+
       <TouchableOpacity
         onPress={onSubmit}
-        disabled={isLoading || !email.trim()}
+        disabled={isLoading || !email.trim() || !agreed}
         style={[
           globalStyles.button,
-          (isLoading || !email.trim()) && globalStyles.buttonDisabled,
+          (isLoading || !email.trim() || !agreed) && globalStyles.buttonDisabled,
         ]}
         activeOpacity={0.8}
       >

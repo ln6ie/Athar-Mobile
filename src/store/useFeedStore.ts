@@ -13,6 +13,7 @@ interface FeedState {
   posts: Post[];
   myPosts: Post[];
   likedPosts: Post[];
+  blockedUsers: string[];
   nextCursor: string | null;
   isLoading: boolean;
   isLoadingMyPosts: boolean;
@@ -38,6 +39,9 @@ interface FeedState {
   fetchNotifications: () => Promise<void>;
   fetchMyPosts: () => Promise<void>;
   fetchLikedPosts: () => Promise<void>;
+  blockUser: (anonymousName: string) => Promise<void>;
+  reportPost: (postId: string) => Promise<void>;
+  deletePost: (postId: string) => Promise<void>;
   initializeFeed: () => Promise<void>;
 }
 
@@ -47,6 +51,7 @@ export const useFeedStore = create<FeedState>()(
       posts: [],
       myPosts: [],
       likedPosts: [],
+      blockedUsers: [],
       nextCursor: null,
       isLoading: false,
       isLoadingMyPosts: false,
@@ -97,9 +102,10 @@ export const useFeedStore = create<FeedState>()(
           const { posts: newPosts, nextCursor: newCursor } = response.data;
 
           const mergedPosts = reset ? newPosts : [...posts, ...newPosts];
-          const uniquePosts = mergedPosts.filter(
-            (post: Post, index: number, self: Post[]) => self.findIndex((p: Post) => p.id === post.id) === index
-          );
+          const { blockedUsers } = get();
+          const uniquePosts = mergedPosts
+            .filter((post: Post, index: number, self: Post[]) => self.findIndex((p: Post) => p.id === post.id) === index)
+            .filter((post: Post) => !blockedUsers.includes(post.anonymousName));
 
           set({
             posts: uniquePosts,
@@ -309,6 +315,41 @@ export const useFeedStore = create<FeedState>()(
           });
         }
       },
+
+      blockUser: async (anonymousName) => {
+        const { blockedUsers, posts, myPosts, likedPosts } = get();
+        if (blockedUsers.includes(anonymousName)) return;
+
+        const newBlockedUsers = [...blockedUsers, anonymousName];
+        set({
+          blockedUsers: newBlockedUsers,
+          posts: posts.filter((p) => p.anonymousName !== anonymousName),
+          myPosts: myPosts.filter((p) => p.anonymousName !== anonymousName),
+          likedPosts: likedPosts.filter((p) => p.anonymousName !== anonymousName),
+        });
+      },
+
+      reportPost: async (postId) => {
+        try {
+          await api.post(`/posts/${postId}/report`);
+        } catch (error) {
+          console.error('[useFeedStore] reportPost error:', error);
+        }
+      },
+
+      deletePost: async (postId) => {
+        try {
+          await api.delete(`/posts/${postId}`);
+          set((state) => ({
+            posts: state.posts.filter((p) => p.id !== postId),
+            myPosts: state.myPosts.filter((p) => p.id !== postId),
+            likedPosts: state.likedPosts.filter((p) => p.id !== postId),
+          }));
+        } catch (error) {
+          console.error('[useFeedStore] deletePost error:', error);
+          throw error;
+        }
+      },
     }),
     {
       name: 'athar-feed-storage',
@@ -369,6 +410,7 @@ export const useFeedStore = create<FeedState>()(
       partialize: (state) => ({
         posts: state.posts,
         unreadLikesCount: state.unreadLikesCount,
+        blockedUsers: state.blockedUsers,
       }),
     }
   )
