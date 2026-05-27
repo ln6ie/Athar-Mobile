@@ -15,6 +15,8 @@ import { FloatingTabBar } from './src/components/FloatingTabBar';
 import { PostModal } from './src/components/PostModal';
 import { forceArabicLayout } from './src/utils/rtl';
 import { IntroScreen } from './src/screens/IntroScreen';
+import { useConfigStore } from './src/store/useConfigStore';
+import { ForceUpdateModal } from './src/components/ForceUpdateModal';
 
 const Tab = createBottomTabNavigator();
 
@@ -23,11 +25,15 @@ export default function App() {
   const { initializeTheme } = useThemeStore();
   const { colors, isDark } = useTheme();
   const { createPost, initializeFeed } = useFeedStore();
+  const { checkAppVersion } = useConfigStore();
   const [modalVisible, setModalVisible] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
     forceArabicLayout();
+    
+    // Check app version and initializations
+    checkAppVersion();
     
     // Initialize authentication, theme, and feed cache concurrently
     Promise.all([initialize(), initializeTheme(), initializeFeed()]).catch((err) => {
@@ -52,6 +58,7 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <StatusBar style={isDark ? 'light' : 'dark'} />
+      <ForceUpdateModal />
       {isAuthenticated ? (
         <NavigationContainer>
           <View style={[styles.container, { backgroundColor: colors.background.default }]}>
