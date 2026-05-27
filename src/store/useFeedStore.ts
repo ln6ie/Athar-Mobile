@@ -11,12 +11,18 @@ const memoryStorage = new Map<string, string>();
 
 interface FeedState {
   posts: Post[];
+  myPosts: Post[];
+  likedPosts: Post[];
   nextCursor: string | null;
   isLoading: boolean;
+  isLoadingMyPosts: boolean;
+  isLoadingLikedPosts: boolean;
   isLoadingMore: boolean;
   isRefreshing: boolean;
   isFetchingFeed: boolean;
   error: string | null;
+  myPostsError: string | null;
+  likedPostsError: string | null;
   unreadLikesCount: number;
   lastViewedLikesCount: number;
   notifications: Notification[];
@@ -30,6 +36,8 @@ interface FeedState {
   clearError: () => void;
   markLikesAsRead: () => void;
   fetchNotifications: () => Promise<void>;
+  fetchMyPosts: () => Promise<void>;
+  fetchLikedPosts: () => Promise<void>;
   initializeFeed: () => Promise<void>;
 }
 
@@ -37,12 +45,18 @@ export const useFeedStore = create<FeedState>()(
   persist(
     (set, get) => ({
       posts: [],
+      myPosts: [],
+      likedPosts: [],
       nextCursor: null,
       isLoading: false,
+      isLoadingMyPosts: false,
+      isLoadingLikedPosts: false,
       isLoadingMore: false,
       isRefreshing: false,
       isFetchingFeed: false,
       error: null,
+      myPostsError: null,
+      likedPostsError: null,
       unreadLikesCount: 0,
       lastViewedLikesCount: 0,
       notifications: [],
@@ -153,11 +167,14 @@ export const useFeedStore = create<FeedState>()(
       },
 
       toggleLike: async (postId) => {
-        const { posts } = get();
+        const { posts, myPosts, likedPosts } = get();
 
         // 1. Optimistic UI update
         const previousPosts = [...posts];
-        const updatedPosts = posts.map((post) => {
+        const previousMyPosts = [...myPosts];
+        const previousLikedPosts = [...likedPosts];
+
+        const updatePostHelper = (post: Post) => {
           if (post.id === postId) {
             return {
               ...post,
@@ -166,32 +183,54 @@ export const useFeedStore = create<FeedState>()(
             };
           }
           return post;
-        });
+        };
 
-        set({ posts: updatedPosts });
+        const updatedPosts = posts.map(updatePostHelper);
+        const updatedMyPosts = myPosts.map(updatePostHelper);
+        const updatedLikedPosts = likedPosts.map(updatePostHelper);
+
+        set({ 
+          posts: updatedPosts,
+          myPosts: updatedMyPosts,
+          likedPosts: updatedLikedPosts,
+        });
 
         try {
           // 2. Persist to API
           const response = await api.post(`/posts/${postId}/like`);
           const { liked, likesCount } = response.data;
 
+          const applyStrictUpdate = (post: Post) => {
+            if (post.id === postId) {
+              return {
+                ...post,
+                isLiked: liked,
+                likesCount: likesCount,
+              };
+            }
+            return post;
+          };
+
           // 3. Update with strict API returned values
-          set((state) => ({
-            posts: state.posts.map((post) => {
-              if (post.id === postId) {
-                return {
-                  ...post,
-                  isLiked: liked,
-                  likesCount: likesCount,
-                };
-              }
-              return post;
-            }),
-          }));
+          set((state) => {
+            const newLikedPosts = state.likedPosts.map(applyStrictUpdate);
+            // If the user unliked the post, filter it out from the likedPosts list so it disappears from "Favorites"
+            const finalLikedPosts = liked ? newLikedPosts : newLikedPosts.filter(p => p.id !== postId);
+
+            return {
+              posts: state.posts.map(applyStrictUpdate),
+              myPosts: state.myPosts.map(applyStrictUpdate),
+              likedPosts: finalLikedPosts,
+            };
+          });
         } catch (error) {
           console.error('Failed to toggle like on API, rolling back UI', error);
           // Rollback on error
-          set({ posts: previousPosts });
+          set({ 
+            posts: previousPosts,
+            myPosts: previousMyPosts,
+            likedPosts: previousLikedPosts,
+          });
         }
       },
 
@@ -233,6 +272,40 @@ export const useFeedStore = create<FeedState>()(
           set({
             isLoadingNotifications: false,
             notificationsError: errMsg,
+          });
+        }
+      },
+
+      fetchMyPosts: async () => {
+        set({ isLoadingMyPosts: true, myPostsError: null });
+        try {
+          const response = await api.get('/posts/my-posts');
+          set({
+            myPosts: response.data,
+            isLoadingMyPosts: false,
+          });
+        } catch (error: any) {
+          const errMsg = error.response?.data?.message || 'تعذر تحميل آثارك النشطة. يرجى المحاولة لاحقاً.';
+          set({
+            isLoadingMyPosts: false,
+            myPostsError: errMsg,
+          });
+        }
+      },
+
+      fetchLikedPosts: async () => {
+        set({ isLoadingLikedPosts: true, likedPostsError: null });
+        try {
+          const response = await api.get('/posts/liked');
+          set({
+            likedPosts: response.data,
+            isLoadingLikedPosts: false,
+          });
+        } catch (error: any) {
+          const errMsg = error.response?.data?.message || 'تعذر تحميل الآثار المفضلة. يرجى المحاولة لاحقاً.';
+          set({
+            isLoadingLikedPosts: false,
+            likedPostsError: errMsg,
           });
         }
       },

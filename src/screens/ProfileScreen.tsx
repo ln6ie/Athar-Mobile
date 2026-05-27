@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert, Modal } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuthStore } from '../store/useAuthStore';
@@ -19,7 +19,15 @@ import { GlassicView } from '../components/GlassicView';
 
 export const ProfileScreen: React.FC = () => {
   const { user, logout, deleteAccount } = useAuthStore();
-  const { posts, toggleLike, isLoading, isFetchingFeed } = useFeedStore();
+  const { 
+    myPosts, 
+    likedPosts, 
+    toggleLike, 
+    isLoadingMyPosts, 
+    isLoadingLikedPosts, 
+    fetchMyPosts, 
+    fetchLikedPosts 
+  } = useFeedStore();
   const { colors } = useTheme();
   const styles = useProfileStyles();
   const [activeSubScreen, setActiveSubScreen] = useState<'main' | 'change-email' | 'support' | 'about' | 'privacy'>('main');
@@ -29,11 +37,16 @@ export const ProfileScreen: React.FC = () => {
   const userEmail = user?.email || 'user@athar.app';
   const anonymousName = user?.anonymousName || 'مستكشف-مجهول-100';
 
-  const myPosts = posts.filter((post) => post.anonymousName === anonymousName);
-  const likedPosts = posts.filter((post) => post.isLiked);
-  const displayedPosts = activeTab === 'my-posts' ? myPosts : likedPosts;
+  useEffect(() => {
+    fetchMyPosts();
+    fetchLikedPosts();
+  }, []);
 
-  const isSkeletonLoading = (isLoading || isFetchingFeed) && posts.length === 0;
+  const displayedPosts = activeTab === 'my-posts' ? myPosts : likedPosts;
+  const isSkeletonLoading = activeTab === 'my-posts' 
+    ? isLoadingMyPosts && myPosts.length === 0 
+    : isLoadingLikedPosts && likedPosts.length === 0;
+
   const dummySkeletons = Array.from({ length: 3 }, (_, i) => ({ id: `profile-skeleton-${i}` }));
   const displayedData = isSkeletonLoading ? dummySkeletons : displayedPosts;
 
@@ -76,6 +89,14 @@ export const ProfileScreen: React.FC = () => {
       <FlatList
         data={displayedData}
         keyExtractor={(item) => `profile-${item.id}`}
+        onRefresh={() => {
+          if (activeTab === 'my-posts') {
+            fetchMyPosts();
+          } else {
+            fetchLikedPosts();
+          }
+        }}
+        refreshing={activeTab === 'my-posts' ? isLoadingMyPosts : isLoadingLikedPosts}
         renderItem={({ item }) => {
           if (isSkeletonLoading) {
             return <PostCardSkeleton />;
@@ -183,7 +204,10 @@ export const ProfileScreen: React.FC = () => {
             >
               <TouchableOpacity
                 style={[styles.tabToggle, activeTab === 'my-posts' && styles.tabToggleActive]}
-                onPress={() => setActiveTab('my-posts')}
+                onPress={() => {
+                  setActiveTab('my-posts');
+                  fetchMyPosts();
+                }}
                 activeOpacity={0.8}
               >
                 <Text style={[styles.tabToggleText, activeTab === 'my-posts' && styles.tabToggleTextActive]}>
@@ -193,7 +217,10 @@ export const ProfileScreen: React.FC = () => {
 
               <TouchableOpacity
                 style={[styles.tabToggle, activeTab === 'likes' && styles.tabToggleActive]}
-                onPress={() => setActiveTab('likes')}
+                onPress={() => {
+                  setActiveTab('likes');
+                  fetchLikedPosts();
+                }}
                 activeOpacity={0.8}
               >
                 <Text style={[styles.tabToggleText, activeTab === 'likes' && styles.tabToggleTextActive]}>
