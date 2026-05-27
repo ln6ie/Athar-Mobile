@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Activi
 import { Header } from './Header';
 import { useAuthStore } from '../store/useAuthStore';
 import { useTheme } from '../hooks/useTheme';
+import { useGlobalStyles } from '../styles/globalStyles';
 
 interface ChangeEmailSubScreenProps {
   currentEmail: string;
@@ -12,6 +13,7 @@ interface ChangeEmailSubScreenProps {
 export const ChangeEmailSubScreen: React.FC<ChangeEmailSubScreenProps> = ({ currentEmail, onBack }) => {
   const { changeEmail } = useAuthStore();
   const { colors, isDark } = useTheme();
+  const globalStyles = useGlobalStyles();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -68,12 +70,17 @@ export const ChangeEmailSubScreen: React.FC<ChangeEmailSubScreenProps> = ({ curr
         )}
 
         <View style={styles.form}>
-          <Text style={[styles.label, { color: colors.text.primary }]}>البريد الإلكتروني الجديد</Text>
+          <Text style={globalStyles.label}>البريد الإلكتروني الجديد</Text>
           <TextInput
-            style={[styles.input, { backgroundColor: colors.background.input, color: colors.text.primary, borderColor: colors.border.muted }]}
+            style={[
+              globalStyles.input, 
+              { 
+                textAlign: email ? 'left' : 'right' 
+              }
+            ]}
             value={email}
             onChangeText={(txt) => { setEmail(txt); setError(null); }}
-            placeholder="البريد الجديد"
+            placeholder="email@gmail.com"
             keyboardType="email-address"
             autoCapitalize="none"
             placeholderTextColor={colors.text.disabled}
@@ -88,7 +95,7 @@ export const ChangeEmailSubScreen: React.FC<ChangeEmailSubScreenProps> = ({ curr
             {loading ? (
               <ActivityIndicator color="#FFFFFF" size="small" />
             ) : (
-              <Text style={styles.saveText}>حفظ </Text>
+              <Text style={styles.saveText}>حفظ</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -105,17 +112,6 @@ const styles = StyleSheet.create({
   currentLabel: { fontSize: 11, textAlign: 'right', marginBottom: 4 },
   currentValue: { fontSize: 13, fontWeight: 'bold', textAlign: 'right' },
   form: { width: '100%' },
-  label: { fontSize: 12, fontWeight: 'bold', marginBottom: 8, textAlign: 'right' },
-  input: {
-    width: '100%',
-    height: 48,
-    borderWidth: 1,
-    borderRadius: 24,
-    paddingHorizontal: 16,
-    fontSize: 13,
-    textAlign: 'right',
-    marginBottom: 24,
-  },
   saveButton: {
     width: '100%',
     height: 48,

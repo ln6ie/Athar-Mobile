@@ -13,7 +13,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ minimal = false })
   const options: { mode: ThemeMode; label: string }[] = [
     { mode: 'dark', label: 'داكن' },
     { mode: 'system', label: 'تلقائي' },
-    { mode: 'light', label: 'مضيء' },
+    { mode: 'light', label: 'الفاتح' },
   ];
 
   return (

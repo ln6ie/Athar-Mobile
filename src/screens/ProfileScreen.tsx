@@ -5,6 +5,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { useFeedStore } from '../store/useFeedStore';
 import { useTheme } from '../hooks/useTheme';
 import { PostCard } from '../components/PostCard';
+import { PostCardSkeleton } from '../components/PostCardSkeleton';
 import { globalStyles } from '../styles/globalStyles';
 import { ChangeEmailSubScreen } from '../components/ChangeEmailSubScreen';
 import { SupportSubScreen } from '../components/SupportSubScreen';
@@ -18,7 +19,7 @@ import { GlassicView } from '../components/GlassicView';
 
 export const ProfileScreen: React.FC = () => {
   const { user, logout, deleteAccount } = useAuthStore();
-  const { posts, toggleLike } = useFeedStore();
+  const { posts, toggleLike, isLoading, isFetchingFeed } = useFeedStore();
   const { colors } = useTheme();
   const styles = useProfileStyles();
   const [activeSubScreen, setActiveSubScreen] = useState<'main' | 'change-email' | 'support' | 'about' | 'privacy'>('main');
@@ -31,6 +32,10 @@ export const ProfileScreen: React.FC = () => {
   const myPosts = posts.filter((post) => post.anonymousName === anonymousName);
   const likedPosts = posts.filter((post) => post.isLiked);
   const displayedPosts = activeTab === 'my-posts' ? myPosts : likedPosts;
+
+  const isSkeletonLoading = (isLoading || isFetchingFeed) && posts.length === 0;
+  const dummySkeletons = Array.from({ length: 3 }, (_, i) => ({ id: `profile-skeleton-${i}` }));
+  const displayedData = isSkeletonLoading ? dummySkeletons : displayedPosts;
 
   const handleLogout = () => {
     Alert.alert(
@@ -69,11 +74,14 @@ export const ProfileScreen: React.FC = () => {
   return (
     <View style={[globalStyles.container, { backgroundColor: colors.background.default }]}>
       <FlatList
-        data={displayedPosts}
+        data={displayedData}
         keyExtractor={(item) => `profile-${item.id}`}
-        renderItem={({ item }) => (
-          <PostCard post={item} onLike={toggleLike} />
-        )}
+        renderItem={({ item }) => {
+          if (isSkeletonLoading) {
+            return <PostCardSkeleton />;
+          }
+          return <PostCard post={item as any} onLike={toggleLike} />;
+        }}
         contentContainerStyle={[
           styles.listContent,
           { paddingTop: Math.max(insets.top, 24) }
@@ -196,19 +204,21 @@ export const ProfileScreen: React.FC = () => {
           </View>
         }
         ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <View style={styles.emptyIconCircle}>
-              <View style={styles.emptyIconDot} />
+          isSkeletonLoading ? null : (
+            <View style={styles.emptyContainer}>
+              <View style={styles.emptyIconCircle}>
+                <View style={styles.emptyIconDot} />
+              </View>
+              <Text style={styles.emptyTitle}>
+                {activeTab === 'my-posts' ? 'لم تنشر أي أثر بعد' : 'لا توجد آثار مفضلة'}
+              </Text>
+              <Text style={styles.emptyDescription}>
+                {activeTab === 'my-posts'
+                  ? 'ابدأ بمشاركة خواطرك وأفكارك من خلال زر الإضافة السفلي، ودع أثرك يمر بسلام عبر الفضاء الرقمي.'
+                  : 'الأشياء الجميلة تستحق التقدير. تصفح جدار الأثر وقم بالإعجاب بالأفكار التي تلامس قلبك لتظهر هنا في ملفك الشخصي.'}
+              </Text>
             </View>
-            <Text style={styles.emptyTitle}>
-              {activeTab === 'my-posts' ? 'لم تنشر أي أثر بعد' : 'لا توجد آثار مفضلة'}
-            </Text>
-            <Text style={styles.emptyDescription}>
-              {activeTab === 'my-posts'
-                ? 'ابدأ بمشاركة خواطرك وأفكارك من خلال زر الإضافة السفلي، ودع أثرك يمر بسلام عبر الفضاء الرقمي.'
-                : 'الأشياء الجميلة تستحق التقدير. تصفح جدار الأثر وقم بالإعجاب بالأفكار التي تلامس قلبك لتظهر هنا في ملفك الشخصي.'}
-            </Text>
-          </View>
+          )
         }
       />
 

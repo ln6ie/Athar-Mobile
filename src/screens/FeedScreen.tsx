@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator, StyleSheet, Text, TouchableOpacity, Modal } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Text, TouchableOpacity, Modal, RefreshControl, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNetInfo } from '@react-native-community/netinfo';
 import * as Haptics from 'expo-haptics';
 import { useFeedStore } from '../store/useFeedStore';
 import { useTheme } from '../hooks/useTheme';
 import { PostCard } from '../components/PostCard';
+import { PostCardSkeleton } from '../components/PostCardSkeleton';
 import { BellIcon } from '../components/BellIcon';
 import { NotificationsScreen } from '../screens/NotificationsScreen';
-import { LoadingState, EmptyState, ErrorState } from '../components/StateContainers';
+import { EmptyState, ErrorState } from '../components/StateContainers';
 import { useGlobalStyles } from '../styles/globalStyles';
 import { TOKENS } from '../constants/tokens';
 import { GlassicView } from '../components/GlassicView';
@@ -20,6 +21,7 @@ export const FeedScreen: React.FC = () => {
     isLoading, 
     isLoadingMore, 
     isRefreshing, 
+    isFetchingFeed,
     error, 
     fetchFeed, 
     toggleLike,
@@ -66,17 +68,17 @@ export const FeedScreen: React.FC = () => {
     // 2. Set active tab in Zustand
     setActiveTab(tab);
     
-    // 3. Clear posts to prevent screen flash / showing old posts
-    useFeedStore.setState({ posts: [], nextCursor: null });
+    // 3. Clear posts and set isLoading to true to instantly trigger skeleton state
+    useFeedStore.setState({ posts: [], nextCursor: null, isLoading: true });
   };
-
-  if (isLoading && posts.length === 0) {
-    return <LoadingState />;
-  }
 
   if (error && posts.length === 0) {
     return <ErrorState message={error} onRetry={() => fetchFeed(true)} />;
   }
+
+  const isSkeletonLoading = (isLoading || isFetchingFeed) && posts.length === 0;
+  const dummySkeletons = Array.from({ length: 6 }, (_, i) => ({ id: `skeleton-${i}` }));
+  const listData = isSkeletonLoading ? dummySkeletons : posts;
 
   const tabWrapperBg = isDark ? '#000000' : colors.background.input;
   const activeTabStyle = [
@@ -89,6 +91,8 @@ export const FeedScreen: React.FC = () => {
   ];
   const tabTextColor = colors.text.secondary;
   const activeTabTextColor = colors.brand.gold;
+
+  const topPadding = insets.top + 74 + (isOffline ? 38 : 0);
 
   return (
     <View style={globalStyles.container}>
@@ -150,27 +154,44 @@ export const FeedScreen: React.FC = () => {
 
       {/* Cardless Clean List Feed */}
       <FlashList
-        data={posts}
+        data={listData}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <PostCard
-            post={item}
-            onLike={toggleLike}
-          />
-        )}
+        renderItem={({ item }) => {
+          if (isSkeletonLoading) {
+            return <PostCardSkeleton />;
+          }
+          return (
+            <PostCard
+              post={item as any}
+              onLike={toggleLike}
+            />
+          );
+        }}
         contentContainerStyle={[
           styles.listContent,
-          { paddingTop: insets.top + 74 + (isOffline ? 38 : 0) }
+          Platform.OS === 'android' ? { paddingTop: topPadding } : undefined
         ]}
-        refreshing={isConnected !== false && isRefreshing}
-        onRefresh={isConnected !== false ? handleRefresh : undefined}
+        contentInset={Platform.OS === 'ios' ? { top: topPadding } : undefined}
+        contentOffset={Platform.OS === 'ios' ? { x: 0, y: -topPadding } : undefined}
+        automaticallyAdjustContentInsets={false}
+        refreshControl={
+          isConnected !== false ? (
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={handleRefresh}
+              progressViewOffset={Platform.OS === 'android' ? insets.top + 60 : undefined}
+              tintColor={colors.brand.gold}
+              colors={[colors.brand.gold]}
+            />
+          ) : undefined
+        }
         onEndReached={isConnected !== false ? handleLoadMore : undefined}
         onEndReachedThreshold={0.2}
-        ListEmptyComponent={<EmptyState />}
+        ListEmptyComponent={isSkeletonLoading ? null : <EmptyState />}
         ListFooterComponent={
           isLoadingMore ? (
             <View style={styles.loaderFooter}>
-              <ActivityIndicator size="small" color={TOKENS.colors.brand.gold} />
+              <ActivityIndicator size="small" color={colors.brand.gold} />
             </View>
           ) : null
         }

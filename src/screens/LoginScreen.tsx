@@ -97,6 +97,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onSuccess }) => {
               }}
               onSubmit={handleSendOtp}
               isLoading={isLoading}
+              error={displayError}
             />
           ) : (
             <OtpForm
@@ -109,15 +110,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onSuccess }) => {
                 clearError();
               }}
               isLoading={isLoading}
+              error={displayError}
             />
           )}
-
-          {/* Error Display */}
-          {displayError ? (
-            <View style={globalStyles.errorContainer}>
-              <Text style={globalStyles.errorText}>{displayError}</Text>
-            </View>
-          ) : null}
         </View>
       </KeyboardAvoidingView>
     </View>

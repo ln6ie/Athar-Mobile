@@ -16,8 +16,8 @@ export const EmptyState: React.FC = () => {
   const { colors } = useTheme();
   return (
     <View style={[styles.emptyContainer, { backgroundColor: colors.background.default }]}>
-      <Text style={[styles.emptyTitle, { color: colors.brand.gold }]}>لا يوجد أثر</Text>
-      <Text style={[styles.emptySubtitle, { color: colors.text.secondary }]}>كن البادئ واكتب أثراً.</Text>
+      <Text style={[styles.emptyTitle, { color: colors.brand.gold }]}>لا يوجد منشورات</Text>
+      <Text style={[styles.emptySubtitle, { color: colors.text.secondary }]}>كن البادئ واكتب منشورا.</Text>
     </View>
   );
 };

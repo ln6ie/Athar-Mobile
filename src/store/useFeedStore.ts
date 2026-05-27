@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../services/api';
 import { Post, Notification } from '../types';
 import { useAuthStore } from './useAuthStore';
+import { EncryptionService } from '../services/encryption';
 
 interface FeedState {
   posts: Post[];
@@ -231,7 +232,25 @@ export const useFeedStore = create<FeedState>()(
     }),
     {
       name: 'athar-feed-storage',
-      storage: createJSONStorage(() => AsyncStorage),
+      storage: createJSONStorage(() => ({
+        getItem: async (name: string) => {
+          const value = await AsyncStorage.getItem(name);
+          if (!value) return null;
+          try {
+            return EncryptionService.decrypt(value);
+          } catch (e) {
+            console.error('Failed to decrypt storage for name:', name, e);
+            return null;
+          }
+        },
+        setItem: async (name: string, value: string) => {
+          const encryptedValue = EncryptionService.encrypt(value);
+          await AsyncStorage.setItem(name, encryptedValue);
+        },
+        removeItem: async (name: string) => {
+          await AsyncStorage.removeItem(name);
+        },
+      })),
       partialize: (state) => ({
         posts: state.posts,
         unreadLikesCount: state.unreadLikesCount,

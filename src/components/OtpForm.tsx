@@ -9,6 +9,7 @@ interface OtpFormProps {
   onSubmit: (code: string) => void;
   onBack: () => void;
   isLoading: boolean;
+  error?: string | null;
 }
 
 export const OtpForm: React.FC<OtpFormProps> = ({
@@ -16,6 +17,7 @@ export const OtpForm: React.FC<OtpFormProps> = ({
   onSubmit,
   onBack,
   isLoading,
+  error,
 }) => {
   const [otpCode, setOtpCode] = useState('');
   const globalStyles = useGlobalStyles();
@@ -40,6 +42,12 @@ export const OtpForm: React.FC<OtpFormProps> = ({
         textAlign="center"
         style={[styles.otpInput, { backgroundColor: colors.background.input, color: colors.text.primary, borderColor: colors.border.muted }]}
       />
+
+      {error ? (
+        <Text style={{ color: colors.feedback.error, fontSize: 12, textAlign: 'center', marginBottom: 16, fontWeight: '600' }}>
+          {error}
+        </Text>
+      ) : null}
 
       <TouchableOpacity
         onPress={handleVerify}
