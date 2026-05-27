@@ -14,17 +14,18 @@ export const getGlobalStyles = (colors: typeof LIGHT_COLORS) =>
     },
     input: {
       width: '100%',
+      height: 54, // Fixed premium height for perfect centering
       backgroundColor: colors.background.input,
       color: colors.text.primary,
       fontSize: 14,
-      paddingVertical: Platform.OS === 'ios' ? 16 : 12,
+      paddingVertical: 0, // Reset vertical padding to let height and textAlignVertical govern centering
       paddingHorizontal: 20,
       borderRadius: TOKENS.borderRadius.lg,
       borderWidth: 1,
       borderColor: colors.border.muted,
       marginBottom: 20,
       textAlign: 'left',
-      textAlignVertical: 'center',
+      textAlignVertical: 'center', // Explicit vertical centering on Android
     },
     button: {
       width: '100%',

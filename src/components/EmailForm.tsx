@@ -35,6 +35,7 @@ export const EmailForm: React.FC<EmailFormProps> = ({
         onChangeText={onChangeEmail}
         textAlign="left"
         style={globalStyles.input}
+        underlineColorAndroid="transparent"
       />
 
       {error ? (

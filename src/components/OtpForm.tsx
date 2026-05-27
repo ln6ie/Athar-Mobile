@@ -41,6 +41,7 @@ export const OtpForm: React.FC<OtpFormProps> = ({
         onChangeText={setOtpCode}
         textAlign="center"
         style={[styles.otpInput, { backgroundColor: colors.background.input, color: colors.text.primary, borderColor: colors.border.muted }]}
+        underlineColorAndroid="transparent"
       />
 
       {error ? (

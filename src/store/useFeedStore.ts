@@ -58,7 +58,11 @@ export const useFeedStore = create<FeedState>()(
 
       fetchFeed: async (reset = false, silent = false) => {
         const { nextCursor, posts, isLoading, isLoadingMore, isRefreshing, isFetchingFeed, activeTab } = get();
-        if (isLoading || isLoadingMore || isRefreshing || isFetchingFeed) return;
+        
+        // Allow resets (tab changes/pull-to-refresh) to bypass the 'isLoading' block so primed skeleton states don't hang
+        if (!reset && (isLoading || isLoadingMore || isRefreshing || isFetchingFeed)) return;
+        if (reset && (isRefreshing || isFetchingFeed)) return;
+
         if (!reset && !nextCursor) return;
 
         set({ isFetchingFeed: true });
