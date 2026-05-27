@@ -12,6 +12,7 @@ import { ChangeEmailSubScreen } from '../components/ChangeEmailSubScreen';
 import { SupportSubScreen } from '../components/SupportSubScreen';
 import { AboutSubScreen } from '../components/AboutSubScreen';
 import { PrivacySubScreen } from '../components/PrivacySubScreen';
+import { BlockedUsersSubScreen } from '../components/BlockedUsersSubScreen';
 import { AnonymousAvatar } from '../components/AnonymousAvatar';
 import { ThemeSelector } from '../components/ThemeSelector';
 import { useProfileStyles } from '../styles/ProfileStyles';
@@ -31,7 +32,7 @@ export const ProfileScreen: React.FC = () => {
   } = useFeedStore();
   const { colors } = useTheme();
   const styles = useProfileStyles();
-  const [activeSubScreen, setActiveSubScreen] = useState<'main' | 'change-email' | 'support' | 'about' | 'privacy'>('main');
+  const [activeSubScreen, setActiveSubScreen] = useState<'main' | 'change-email' | 'support' | 'about' | 'privacy' | 'blocked-users'>('main');
   const [activeTab, setActiveTab] = useState<'my-posts' | 'likes'>('my-posts');
   const insets = useSafeAreaInsets();
 
@@ -141,6 +142,16 @@ export const ProfileScreen: React.FC = () => {
                   <Text style={styles.optionLabel}>تغيير البريد الإلكتروني</Text>
                   <View style={styles.optionIconWrapper}>
                     <Ionicons name="mail" size={20} color={colors.brand.gold} />
+                  </View>
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.optionRow} onPress={() => setActiveSubScreen('blocked-users')}>
+                <Text style={styles.chevron}>‹</Text>
+                <View style={styles.optionRightContainer}>
+                  <Text style={styles.optionLabel}>المستخدمون المحظورون</Text>
+                  <View style={styles.optionIconWrapper}>
+                    <Ionicons name="ban" size={20} color={colors.brand.gold} />
                   </View>
                 </View>
               </TouchableOpacity>
@@ -256,6 +267,7 @@ export const ProfileScreen: React.FC = () => {
           {activeSubScreen === 'support' && <SupportSubScreen currentEmail={userEmail} onBack={() => setActiveSubScreen('main')} />}
           {activeSubScreen === 'privacy' && <PrivacySubScreen onBack={() => setActiveSubScreen('main')} />}
           {activeSubScreen === 'about' && <AboutSubScreen onBack={() => setActiveSubScreen('main')} />}
+          {activeSubScreen === 'blocked-users' && <BlockedUsersSubScreen onBack={() => setActiveSubScreen('main')} />}
         </Modal>
       )}
     </View>

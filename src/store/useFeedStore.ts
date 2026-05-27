@@ -40,6 +40,7 @@ interface FeedState {
   fetchMyPosts: () => Promise<void>;
   fetchLikedPosts: () => Promise<void>;
   blockUser: (anonymousName: string) => Promise<void>;
+  unblockUser: (anonymousName: string) => Promise<void>;
   reportPost: (postId: string) => Promise<void>;
   deletePost: (postId: string) => Promise<void>;
   initializeFeed: () => Promise<void>;
@@ -326,6 +327,13 @@ export const useFeedStore = create<FeedState>()(
           posts: posts.filter((p) => p.anonymousName !== anonymousName),
           myPosts: myPosts.filter((p) => p.anonymousName !== anonymousName),
           likedPosts: likedPosts.filter((p) => p.anonymousName !== anonymousName),
+        });
+      },
+
+      unblockUser: async (anonymousName) => {
+        const { blockedUsers } = get();
+        set({
+          blockedUsers: blockedUsers.filter((name) => name !== anonymousName),
         });
       },
 
