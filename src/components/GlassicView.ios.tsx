@@ -40,15 +40,17 @@ export const GlassicView: React.FC<GlassicViewProps> = ({
           styles.fallbackContainer,
           {
             borderRadius: cornerRadius,
-            backgroundColor: isDark ? 'rgba(12, 24, 48, 0.45)' : 'rgba(230, 242, 255, 0.38)',
-            borderColor: isDark ? 'rgba(59, 130, 246, 0.18)' : 'rgba(0, 85, 165, 0.14)',
+            // Low opacity overlays let the blur shine through natively
+            backgroundColor: isDark ? 'rgba(20, 20, 25, 0.35)' : 'rgba(255, 255, 255, 0.35)',
+            // High-end white-tinted borders mimic native glass refraction
+            borderColor: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.45)',
             borderWidth: 1.2,
           },
           style,
         ]}
       >
         <BlurView
-          intensity={80}
+          intensity={65}
           tint={isDark ? 'dark' : 'light'}
           style={[StyleSheet.absoluteFill, { borderRadius: cornerRadius }]}
         />

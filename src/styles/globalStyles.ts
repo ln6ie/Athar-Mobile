@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import { TOKENS, LIGHT_COLORS } from '../constants/tokens';
 import { useTheme } from '../hooks/useTheme';
 
@@ -17,13 +17,14 @@ export const getGlobalStyles = (colors: typeof LIGHT_COLORS) =>
       backgroundColor: colors.background.input,
       color: colors.text.primary,
       fontSize: 14,
-      paddingVertical: 16,
+      paddingVertical: Platform.OS === 'ios' ? 16 : 12,
       paddingHorizontal: 20,
       borderRadius: TOKENS.borderRadius.lg,
       borderWidth: 1,
       borderColor: colors.border.muted,
       marginBottom: 20,
       textAlign: 'left',
+      textAlignVertical: 'center',
     },
     button: {
       width: '100%',

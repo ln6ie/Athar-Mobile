@@ -5,6 +5,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
+  ScrollView,
 } from 'react-native';
 import { useAuthStore } from '../store/useAuthStore';
 import { RequestOtpSchema } from '../types/schemas';
@@ -74,52 +75,64 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onSuccess }) => {
   return (
     <View style={globalStyles.container}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={globalStyles.keyboardAvoid}
       >
-        <View style={styles.innerContainer}>
-          {/* Brand Header */}
-          <View style={globalStyles.headerContainer}>
-            <View style={{ marginBottom: 16 }}>
-              <Logo size={80} />
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.innerContainer}>
+            {/* Brand Header */}
+            <View style={globalStyles.headerContainer}>
+              <View style={{ marginBottom: 16 }}>
+                <Logo size={80} />
+              </View>
+              <Text style={globalStyles.brandTitle}>أثر</Text>
+              <Text style={globalStyles.brandSubtitle}>أبْقِ أثرك في هذا العالم</Text>
             </View>
-            <Text style={globalStyles.brandTitle}>أثر</Text>
-            <Text style={globalStyles.brandSubtitle}>أبْقِ أثرك في هذا العالم</Text>
-          </View>
 
-          {/* Form switching */}
-          {step === 'EMAIL' ? (
-            <EmailForm
-              email={email}
-              onChangeEmail={(val) => {
-                setEmail(val);
-                setLocalError(null);
-              }}
-              onSubmit={handleSendOtp}
-              isLoading={isLoading}
-              error={displayError}
-            />
-          ) : (
-            <OtpForm
-              email={email}
-              onSubmit={handleVerifyOtp}
-              onBack={() => {
-                console.log('[LoginScreen] Returning to email step.');
-                setStep('EMAIL');
-                setLocalError(null);
-                clearError();
-              }}
-              isLoading={isLoading}
-              error={displayError}
-            />
-          )}
-        </View>
+            {/* Form switching */}
+            {step === 'EMAIL' ? (
+              <EmailForm
+                email={email}
+                onChangeEmail={(val) => {
+                  setEmail(val);
+                  setLocalError(null);
+                }}
+                onSubmit={handleSendOtp}
+                isLoading={isLoading}
+                error={displayError}
+              />
+            ) : (
+              <OtpForm
+                email={email}
+                onSubmit={handleVerifyOtp}
+                onBack={() => {
+                  console.log('[LoginScreen] Returning to email step.');
+                  setStep('EMAIL');
+                  setLocalError(null);
+                  clearError();
+                }}
+                isLoading={isLoading}
+                error={displayError}
+              />
+            )}
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 24,
+  },
   innerContainer: {
     width: '100%',
     paddingHorizontal: 32,
