@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Alert, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, Modal } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuthStore } from '../store/useAuthStore';
 import { useFeedStore } from '../store/useFeedStore';
@@ -86,9 +87,10 @@ export const ProfileScreen: React.FC = () => {
 
   return (
     <View style={[globalStyles.container, { backgroundColor: colors.background.default }]}>
-      <FlatList
+      <FlashList
         data={displayedData}
         keyExtractor={(item) => `profile-${item.id}`}
+        estimatedItemSize={140}
         onRefresh={() => {
           if (activeTab === 'my-posts') {
             fetchMyPosts();

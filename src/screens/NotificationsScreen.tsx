@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFeedStore } from '../store/useFeedStore';
 import { AnonymousAvatar } from '../components/AnonymousAvatar';
@@ -89,9 +90,10 @@ export const NotificationsScreen: React.FC<NotificationsScreenProps> = ({ onClos
           </Text>
         </View>
       ) : (
-        <FlatList
+        <FlashList
           data={notifications}
           keyExtractor={(item) => item.id}
+          estimatedItemSize={110}
           renderItem={({ item }) => (
             <View style={[styles.notificationCard, { borderBottomColor: colors.border.muted }]}>
               <View style={styles.avatarWrapper}>
