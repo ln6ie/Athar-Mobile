@@ -20,16 +20,6 @@ export const ProfileHeaderCard: React.FC<ProfileHeaderCardProps> = ({
 
   return (
     <View style={styles.headerWrapper}>
-      {/* Background Accent Wave Layer for Depth */}
-      <View
-        style={[
-          styles.backgroundWave,
-          {
-            backgroundColor: isDark ? 'rgba(59, 130, 246, 0.15)' : 'rgba(0, 85, 165, 0.12)',
-          },
-        ]}
-      />
-
       {/* Foreground Main Curved Wave Card */}
       <View
         style={[
