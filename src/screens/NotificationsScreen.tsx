@@ -7,8 +7,10 @@ import { AnonymousAvatar } from '../components/AnonymousAvatar';
 import { TOKENS } from '../constants/tokens';
 import { useTheme } from '../hooks/useTheme';
 import { Logo } from '../components/Logo';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { GlassicView } from '../components/GlassicView';
+import { BouncyPressable } from '../components/BouncyPressable';
+import { SymbolView } from 'expo-symbols';
+
 
 interface NotificationsScreenProps {
   onClose: () => void;
@@ -35,34 +37,40 @@ export const NotificationsScreen: React.FC<NotificationsScreenProps> = ({ onClos
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.default }]}>
-      {/* Local custom sub-header to cleanly resolve require cycle */}
+      {/* Local custom sub-header styled exactly like the unified Header */}
       <View style={[styles.localHeaderContainer, { 
         paddingTop: Math.max(insets.top, 10), 
         backgroundColor: colors.background.default, 
-        borderBottomColor: colors.border.muted 
       }]}>
         <View style={styles.localHeader}>
-          {/* Left Side: Empty spacer for alignment */}
-          <View style={styles.headerPlaceholder} />
-          
-          {/* Center: Title & Subtitle */}
-          <View style={styles.headerTitleContainer}>
-            <Text style={[styles.headerTitleText, { color: colors.text.primary }]}>الاشعارات و التنبيهات </Text>
+          {/* Left Side: Native iOS Circular Glass Close Button (Perfect for Arabic RTL) */}
+          <View style={styles.leftContainer}>
+            <GlassicView
+              cornerRadius={14}
+              style={styles.circularCloseButton}
+            >
+              <BouncyPressable
+                onPress={onClose}
+                style={{ width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}
+              >
+                <SymbolView
+                  name={{ ios: 'xmark', android: 'close' }}
+                  size={11}
+                  tintColor={colors.text.secondary}
+                />
+              </BouncyPressable>
+            </GlassicView>
           </View>
           
-          {/* Right Side: Gold Back Button */}
-          <GlassicView
-            cornerRadius={18}
-            style={styles.backButton}
-          >
-            <TouchableOpacity 
-              onPress={onClose}
-              style={{ width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="close" size={20} color={colors.brand.gold} />
-            </TouchableOpacity>
-          </GlassicView>
+          {/* Center: Title */}
+          <View style={styles.titleContainer}>
+            <Text style={[styles.titleText, { color: colors.text.primary }]}>الاشعارات والتنبيهات</Text>
+          </View>
+          
+          {/* Right Side: Empty placeholder */}
+          <View style={styles.rightContainer}>
+            <View style={styles.placeholder} />
+          </View>
         </View>
       </View>
 
@@ -152,44 +160,35 @@ const styles = StyleSheet.create({
   postContentBox: { borderRadius: TOKENS.borderRadius.sm, padding: 10, width: '100%', borderWidth: 1 },
   postContentText: { fontSize: 12, lineHeight: 18, textAlign: 'right' },
   
-  // Local Header Styles
   localHeaderContainer: {
-    borderBottomWidth: 1,
+    borderBottomWidth: 0,
   },
   localHeader: {
     paddingHorizontal: 24,
-    paddingBottom: 12,
+    paddingBottom: 8,
     paddingTop: 4,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  headerPlaceholder: {
-    width: 36,
-  },
-  headerTitleContainer: {
-    flex: 1,
+  circularCloseButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  headerTitleText: {
+  leftContainer: { width: 60, alignItems: 'flex-start', justifyContent: 'center' },
+  rightContainer: { width: 60, alignItems: 'flex-end', justifyContent: 'center' },
+  placeholder: { width: 28, height: 28 },
+  titleContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  titleText: {
     fontSize: 16,
     fontWeight: 'bold',
     lineHeight: 22,
     textAlign: 'center',
   },
-  headerSubtitleText: {
-    fontSize: 9,
-    fontWeight: 'bold',
-    lineHeight: 12,
-    textAlign: 'center',
-  },
-  backButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+
 });
 
 
