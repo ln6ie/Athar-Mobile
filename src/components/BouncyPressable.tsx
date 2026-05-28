@@ -6,8 +6,6 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
 interface BouncyPressableProps extends Omit<PressableProps, 'style'> {
   children: React.ReactNode;
   style?: StyleProp<ViewStyle>;
@@ -39,13 +37,15 @@ export const BouncyPressable: React.FC<BouncyPressableProps> = ({
   };
 
   return (
-    <AnimatedPressable
-      {...pressableProps}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
-      style={[style, animatedStyle]}
-    >
-      {children}
-    </AnimatedPressable>
+    <Animated.View style={animatedStyle}>
+      <Pressable
+        {...pressableProps}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        style={style}
+      >
+        {children}
+      </Pressable>
+    </Animated.View>
   );
 };
