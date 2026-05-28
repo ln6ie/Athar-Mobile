@@ -159,7 +159,6 @@ export const PostModal: React.FC<PostModalProps> = ({ visible, onClose, onSubmit
             styles.bottomBar,
             {
               paddingBottom: Math.max(insets.bottom, 16),
-              borderTopColor: colors.border.muted,
             },
           ]}
         >
@@ -279,7 +278,7 @@ const styles = StyleSheet.create({
   bottomBar: {
     paddingHorizontal: 24,
     paddingTop: 12,
-    borderTopWidth: 1,
+    borderTopWidth: 0,
   },
   infoContainer: {
     flexDirection: 'row-reverse',
