@@ -209,13 +209,11 @@ const styles = StyleSheet.create({
     marginLeft: 16,
   },
   brandTitle: {
-    fontSize: 38,
-    fontWeight: '900',
-    color: '#FFFFFF', // High-end white text directly overlaying the blue card
+    fontSize: 34,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
     marginBottom: 4,
     textAlign: 'right',
-    lineHeight: 46,
-    letterSpacing: 0.5,
   },
   brandSubtitle: {
     fontSize: 12,
