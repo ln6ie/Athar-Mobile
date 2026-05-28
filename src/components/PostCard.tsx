@@ -158,88 +158,90 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
 
   return (
     <NativeContextMenu options={menuOptions} title="خيارات الأثر">
-      <AnimatedPressable
+      <Pressable
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         onPress={() => onLike(post.id)}
         style={[
           styles.card, 
-          cardAnimatedStyle, 
           { borderBottomColor: colors.border.muted }
         ]}
       >
-        {/* Header: Name + Time on right, Menu icon on left */}
-        <View style={styles.header}>
-          <View style={{ flexDirection: 'row-reverse', alignItems: 'center' }}>
-            <Text style={[styles.anonymousName, { color: colors.brand.gold, marginLeft: 8 }]}>
-              {post.anonymousName}
-            </Text>
-            <Text style={[styles.timeText, { color: colors.text.disabled }]}>
-              {formattedDate}
-            </Text>
-          </View>
-          <View style={{ padding: 4 }}>
-            <Ionicons name="ellipsis-horizontal" size={16} color={colors.text.secondary} />
-          </View>
-        </View>
-
-        {/* Post content */}
-        <Text
-          style={[
-            styles.content,
-            { textAlign: isArabic ? 'right' : 'left', color: colors.text.primary },
-          ]}
-        >
-          {post.content}
-        </Text>
-
-        {/* Footer: Like + Expiry */}
-        <View style={styles.footer}>
-          <View style={styles.likeContainer}>
-            <Animated.View
-              style={[
-                styles.rippleOuterRing,
-                post.isLiked
-                  ? {
-                      borderColor: colors.brand.gold,
-                      backgroundColor: isDark ? '#2C2C2E' : '#FFFFFF',
-                      borderWidth: isDark ? 1 : 0.5,
-                      shadowColor: '#000000',
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.08,
-                      shadowRadius: 4,
-                      elevation: 2,
-                    }
-                  : { borderColor: colors.border.muted },
-                likeAnimatedStyle
-              ]}
-            >
-              <View
-                style={[
-                  styles.rippleInnerDot,
-                  post.isLiked
-                    ? { backgroundColor: colors.brand.gold, width: 7, height: 7, borderRadius: 3.5 }
-                    : { backgroundColor: colors.text.disabled, width: 3, height: 3, borderRadius: 1.5 },
-                ]}
-              />
-            </Animated.View>
-            <Text
-              style={[
-                styles.likeCountText,
-                post.isLiked
-                  ? { color: colors.brand.gold, fontWeight: 'bold' }
-                  : { color: colors.text.secondary },
-              ]}
-            >
-              {post.likesCount}
-            </Text>
+        <Animated.View style={cardAnimatedStyle}>
+          {/* Header: Name + Time on right, Menu icon on left */}
+          <View style={styles.header}>
+            <View style={{ flexDirection: 'row-reverse', alignItems: 'center' }}>
+              <Text style={[styles.anonymousName, { color: colors.brand.gold, marginLeft: 8 }]}>
+                {post.anonymousName}
+              </Text>
+              <Text style={[styles.timeText, { color: colors.text.disabled }]}>
+                {formattedDate}
+              </Text>
+            </View>
+            <View style={{ padding: 4 }}>
+              <Ionicons name="ellipsis-horizontal" size={16} color={colors.text.secondary} />
+            </View>
           </View>
 
-          <Text style={[styles.expiryText, { color: colors.text.disabled }]}>
-            {expiryText}
+          {/* Post content */}
+          <Text
+            style={[
+              styles.content,
+              { textAlign: isArabic ? 'right' : 'left', color: colors.text.primary },
+            ]}
+          >
+            {post.content}
           </Text>
-        </View>
-      </AnimatedPressable>
+
+          {/* Footer: Like + Expiry */}
+          <View style={styles.footer}>
+            <View style={styles.likeContainer}>
+              <Animated.View style={likeAnimatedStyle}>
+                <View
+                  style={[
+                    styles.rippleOuterRing,
+                    post.isLiked
+                      ? {
+                          borderColor: colors.brand.gold,
+                          backgroundColor: isDark ? '#2C2C2E' : '#FFFFFF',
+                          borderWidth: isDark ? 1 : 0.5,
+                          shadowColor: '#000000',
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: 0.08,
+                          shadowRadius: 4,
+                          elevation: 2,
+                        }
+                      : { borderColor: colors.border.muted },
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.rippleInnerDot,
+                      post.isLiked
+                        ? { backgroundColor: colors.brand.gold, width: 7, height: 7, borderRadius: 3.5 }
+                        : { backgroundColor: colors.text.disabled, width: 3, height: 3, borderRadius: 1.5 },
+                    ]}
+                  />
+                </View>
+              </Animated.View>
+              <Text
+                style={[
+                  styles.likeCountText,
+                  post.isLiked
+                    ? { color: colors.brand.gold, fontWeight: 'bold' }
+                    : { color: colors.text.secondary },
+                ]}
+              >
+                {post.likesCount}
+              </Text>
+            </View>
+
+            <Text style={[styles.expiryText, { color: colors.text.disabled }]}>
+              {expiryText}
+            </Text>
+          </View>
+        </Animated.View>
+      </Pressable>
     </NativeContextMenu>
   );
 };
