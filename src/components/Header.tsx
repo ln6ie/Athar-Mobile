@@ -7,8 +7,10 @@ import { useFeedStore } from '../store/useFeedStore';
 import { BellIcon } from './BellIcon';
 import { Logo } from './Logo';
 import { NotificationsScreen } from '../screens/NotificationsScreen';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { GlassicView } from './GlassicView';
+import { BouncyPressable } from './BouncyPressable';
+import { SymbolView } from 'expo-symbols';
+
 
 interface HeaderProps {
   title?: string;
@@ -72,9 +74,27 @@ export const Header: React.FC<HeaderProps> = ({
           </>
         ) : (
           <>
-            {/* Sub-screens Left Side: Empty placeholder */}
+            {/* Sub-screens Left Side: Native iOS Circular Close Button (Perfect for Arabic RTL) */}
             <View style={styles.leftContainer}>
-              <View style={styles.placeholder} />
+              {onLeftPress ? (
+                <BouncyPressable
+                  onPress={onLeftPress}
+                  style={[
+                    styles.circularCloseButton,
+                    {
+                      backgroundColor: colors.background.input,
+                    }
+                  ]}
+                >
+                  <SymbolView
+                    name={{ ios: 'xmark', android: 'close' }}
+                    size={12}
+                    tintColor={colors.text.secondary}
+                  />
+                </BouncyPressable>
+              ) : (
+                <View style={styles.placeholder} />
+              )}
             </View>
 
             {/* Sub-screens Center: Title and Subtitle */}
@@ -83,29 +103,11 @@ export const Header: React.FC<HeaderProps> = ({
               {subtitle ? <Text style={[styles.subtitleText, { color: colors.text.disabled }]}>{subtitle}</Text> : null}
             </View>
 
-            {/* Sub-screens Right Side: Back / Exit Button */}
+            {/* Sub-screens Right Side: Empty placeholder */}
             <View style={styles.rightContainer}>
-              {onLeftPress ? (
-                <GlassicView
-                  cornerRadius={18}
-                  style={showIcon ? styles.iconButton : styles.logoutButton}
-                >
-                  <TouchableOpacity 
-                    onPress={onLeftPress}
-                    style={{ width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}
-                    activeOpacity={0.7}
-                  >
-                    {showIcon ? (
-                      <Ionicons name="close" size={20} color={isLogout ? "#DC2626" : colors.brand.gold} />
-                    ) : (
-                      <Text style={styles.logoutText}>{leftText}</Text>
-                    )}
-                  </TouchableOpacity>
-                </GlassicView>
-              ) : (
-                <View style={styles.placeholder} />
-              )}
+              <View style={styles.placeholder} />
             </View>
+
           </>
         )}
       </View>
@@ -149,17 +151,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     lineHeight: 14,
   },
-  iconButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+  circularCloseButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  leftContainer: { width: 60, alignItems: 'flex-start' },
-  rightContainer: { width: 60, alignItems: 'flex-end' },
-  placeholder: { width: 36, height: 36 },
-  titleContainer: { flex: 1, alignItems: 'center' },
+  leftContainer: { width: 60, alignItems: 'flex-start', justifyContent: 'center' },
+  rightContainer: { width: 60, alignItems: 'flex-end', justifyContent: 'center' },
+  placeholder: { width: 28, height: 28 },
+  titleContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   titleText: {
     color: TOKENS.colors.text.primary,
     fontSize: 16,
