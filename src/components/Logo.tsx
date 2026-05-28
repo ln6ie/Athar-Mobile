@@ -4,10 +4,12 @@ import { useTheme } from '../hooks/useTheme';
 
 interface LogoProps {
   size?: number;
+  color?: string;
 }
 
-export const Logo: React.FC<LogoProps> = ({ size = 120 }) => {
+export const Logo: React.FC<LogoProps> = ({ size = 120, color }) => {
   const { colors } = useTheme();
+  const logoColor = color || colors.brand.gold;
 
   return (
     <View style={[styles.container, { width: size, height: size }]}>
@@ -15,27 +17,27 @@ export const Logo: React.FC<LogoProps> = ({ size = 120 }) => {
       <View style={[
         styles.ring, 
         styles.ringOuter3, 
-        { width: size, height: size, borderRadius: size / 2, borderColor: colors.brand.gold }
+        { width: size, height: size, borderRadius: size / 2, borderColor: logoColor }
       ]} />
 
       {/* Outer Ring 2 */}
       <View style={[
         styles.ring, 
         styles.ringOuter2, 
-        { width: size * 0.75, height: size * 0.75, borderRadius: (size * 0.75) / 2, borderColor: colors.brand.gold }
+        { width: size * 0.75, height: size * 0.75, borderRadius: (size * 0.75) / 2, borderColor: logoColor }
       ]} />
 
       {/* Outer Ring 1 */}
       <View style={[
         styles.ring, 
         styles.ringOuter1, 
-        { width: size * 0.5, height: size * 0.5, borderRadius: (size * 0.5) / 2, borderColor: colors.brand.gold }
+        { width: size * 0.5, height: size * 0.5, borderRadius: (size * 0.5) / 2, borderColor: logoColor }
       ]} />
 
       {/* Center Core Dot */}
       <View style={[
         styles.coreDot, 
-        { width: size * 0.2, height: size * 0.2, borderRadius: (size * 0.2) / 2, backgroundColor: colors.brand.gold }
+        { width: size * 0.2, height: size * 0.2, borderRadius: (size * 0.2) / 2, backgroundColor: logoColor }
       ]} />
     </View>
   );

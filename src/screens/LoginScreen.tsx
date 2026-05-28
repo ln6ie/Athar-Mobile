@@ -13,6 +13,8 @@ import { useGlobalStyles } from '../styles/globalStyles';
 import { EmailForm } from '../components/EmailForm';
 import { OtpForm } from '../components/OtpForm';
 import { Logo } from '../components/Logo';
+import { useTheme } from '../hooks/useTheme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface LoginScreenProps {
   onSuccess: () => void;
@@ -21,6 +23,8 @@ interface LoginScreenProps {
 export const LoginScreen: React.FC<LoginScreenProps> = ({ onSuccess }) => {
   const { sendOtp, verifyOtp, isLoading, error, clearError } = useAuthStore();
   const globalStyles = useGlobalStyles();
+  const { colors, isDark } = useTheme();
+  const insets = useSafeAreaInsets();
 
   const [email, setEmail] = useState('');
   const [step, setStep] = useState<'EMAIL' | 'OTP'>('EMAIL');
@@ -83,17 +87,46 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onSuccess }) => {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.innerContainer}>
-            {/* Brand Header */}
-            <View style={globalStyles.headerContainer}>
-              <View style={{ marginBottom: 16 }}>
-                <Logo size={80} />
-              </View>
-              <Text style={globalStyles.brandTitle}>أثر</Text>
-              <Text style={globalStyles.brandSubtitle}>أبْقِ أثرك في هذا العالم</Text>
-            </View>
+          {/* Curved Layered Wave Header Container */}
+          <View style={styles.headerWrapper}>
+            {/* Background Accent Wave Layer for Depth */}
+            <View
+              style={[
+                styles.backgroundWave,
+                {
+                  backgroundColor: isDark ? 'rgba(59, 130, 246, 0.15)' : 'rgba(0, 85, 165, 0.12)',
+                },
+              ]}
+            />
 
-            {/* Form switching */}
+            {/* Foreground Main Curved Wave Card */}
+            <View
+              style={[
+                styles.mainWaveCard,
+                {
+                  backgroundColor: colors.brand.gold,
+                  paddingTop: Math.max(insets.top + 16, 40),
+                },
+              ]}
+            >
+              {/* Logo (Left) and Text (Right) Premium Horizontal Layout */}
+              <View style={styles.headerRow}>
+                {/* Logo on the Left */}
+                <View style={styles.logoWrapper}>
+                  <Logo size={70} color="#FFFFFF" />
+                </View>
+
+                {/* Brand Titles on the Right (Arabic RTL Aligned) */}
+                <View style={styles.brandTextColumn}>
+                  <Text style={styles.brandTitle}>أثر</Text>
+                  <Text style={styles.brandSubtitle}>أبْقِ أثرك في هذا العالم</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+
+          {/* Form switching and input area */}
+          <View style={styles.innerContainer}>
             {step === 'EMAIL' ? (
               <EmailForm
                 email={email}
@@ -129,12 +162,71 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onSuccess }) => {
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
-    justifyContent: 'center',
+    paddingBottom: 40,
+  },
+  headerWrapper: {
+    width: '100%',
+    position: 'relative',
+  },
+  backgroundWave: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: -10,
+    borderBottomLeftRadius: 60,
+    borderBottomRightRadius: 130, // Opposite curve layer to create wave overlap
+  },
+  mainWaveCard: {
+    width: '100%',
+    paddingBottom: 40,
+    borderBottomLeftRadius: 130, // Deep wave sweep on the left
+    borderBottomRightRadius: 50,  // Soft curve on the right
+    // Premium soft card drop shadow
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.12,
+    shadowRadius: 15,
+    elevation: 8,
+  },
+  headerRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 24,
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 28,
+  },
+  logoWrapper: {
+    // Elegant soft glow backlighting for white logo
+    shadowColor: '#FFFFFF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+  },
+  brandTextColumn: {
+    alignItems: 'flex-end', // Align texts to the right for Arabic RTL layout
+    flex: 1,
+    marginLeft: 16,
+  },
+  brandTitle: {
+    fontSize: 38,
+    fontWeight: '900',
+    color: '#FFFFFF', // High-end white text directly overlaying the blue card
+    marginBottom: 4,
+    textAlign: 'right',
+    lineHeight: 46,
+    letterSpacing: 0.5,
+  },
+  brandSubtitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.85)', // Highly readable semi-transparent white on blue
+    textAlign: 'right',
+    lineHeight: 18,
   },
   innerContainer: {
     width: '100%',
-    paddingHorizontal: 32,
+    paddingHorizontal: 28,
+    marginTop: 40,
   },
 });
