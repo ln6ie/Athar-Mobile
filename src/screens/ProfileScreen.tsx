@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Alert, Modal } from 'react-native';
+import { View, Text, Alert, Modal, StyleSheet } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from 'react-native-reanimated';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuthStore } from '../store/useAuthStore';
@@ -18,6 +23,8 @@ import { useProfileStyles } from '../styles/ProfileStyles';
 import { GlassicView } from '../components/GlassicView';
 import { ProfileHeaderCard } from '../components/ProfileHeaderCard';
 import { ProfileOptionsCard } from '../components/ProfileOptionsCard';
+import { BouncyPressable } from '../components/BouncyPressable';
+
 
 export const ProfileScreen: React.FC = () => {
   const { user, logout, deleteAccount } = useAuthStore();
@@ -37,6 +44,37 @@ export const ProfileScreen: React.FC = () => {
   const [activeSubScreen, setActiveSubScreen] = useState<'main' | 'change-email' | 'support' | 'about' | 'privacy' | 'blocked-users'>('main');
   const [activeTab, setActiveTab] = useState<'my-posts' | 'likes'>('my-posts');
   const insets = useSafeAreaInsets();
+
+  // Dynamic layout measurements for Profile active tab spring slide
+  const tabContainerWidth = useSharedValue(0);
+  const tabTranslation = useSharedValue(0);
+
+  const updateTabPosition = () => {
+    'worklet';
+    if (tabContainerWidth.value === 0) return;
+    const buttonWidth = (tabContainerWidth.value - 8) / 2; // total padding of 8px (4px on each side)
+    // In RTL, "my-posts" is index 0 (right), "likes" is index 1 (left, moving negative buttonWidth)
+    tabTranslation.value = withSpring(
+      activeTab === 'my-posts' ? 0 : -buttonWidth,
+      { damping: 15, stiffness: 150, mass: 0.6 }
+    );
+  };
+
+  useEffect(() => {
+    updateTabPosition();
+  }, [activeTab, tabContainerWidth.value]);
+
+  const onTabContainerLayout = (e: any) => {
+    tabContainerWidth.value = e.nativeEvent.layout.width;
+  };
+
+  const tabSliderAnimatedStyle = useAnimatedStyle(() => {
+    const buttonWidth = tabContainerWidth.value > 0 ? (tabContainerWidth.value - 8) / 2 : 150;
+    return {
+      width: buttonWidth,
+      transform: [{ translateX: tabTranslation.value }],
+    };
+  });
 
   const userEmail = user?.email || 'user@athar.app';
   const anonymousName = user?.anonymousName || 'مستكشف-مجهول-100';
@@ -131,35 +169,54 @@ export const ProfileScreen: React.FC = () => {
 
             {/* Segment Toggle Tab Bar */}
             <GlassicView
-              cornerRadius={20}
+              cornerRadius={24}
               style={styles.tabContainer}
             >
-              <TouchableOpacity
-                style={[styles.tabToggle, activeTab === 'my-posts' && styles.tabToggleActive]}
+              <View
+                style={[StyleSheet.absoluteFill, { flexDirection: 'row-reverse', padding: 4 }]}
+                onLayout={onTabContainerLayout}
+                pointerEvents="box-none"
+              >
+                <Animated.View
+                  style={[
+                    styles.tabToggleActive,
+                    {
+                      position: 'absolute',
+                      right: 4,
+                      top: 4,
+                      height: 36,
+                      zIndex: 1,
+                    },
+                    tabSliderAnimatedStyle,
+                  ]}
+                />
+              </View>
+
+              <BouncyPressable
+                style={[styles.tabToggle, { zIndex: 2 }]}
                 onPress={() => {
                   setActiveTab('my-posts');
                   fetchMyPosts();
                 }}
-                activeOpacity={0.8}
               >
                 <Text style={[styles.tabToggleText, activeTab === 'my-posts' && styles.tabToggleTextActive]}>
                   منشوراتي
                 </Text>
-              </TouchableOpacity>
+              </BouncyPressable>
 
-              <TouchableOpacity
-                style={[styles.tabToggle, activeTab === 'likes' && styles.tabToggleActive]}
+              <BouncyPressable
+                style={[styles.tabToggle, { zIndex: 2 }]}
                 onPress={() => {
                   setActiveTab('likes');
                   fetchLikedPosts();
                 }}
-                activeOpacity={0.8}
               >
                 <Text style={[styles.tabToggleText, activeTab === 'likes' && styles.tabToggleTextActive]}>
                   المفضلة
                 </Text>
-              </TouchableOpacity>
+              </BouncyPressable>
             </GlassicView>
+
           </View>
         }
         ListEmptyComponent={

@@ -1,8 +1,14 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from 'react-native-reanimated';
 import { useTheme } from '../hooks/useTheme';
 import { ThemeMode } from '../store/useThemeStore';
 import { GlassicView } from './GlassicView';
+import { BouncyPressable } from './BouncyPressable';
 
 interface ThemeSelectorProps {
   minimal?: boolean;
@@ -17,41 +23,82 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ minimal = false })
     { mode: 'light', label: 'الفاتح' },
   ];
 
+  // Dynamic layout measurements for 3-column spring capsule animation
+  const containerWidth = useSharedValue(0);
+  const slideTranslation = useSharedValue(0);
+
+  const updateSlidePosition = () => {
+    'worklet';
+    if (containerWidth.value === 0) return;
+    const buttonWidth = (containerWidth.value - 8) / 3; // padding 4 on each side = 8 total
+    
+    let targetIndex = 1; // Default to 'system'
+    if (themeMode === 'dark') targetIndex = 0;
+    if (themeMode === 'light') targetIndex = 2;
+
+    // In RTL: dark (0) is at 0, system (1) is at -buttonWidth, light (2) is at -2 * buttonWidth
+    slideTranslation.value = withSpring(
+      -targetIndex * buttonWidth,
+      { damping: 15, stiffness: 150, mass: 0.6 }
+    );
+  };
+
+  useEffect(() => {
+    updateSlidePosition();
+  }, [themeMode, containerWidth.value]);
+
+  const onLayout = (e: any) => {
+    containerWidth.value = e.nativeEvent.layout.width;
+  };
+
+  const sliderAnimatedStyle = useAnimatedStyle(() => {
+    const buttonWidth = containerWidth.value > 0 ? (containerWidth.value - 8) / 3 : 80;
+    return {
+      width: buttonWidth,
+      transform: [{ translateX: slideTranslation.value }],
+    };
+  });
+
   const renderContent = () => (
     <>
       <Text style={[styles.title, { color: colors.brand.gold }]}>مظهر التطبيق</Text>
       
-      <View style={[styles.segmentContainer, { backgroundColor: isDark ? '#000000' : colors.background.input }]}>
+      <View
+        style={[styles.segmentContainer, { backgroundColor: isDark ? '#000000' : colors.background.input }]}
+        onLayout={onLayout}
+      >
+        {/* Spring-Driven 3-Column Sliding Backdrop Capsule */}
+        <Animated.View
+          style={[
+            styles.activeSlider,
+            {
+              backgroundColor: isDark ? '#2C2C2E' : '#FFFFFF',
+              borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
+              borderWidth: isDark ? 1 : 0.5,
+            },
+            sliderAnimatedStyle,
+          ]}
+        />
+
         {options.map((opt) => {
           const isActive = themeMode === opt.mode;
           return (
-            <TouchableOpacity
+            <BouncyPressable
               key={opt.mode}
-              style={[
-                styles.segmentButton,
-                isActive && [
-                  styles.activeSegmentButton,
-                  {
-                    backgroundColor: isDark ? '#2C2C2E' : colors.background.card,
-                    borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
-                    borderWidth: isDark ? 1 : 0.5,
-                  }
-                ]
-              ]}
+              style={styles.segmentButton}
               onPress={() => setThemeMode(opt.mode)}
-              activeOpacity={0.8}
             >
               <Text
                 style={[
                   styles.segmentText,
                   isActive
                     ? [styles.activeSegmentText, { color: colors.brand.gold }]
-                    : { color: colors.text.secondary }
+                    : { color: colors.text.secondary },
                 ]}
               >
                 {opt.label}
               </Text>
-            </TouchableOpacity>
+            </BouncyPressable>
           );
         })}
       </View>
@@ -94,6 +141,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row-reverse',
     borderRadius: 24,
     padding: 4,
+    position: 'relative',
   },
   segmentButton: {
     flex: 1,
@@ -101,13 +149,20 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 2,
   },
-  activeSegmentButton: {
+  activeSlider: {
+    position: 'absolute',
+    right: 4,
+    top: 4,
+    height: 36,
+    borderRadius: 18,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 2,
+    zIndex: 1,
   },
   segmentText: {
     fontSize: 13,
