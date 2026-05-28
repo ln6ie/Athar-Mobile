@@ -139,6 +139,15 @@ export const useFeedStore = create<FeedState>()(
       },
 
       reportPost: async (postId) => {
+        // Apple Safety Guideline 1.2: Immediately filter out reported posts locally
+        set((state: any) => ({
+          posts: {
+            ...state.posts,
+            recent: (state.posts.recent || []).filter((p: Post) => p.id !== postId),
+            trending: (state.posts.trending || []).filter((p: Post) => p.id !== postId),
+          },
+          likedPosts: (state.likedPosts || []).filter((p: Post) => p.id !== postId),
+        }));
         await reportPostAction(postId);
       },
 

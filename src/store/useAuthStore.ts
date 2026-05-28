@@ -29,6 +29,15 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   sendOtp: async (email) => {
     console.log('[useAuthStore] sendOtp called for email:', email);
+    const normalizedEmail = email.trim().toLowerCase();
+    
+    // Apple App Store Review Bypass / Demo Mode
+    if (normalizedEmail === 'apple-test@athar.app') {
+      console.log('[useAuthStore] Apple Review Demo Mode: sendOtp bypassed successfully.');
+      set({ isLoading: false, error: null });
+      return;
+    }
+
     set({ isLoading: true, error: null });
     try {
       const response = await api.post('/auth/send-otp', { email });
@@ -48,6 +57,35 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   verifyOtp: async (email, code) => {
     console.log('[useAuthStore] verifyOtp called for email:', email, 'code:', code);
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Apple App Store Review Bypass / Demo Mode
+    if (normalizedEmail === 'apple-test@athar.app') {
+      if (code === '123456') {
+        console.log('[useAuthStore] Apple Review Demo Mode: verifyOtp bypass success!');
+        const mockToken = 'apple_review_demo_mock_jwt_token';
+        const mockUser = {
+          id: 'apple_review_tester_id_55',
+          email: 'apple-test@athar.app',
+          anonymousName: 'مستكشف-أثر-الذهبي',
+        };
+
+        await SecureStore.setItemAsync('athar_jwt_token', mockToken);
+        await SecureStore.setItemAsync('athar_user_data', JSON.stringify(mockUser));
+
+        set({
+          token: mockToken,
+          user: mockUser,
+          isAuthenticated: true,
+          isLoading: false,
+        });
+        return;
+      } else {
+        set({ isLoading: false, error: 'رمز التحقق التجريبي غير صحيح (استخدم 123456).' });
+        throw new Error('Invalid demo OTP');
+      }
+    }
+
     set({ isLoading: true, error: null });
     try {
       const response = await api.post('/auth/verify-otp', { email, code });
