@@ -50,10 +50,11 @@ export const FeedTabsHeader: React.FC<FeedTabsHeaderProps> = ({
 
   useEffect(() => {
     updateSlidePosition();
-  }, [activeTab, containerWidth.value]);
+  }, [activeTab]);
 
   const onLayout = (e: any) => {
     containerWidth.value = e.nativeEvent.layout.width;
+    updateSlidePosition();
   };
 
   const sliderAnimatedStyle = useAnimatedStyle(() => {

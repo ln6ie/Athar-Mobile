@@ -62,10 +62,11 @@ export const ProfileScreen: React.FC = () => {
 
   useEffect(() => {
     updateTabPosition();
-  }, [activeTab, tabContainerWidth.value]);
+  }, [activeTab]);
 
   const onTabContainerLayout = (e: any) => {
     tabContainerWidth.value = e.nativeEvent.layout.width;
+    updateTabPosition();
   };
 
   const tabSliderAnimatedStyle = useAnimatedStyle(() => {

@@ -45,10 +45,11 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ minimal = false })
 
   useEffect(() => {
     updateSlidePosition();
-  }, [themeMode, containerWidth.value]);
+  }, [themeMode]);
 
   const onLayout = (e: any) => {
     containerWidth.value = e.nativeEvent.layout.width;
+    updateSlidePosition();
   };
 
   const sliderAnimatedStyle = useAnimatedStyle(() => {

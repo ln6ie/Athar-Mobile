@@ -12,13 +12,13 @@ export default function TabLayout() {
 
   return (
     <NativeTabs {...tabsProps}>
-      <NativeTabs.Trigger name="feed">
-        <Icon sf="house.fill" />
-        <Label>الرئيسية</Label>
-      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile">
         <Icon sf="person.crop.circle.fill" />
         <Label>الملف الشخصي</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="feed">
+        <Icon sf="house.fill" />
+        <Label>الرئيسية</Label>
       </NativeTabs.Trigger>
     </NativeTabs>
   );
