@@ -50,7 +50,7 @@ function MainLayout() {
 
   return (
     <>
-      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <StatusBar style="light" backgroundColor="transparent" translucent />
       <ForceUpdateModal />
 
       {/* Main router tree is always mounted to ensure Expo Router resolves correctly */}

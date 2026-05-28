@@ -1,10 +1,10 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ColorValue } from 'react-native';
 import { useTheme } from '../hooks/useTheme';
 
 interface LogoProps {
   size?: number;
-  color?: string;
+  color?: ColorValue;
 }
 
 export const Logo: React.FC<LogoProps> = ({ size = 120, color }) => {

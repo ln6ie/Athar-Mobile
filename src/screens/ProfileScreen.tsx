@@ -23,6 +23,7 @@ import { useProfileStyles } from '../styles/ProfileStyles';
 import { GlassicView } from '../components/GlassicView';
 import { ProfileHeaderCard } from '../components/ProfileHeaderCard';
 import { ProfileOptionsCard } from '../components/ProfileOptionsCard';
+import { UserInfoModal } from '../components/UserInfoModal';
 import { BouncyPressable } from '../components/BouncyPressable';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
@@ -45,6 +46,7 @@ export const ProfileScreen: React.FC = () => {
   
   const [activeSubScreen, setActiveSubScreen] = useState<'main' | 'change-email' | 'support' | 'about' | 'privacy' | 'blocked-users'>('main');
   const [activeTab, setActiveTab] = useState<'my-posts' | 'likes'>('my-posts');
+  const [userInfoVisible, setUserInfoVisible] = useState(false);
   const insets = useSafeAreaInsets();
 
   // Swipe gesture detection (Swipe left-to-right to return to the feed tab, insulated from vertical scrolling)
@@ -203,6 +205,7 @@ export const ProfileScreen: React.FC = () => {
               anonymousName={anonymousName}
               userEmail={userEmail}
               postsCount={myPosts.length}
+              onPress={() => setUserInfoVisible(true)}
             />
 
             <View style={{ paddingHorizontal: 24 }}>
@@ -296,6 +299,15 @@ export const ProfileScreen: React.FC = () => {
           {activeSubScreen === 'blocked-users' && <BlockedUsersSubScreen onBack={() => setActiveSubScreen('main')} />}
         </Modal>
       )}
+
+      {/* Slide-Up Bottom Sheet showing detailed user profile info */}
+      <UserInfoModal
+        visible={userInfoVisible}
+        onClose={() => setUserInfoVisible(false)}
+        anonymousName={anonymousName}
+        userEmail={userEmail}
+        postsCount={myPosts.length}
+      />
     </View>
   );
 };

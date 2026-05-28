@@ -1,2 +1,3 @@
 allowBuilds:
+  '@shopify/react-native-skia': set this to true or false
   sharp: true

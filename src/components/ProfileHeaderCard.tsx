@@ -1,42 +1,43 @@
-import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { AnonymousAvatar } from './AnonymousAvatar';
 import { useTheme } from '../hooks/useTheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ConcaveHeaderEdge } from './ConcaveHeaderEdge';
+import { BouncyPressable } from './BouncyPressable';
 
 interface ProfileHeaderCardProps {
   anonymousName: string;
   userEmail: string;
   postsCount: number;
+  onPress?: () => void;
 }
 
 export const ProfileHeaderCard: React.FC<ProfileHeaderCardProps> = ({
   anonymousName,
   userEmail,
   postsCount,
+  onPress,
 }) => {
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
 
   return (
     <View style={styles.headerWrapper}>
-      {/* Foreground Main Curved Wave Card */}
       <View
         style={[
-          styles.mainWaveCard,
+          styles.blueBase,
           {
             backgroundColor: colors.brand.gold,
-            paddingTop: Math.max(insets.top + 16, 40),
+            paddingTop: insets.top + 60 ,//pacted top notch offset compensation
+            paddingBottom: 1,  // Compacted bottom padding to shrink vertical size
           },
         ]}
-      />
-
-      {/* Actual Content placed inside the main card area */}
-      <View style={[styles.contentContainer, { paddingTop: Math.max(insets.top + 16, 40) }]}>
-        <View style={styles.headerRow}>
-          {/* Avatar on the Left with dynamic white glow */}
-          <View style={styles.avatarWrapper}>
-            <AnonymousAvatar size={70} />
+      >
+        {/* Actual Content placed inside the main card area (tap to open sheet) */}
+        <BouncyPressable style={styles.headerRow} onPress={onPress}>
+          {/* Avatar on the Left with premium white circle container */}
+          <View style={styles.avatarCircle}>
+            <AnonymousAvatar size={60} />
           </View>
 
           {/* User Information on the Right (Arabic RTL layout) */}
@@ -55,8 +56,15 @@ export const ProfileHeaderCard: React.FC<ProfileHeaderCardProps> = ({
 
             <Text style={styles.profileEmail}>{userEmail}</Text>
           </View>
-        </View>
+        </BouncyPressable>
       </View>
+
+      {/* The Concave Edge absolute-anchored at the bottom */}
+      <ConcaveHeaderEdge
+        color={colors.brand.gold}
+        height={60}
+        style={styles.concaveEdge}
+      />
     </View>
   );
 };
@@ -65,37 +73,19 @@ const styles = StyleSheet.create({
   headerWrapper: {
     width: '100%',
     position: 'relative',
-    // Push the profile container down slightly less to accommodate the wave card natively
-    marginBottom: 20,
-  },
-  backgroundWave: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: -10,
-    borderBottomLeftRadius: 60,
-    borderBottomRightRadius: 130, // Opposite curve layer to create wave overlap
-  },
-  mainWaveCard: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderBottomLeftRadius: 130, // Deep wave sweep on the left
-    borderBottomRightRadius: 50,  // Soft curve on the right
-    // Premium soft card drop shadow
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.12,
-    shadowRadius: 15,
-    elevation: 8,
-  },
-  contentContainer: {
-    width: '100%',
-    paddingBottom: 36,
     zIndex: 10,
+    marginTop: -60, // Pulls the background up to bleed under the status bar, matching the custom insets.top + 60 padding!
+    marginBottom: 70, // Spacing cleared perfectly for the deep S-Curve SVG below!
+  },
+  blueBase: {
+    width: '100%',
+  },
+  concaveEdge: {
+    position: 'absolute',
+    bottom: -60,
+    left: 0,
+    right: 0,
+    zIndex: 15,
   },
   headerRow: {
     flexDirection: 'row',
@@ -104,12 +94,18 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 28,
   },
-  avatarWrapper: {
-    // Elegant soft glow backlighting for avatar
-    shadowColor: '#FFFFFF',
-    shadowOffset: { width: 0, height: 4 },
+  avatarCircle: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.15,
-    shadowRadius: 6,
+    shadowRadius: 10,
+    elevation: 6,
   },
   profileInfoColumn: {
     alignItems: 'flex-end', // Align texts to the right for Arabic RTL

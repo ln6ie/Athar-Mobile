@@ -31,10 +31,6 @@ export const OtpForm: React.FC<OtpFormProps> = ({
     onSubmit(otpCode.trim());
   };
 
-  const handlePressBoxes = () => {
-    inputRef.current?.focus();
-  };
-
   const isSubmitDisabled = isLoading || otpCode.length !== codeLength;
 
   return (
@@ -44,48 +40,64 @@ export const OtpForm: React.FC<OtpFormProps> = ({
         أدخل الرمز المرسل إلى {email}
       </Text>
 
-      {/* Single Native Hidden TextInput for Maximum Robustness and Paste Support */}
-      <TextInput
-        ref={inputRef}
-        keyboardType="number-pad"
-        maxLength={codeLength}
-        value={otpCode}
-        onChangeText={(txt) => setOtpCode(txt.replace(/[^0-9]/g, ''))}
-        style={styles.hiddenInput}
-        underlineColorAndroid="transparent"
-        autoFocus
-      />
+      {/* Container holding both the hidden interactive overlay and visual cards */}
+      <View style={styles.otpInputContainer}>
+        {/* Row of 6 Gorgeous Individual Styled Rounded Square Digit Boxes */}
+        <View style={styles.otpBoxesRow} pointerEvents="none">
+          {digits.map((digit, idx) => {
+            const isFocused = otpCode.length === idx;
+            return (
+              <View
+                key={idx}
+                style={[
+                  styles.digitBox,
+                  {
+                    backgroundColor: colors.background.input,
+                    borderColor: isFocused
+                      ? colors.brand.gold
+                      : isDark
+                      ? 'rgba(255, 255, 255, 0.08)'
+                      : 'rgba(0, 0, 0, 0.06)',
+                    borderWidth: isFocused ? 1.5 : 0.6,
+                  },
+                ]}
+              >
+                <Text style={[styles.digitText, { color: colors.text.primary }]}>
+                  {digit}
+                </Text>
+                {isFocused && (
+                  <View style={[styles.activeCursor, { backgroundColor: colors.brand.gold }]} />
+                )}
+              </View>
+            );
+          })}
+        </View>
 
-      {/* Row of 6 Gorgeous Individual Styled Rounded Square Digit Boxes */}
-      <Pressable style={styles.otpBoxesRow} onPress={handlePressBoxes}>
-        {digits.map((digit, idx) => {
-          const isFocused = otpCode.length === idx;
-          return (
-            <View
-              key={idx}
-              style={[
-                styles.digitBox,
-                {
-                  backgroundColor: colors.background.input,
-                  borderColor: isFocused
-                    ? colors.brand.gold
-                    : isDark
-                    ? 'rgba(255, 255, 255, 0.08)'
-                    : 'rgba(0, 0, 0, 0.06)',
-                  borderWidth: isFocused ? 1.5 : 0.6,
-                },
-              ]}
-            >
-              <Text style={[styles.digitText, { color: colors.text.primary }]}>
-                {digit}
-              </Text>
-              {isFocused && (
-                <View style={[styles.activeCursor, { backgroundColor: colors.brand.gold }]} />
-              )}
-            </View>
-          );
-        })}
-      </Pressable>
+        {/* 
+          Invisibly overlaying real text input over the boxes.
+          Receives all touch, long-press gestures to summon clipboard Paste, 
+          and enables seamless native OS autocomplete suggestions (SMS OTP code).
+        */}
+        <TextInput
+          ref={inputRef}
+          keyboardType="number-pad"
+          textContentType="oneTimeCode" // iOS Auto-fill OTP from SMS
+          autoComplete="one-time-code" // Android Auto-fill OTP from SMS
+          maxLength={codeLength}
+          value={otpCode}
+          onChangeText={(txt) => {
+            const cleaned = txt.replace(/[^0-9]/g, '');
+            setOtpCode(cleaned);
+            if (cleaned.length === codeLength) {
+              onSubmit(cleaned); // Direct Auto-Submit on paste or full input!
+            }
+          }}
+          style={styles.hiddenInput}
+          underlineColorAndroid="transparent"
+          caretHidden={true} // Hide cursor inside the transparent overlay
+          autoFocus
+        />
+      </View>
 
       {error ? (
         <Text style={[styles.errorText, { color: colors.feedback.error }]}>
@@ -119,17 +131,25 @@ export const OtpForm: React.FC<OtpFormProps> = ({
 };
 
 const styles = StyleSheet.create({
+  otpInputContainer: {
+    width: '100%',
+    height: 48,
+    position: 'relative',
+    marginVertical: 20,
+  },
   hiddenInput: {
-    position: 'absolute',
-    width: 1,
-    height: 1,
-    opacity: 0,
+    ...StyleSheet.absoluteFillObject,
+    opacity: 0.01, // Practically transparent but catches gestures for paste
+    fontSize: 24,
+    color: 'transparent',
+    backgroundColor: 'transparent',
+    zIndex: 10,
   },
   otpBoxesRow: {
     flexDirection: 'row', // Left-to-right number layout even in Arabic
     justifyContent: 'space-between',
     width: '100%',
-    marginVertical: 20,
+    height: '100%',
     paddingHorizontal: 2,
   },
   digitBox: {

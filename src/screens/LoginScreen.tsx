@@ -15,6 +15,7 @@ import { OtpForm } from '../components/OtpForm';
 import { Logo } from '../components/Logo';
 import { useTheme } from '../hooks/useTheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ConcaveHeaderEdge } from '../components/ConcaveHeaderEdge';
 
 interface LoginScreenProps {
   onSuccess: () => void;
@@ -87,42 +88,39 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onSuccess }) => {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Curved Layered Wave Header Container */}
+          {/* Flat brand header with Concave Arch Edge */}
           <View style={styles.headerWrapper}>
-            {/* Background Accent Wave Layer for Depth */}
             <View
               style={[
-                styles.backgroundWave,
-                {
-                  backgroundColor: isDark ? 'rgba(59, 130, 246, 0.15)' : 'rgba(0, 85, 165, 0.12)',
-                },
-              ]}
-            />
-
-            {/* Foreground Main Curved Wave Card */}
-            <View
-              style={[
-                styles.mainWaveCard,
+                styles.blueBase,
                 {
                   backgroundColor: colors.brand.gold,
-                  paddingTop: Math.max(insets.top + 16, 40),
+                  paddingTop: insets.top + 128, // Pushes content down below notch while background bleeds up
+                  paddingBottom: 24,
                 },
               ]}
             >
-              {/* Logo (Left) and Text (Right) Premium Horizontal Layout */}
+              {/* Logo (Left) and Text (Right) premium layout */}
               <View style={styles.headerRow}>
-                {/* Logo on the Left */}
-                <View style={styles.logoWrapper}>
-                  <Logo size={70} color="#FFFFFF" />
+                {/* Logo inside solid white circle on the left */}
+                <View style={styles.logoCircle}>
+                  <Logo size={50} color={colors.brand.gold} />
                 </View>
 
-                {/* Brand Titles on the Right (Arabic RTL Aligned) */}
+                {/* Brand text on the right (Arabic RTL) */}
                 <View style={styles.brandTextColumn}>
                   <Text style={styles.brandTitle}>أثر</Text>
                   <Text style={styles.brandSubtitle}>أبْقِ أثرك في هذا العالم</Text>
                 </View>
               </View>
             </View>
+
+            {/* The Concave Edge absolute-anchored at the bottom */}
+            <ConcaveHeaderEdge
+              color={colors.brand.gold}
+              height={60}
+              style={styles.concaveEdge}
+            />
           </View>
 
           {/* Form switching and input area */}
@@ -167,27 +165,18 @@ const styles = StyleSheet.create({
   headerWrapper: {
     width: '100%',
     position: 'relative',
+    marginTop: -100, // Pulls the background up to bleed under the status bar
+    zIndex: 10,
   },
-  backgroundWave: {
+  blueBase: {
+    width: '100%',
+  },
+  concaveEdge: {
     position: 'absolute',
-    top: 0,
+    bottom: -60,
     left: 0,
     right: 0,
-    bottom: -10,
-    borderBottomLeftRadius: 60,
-    borderBottomRightRadius: 130, // Opposite curve layer to create wave overlap
-  },
-  mainWaveCard: {
-    width: '100%',
-    paddingBottom: 40,
-    borderBottomLeftRadius: 130, // Deep wave sweep on the left
-    borderBottomRightRadius: 50,  // Soft curve on the right
-    // Premium soft card drop shadow
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.12,
-    shadowRadius: 15,
-    elevation: 8,
+    zIndex: 15,
   },
   headerRow: {
     flexDirection: 'row',
@@ -196,15 +185,21 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 28,
   },
-  logoWrapper: {
-    // Elegant soft glow backlighting for white logo
-    shadowColor: '#FFFFFF',
-    shadowOffset: { width: 0, height: 4 },
+  logoCircle: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.15,
-    shadowRadius: 6,
+    shadowRadius: 10,
+    elevation: 6,
   },
   brandTextColumn: {
-    alignItems: 'flex-end', // Align texts to the right for Arabic RTL layout
+    alignItems: 'flex-end',
     flex: 1,
     marginLeft: 16,
   },
@@ -218,13 +213,13 @@ const styles = StyleSheet.create({
   brandSubtitle: {
     fontSize: 12,
     fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.85)', // Highly readable semi-transparent white on blue
+    color: 'rgba(255, 255, 255, 0.85)',
     textAlign: 'right',
     lineHeight: 18,
   },
   innerContainer: {
     width: '100%',
     paddingHorizontal: 28,
-    marginTop: 40,
+    marginTop: 70, // Spacing cleared perfectly for the deep S-Curve SVG!
   },
 });
