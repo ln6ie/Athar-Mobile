@@ -4,23 +4,20 @@ import { useAuthStore } from './useAuthStore';
 import { useToastStore } from './useToastStore';
 
 export const fetchFeedAction = async (set: any, get: any, reset = false, silent = false) => {
-  const { nextCursor, posts, isLoading, isLoadingMore, isRefreshing, isFetchingFeed, activeTab, lastFetchTime } = get();
+  const { posts, isLoading, isLoadingMore, isRefreshing, isFetchingFeed, activeTab, lastFetchTime, nextCursor } = get();
   
+  const currentTabPosts = posts[activeTab] || [];
+  const currentTabCursor = nextCursor[activeTab];
+
   if (!reset && (isLoading || isLoadingMore || isRefreshing || isFetchingFeed)) return;
   if (reset && (isRefreshing || isFetchingFeed)) return;
-  if (!reset && !nextCursor) return;
+  if (!reset && !currentTabCursor) return;
 
-  // FETCH THROTTLING SPAM SHIELD:
-  // If this is a category swap / app init (reset = true AND silent = true)
-  // AND we already have cached posts for this category,
-  // AND the time elapsed since the last successful fetch is less than 30 seconds (30000ms):
-  // We completely abort the network fetch and rely on cached posts (Cache-First).
-  // This is only bypassed if the user triggers a manual pull-to-refresh (reset = true AND silent = false) or paginates.
   const now = Date.now();
   const lastFetched = lastFetchTime?.[activeTab] || 0;
   const timeElapsed = now - lastFetched;
 
-  if (reset && silent && posts.length > 0 && timeElapsed < 30000) {
+  if (reset && silent && currentTabPosts.length > 0 && timeElapsed < 30000) {
     return;
   }
 
@@ -30,26 +27,32 @@ export const fetchFeedAction = async (set: any, get: any, reset = false, silent 
     set({ error: null });
   } else if (reset) {
     set({ isRefreshing: true, error: null });
-  } else if (posts.length > 0) {
+  } else if (currentTabPosts.length > 0) {
     set({ isLoadingMore: true, error: null });
   } else {
     set({ isLoading: true, error: null });
   }
 
   try {
-    const cursorParam = reset ? '' : (nextCursor ? `&cursor=${nextCursor}` : '');
+    const cursorParam = reset ? '' : (currentTabCursor ? `&cursor=${currentTabCursor}` : '');
     const response = await api.get(`/posts/feed?sort=${activeTab}${cursorParam}`);
     const { posts: newPosts, nextCursor: newCursor } = response.data;
 
-    const mergedPosts = reset ? newPosts : [...posts, ...newPosts];
+    const mergedPosts = reset ? newPosts : [...currentTabPosts, ...newPosts];
     const { blockedUsers } = get();
     const uniquePosts = mergedPosts
       .filter((post: Post, index: number, self: Post[]) => self.findIndex((p: Post) => p.id === post.id) === index)
       .filter((post: Post) => !blockedUsers.includes(post.anonymousName));
 
     set({
-      posts: uniquePosts,
-      nextCursor: newCursor || null,
+      posts: {
+        ...get().posts,
+        [activeTab]: uniquePosts,
+      },
+      nextCursor: {
+        ...get().nextCursor,
+        [activeTab]: newCursor || null,
+      },
       isLoading: false,
       isLoadingMore: false,
       isRefreshing: false,
@@ -63,7 +66,9 @@ export const fetchFeedAction = async (set: any, get: any, reset = false, silent 
 
     const user = useAuthStore.getState().user;
     if (user) {
-      const myPosts = uniquePosts.filter((p: Post) => p.anonymousName === user.anonymousName);
+      const allPosts = [...(get().posts.recent || []), ...(get().posts.trending || [])];
+      const deduped = allPosts.filter((p: Post, i: number, self: Post[]) => self.findIndex((x: Post) => x.id === p.id) === i);
+      const myPosts = deduped.filter((p: Post) => p.anonymousName === user.anonymousName);
       const totalLikes = myPosts.reduce((sum: number, p: Post) => sum + p.likesCount, 0);
       const { lastViewedLikesCount } = get();
       
@@ -86,7 +91,7 @@ export const fetchFeedAction = async (set: any, get: any, reset = false, silent 
       isFetchingFeed: false,
     });
 
-    const hasCache = get().posts.length > 0;
+    const hasCache = (get().posts[activeTab] || []).length > 0;
     const errMsg = error.response?.data?.message || 'عذراً، تعذر الاتصال بالخادم حالياً. يرجى المحاولة لاحقاً';
 
     if (hasCache) {
@@ -107,8 +112,12 @@ export const createPostAction = async (set: any, get: any, content: string) => {
       likesCount: 0,
       isLiked: false,
     };
+    const { activeTab } = get();
     set((state: any) => ({
-      posts: [newPost, ...state.posts],
+      posts: {
+        ...state.posts,
+        [activeTab]: [newPost, ...(state.posts[activeTab] || [])],
+      },
       isLoading: false,
     }));
   } catch (error: any) {
@@ -124,15 +133,14 @@ const likeOriginalStates = new Map<string, { isLiked: boolean; likesCount: numbe
 export const toggleLikeAction = async (set: any, get: any, postId: string) => {
   const { posts } = get();
   
-  // 1. Capture the original stable server state before any rapid clicking started
   if (!likeOriginalStates.has(postId)) {
-    const post = posts.find((p: Post) => p.id === postId);
+    const allPosts = [...(posts.recent || []), ...(posts.trending || [])];
+    const post = allPosts.find((p: Post) => p.id === postId);
     if (post) {
       likeOriginalStates.set(postId, { isLiked: post.isLiked, likesCount: post.likesCount });
     }
   }
 
-  // Helper function to calculate optimistic UI toggle
   const updatePostHelper = (post: Post) => {
     if (post.id === postId) {
       return {
@@ -144,36 +152,35 @@ export const toggleLikeAction = async (set: any, get: any, postId: string) => {
     return post;
   };
 
-  // 2. Perform absolute instantaneous Optimistic UI Update for maximum user fluid responsiveness
   set((state: any) => ({ 
-    posts: state.posts.map(updatePostHelper),
+    posts: {
+      recent: (state.posts.recent || []).map(updatePostHelper),
+      trending: (state.posts.trending || []).map(updatePostHelper),
+    },
     myPosts: state.myPosts.map(updatePostHelper),
     likedPosts: state.likedPosts.map(updatePostHelper),
   }));
 
-  // 3. Clear any active pending timers to throttle rapid clicks
   if (likeDebounceTimers.has(postId)) {
     clearTimeout(likeDebounceTimers.get(postId)!);
   }
 
-  // 4. Set debounced sync trigger (500ms) to bundle all clicks into one final state sync call
   const timer = setTimeout(async () => {
     likeDebounceTimers.delete(postId);
     
-    const currentPost = get().posts.find((p: Post) => p.id === postId);
+    const currentPosts = get().posts;
+    const allCurrentPosts = [...(currentPosts.recent || []), ...(currentPosts.trending || [])];
+    const currentPost = allCurrentPosts.find((p: Post) => p.id === postId);
     const original = likeOriginalStates.get(postId);
-    likeOriginalStates.delete(postId); // Clean up original state reference
+    likeOriginalStates.delete(postId);
     
     if (!currentPost || !original) return;
     
-    // SPAM SHIELD: If final state matches the original server state (even number of rapid clicks),
-    // then net change is exactly 0. Abort network call entirely to save bandwidth & prevent 429s!
     if (currentPost.isLiked === original.isLiked) {
       return;
     }
     
     try {
-      // Synchronize with the server
       const response = await api.post(`/posts/${postId}/like`);
       const { liked, likesCount } = response.data;
       
@@ -188,15 +195,17 @@ export const toggleLikeAction = async (set: any, get: any, postId: string) => {
         const newLikedPosts = state.likedPosts.map(applyStrictUpdate);
         const finalLikedPosts = liked ? newLikedPosts : newLikedPosts.filter((p: Post) => p.id !== postId);
         return {
-          posts: state.posts.map(applyStrictUpdate),
+          posts: {
+            recent: (state.posts.recent || []).map(applyStrictUpdate),
+            trending: (state.posts.trending || []).map(applyStrictUpdate),
+          },
           myPosts: state.myPosts.map(applyStrictUpdate),
           likedPosts: finalLikedPosts,
         };
       });
     } catch (error) {
-      console.error('[feedActions] Debounced like sync failed. Rolling back UI.', error);
+      console.log('[feedActions] Debounced like sync failed. Rolling back UI.', error);
       
-      // Roll back UI to original server state
       const rollbackUpdate = (post: Post) => {
         if (post.id === postId) {
           return { ...post, isLiked: original.isLiked, likesCount: original.likesCount };
@@ -205,14 +214,16 @@ export const toggleLikeAction = async (set: any, get: any, postId: string) => {
       };
       
       set((state: any) => ({
-        posts: state.posts.map(rollbackUpdate),
+        posts: {
+          recent: (state.posts.recent || []).map(rollbackUpdate),
+          trending: (state.posts.trending || []).map(rollbackUpdate),
+        },
         myPosts: state.myPosts.map(rollbackUpdate),
         likedPosts: original.isLiked 
           ? state.likedPosts.map(rollbackUpdate)
           : state.likedPosts.filter((p: Post) => p.id !== postId),
       }));
 
-      // Display our beautiful non-intrusive bottom global Snackbar
       useToastStore.getState().show('عذراً، تعذر الاتصال بالخادم حالياً. يرجى المحاولة لاحقاً');
     }
   }, 500);
@@ -224,12 +235,15 @@ export const deletePostAction = async (set: any, get: any, postId: string) => {
   try {
     await api.delete(`/posts/${postId}`);
     set((state: any) => ({
-      posts: state.posts.filter((p: Post) => p.id !== postId),
+      posts: {
+        recent: (state.posts.recent || []).filter((p: Post) => p.id !== postId),
+        trending: (state.posts.trending || []).filter((p: Post) => p.id !== postId),
+      },
       myPosts: state.myPosts.filter((p: Post) => p.id !== postId),
       likedPosts: state.likedPosts.filter((p: Post) => p.id !== postId),
     }));
   } catch (error) {
-    console.error('[feedActions] deletePost error:', error);
+    console.log('[feedActions] deletePost error:', error);
     throw error;
   }
 };
@@ -238,6 +252,6 @@ export const reportPostAction = async (postId: string) => {
   try {
     await api.post(`/posts/${postId}/report`);
   } catch (error) {
-    console.error('[feedActions] reportPost error:', error);
+    console.log('[feedActions] reportPost error:', error);
   }
 };

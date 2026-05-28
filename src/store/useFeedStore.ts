@@ -19,15 +19,11 @@ import {
 } from './userActions';
 
 interface FeedState {
-  posts: Post[];
+  posts: { recent: Post[]; trending: Post[] };
   myPosts: Post[];
   likedPosts: Post[];
   blockedUsers: string[];
-  nextCursor: string | null;
-  recentPosts: Post[];
-  trendingPosts: Post[];
-  recentCursor: string | null;
-  trendingCursor: string | null;
+  nextCursor: { recent: string | null; trending: string | null };
   lastFetchTime: { recent: number; trending: number };
   isLoading: boolean;
   isLoadingMyPosts: boolean;
@@ -63,15 +59,11 @@ interface FeedState {
 export const useFeedStore = create<FeedState>()(
   persist(
     (set, get) => ({
-      posts: [],
+      posts: { recent: [], trending: [] },
       myPosts: [],
       likedPosts: [],
       blockedUsers: [],
-      nextCursor: null,
-      recentPosts: [],
-      trendingPosts: [],
-      recentCursor: null,
-      trendingCursor: null,
+      nextCursor: { recent: null, trending: null },
       lastFetchTime: { recent: 0, trending: 0 },
       isLoading: false,
       isLoadingMyPosts: false,
@@ -90,23 +82,7 @@ export const useFeedStore = create<FeedState>()(
       activeTab: 'recent',
       
       setActiveTab: (tab) => {
-        const { posts, nextCursor, activeTab, recentPosts, recentCursor, trendingPosts, trendingCursor } = get();
-        
-        // 1. Save current active tab's posts and cursor to cache
-        const cacheSave = activeTab === 'recent'
-          ? { recentPosts: posts, recentCursor: nextCursor }
-          : { trendingPosts: posts, trendingCursor: nextCursor };
-        
-        // 2. Load target tab's posts and cursor from cache
-        const targetLoad = tab === 'recent'
-          ? { posts: recentPosts, nextCursor: recentCursor }
-          : { posts: trendingPosts, nextCursor: trendingCursor };
-
-        set({
-          activeTab: tab,
-          ...cacheSave,
-          ...targetLoad,
-        });
+        set({ activeTab: tab });
       },
 
       initializeFeed: async () => {
@@ -131,7 +107,9 @@ export const useFeedStore = create<FeedState>()(
         const user = useAuthStore.getState().user;
         if (user) {
           const { posts } = get();
-          const myPosts = posts.filter((p: Post) => p.anonymousName === user.anonymousName);
+          const allPosts = [...(posts.recent || []), ...(posts.trending || [])];
+          const deduped = allPosts.filter((p: Post, i: number, self: Post[]) => self.findIndex((x: Post) => x.id === p.id) === i);
+          const myPosts = deduped.filter((p: Post) => p.anonymousName === user.anonymousName);
           const totalLikes = myPosts.reduce((sum: number, p: Post) => sum + p.likesCount, 0);
           set({ 
             lastViewedLikesCount: totalLikes,

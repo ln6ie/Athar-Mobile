@@ -6,6 +6,22 @@ const memoryStorage = new Map<string, string>();
 
 export const feedPersistConfig = {
   name: 'athar-feed-storage',
+  version: 1,
+  migrate: (persistedState: any, version: number) => {
+    if (version === 0) {
+      if (Array.isArray(persistedState.posts)) {
+        persistedState.posts = { recent: persistedState.posts, trending: [] };
+      }
+      if (typeof persistedState.nextCursor === 'string' || persistedState.nextCursor === null || persistedState.nextCursor === undefined) {
+        persistedState.nextCursor = { recent: persistedState.nextCursor ?? null, trending: null };
+      }
+      delete persistedState.recentPosts;
+      delete persistedState.trendingPosts;
+      delete persistedState.recentCursor;
+      delete persistedState.trendingCursor;
+    }
+    return persistedState;
+  },
   storage: createJSONStorage(() => ({
     getItem: async (name: string) => {
       try {
@@ -59,12 +75,9 @@ export const feedPersistConfig = {
   })),
   partialize: (state: any) => ({
     posts: state.posts,
+    nextCursor: state.nextCursor,
     unreadLikesCount: state.unreadLikesCount,
     blockedUsers: state.blockedUsers,
-    recentPosts: state.recentPosts,
-    recentCursor: state.recentCursor,
-    trendingPosts: state.trendingPosts,
-    trendingCursor: state.trendingCursor,
     lastFetchTime: state.lastFetchTime,
   }),
 };

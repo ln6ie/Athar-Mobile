@@ -14,10 +14,13 @@ import { FlashList } from '@shopify/flash-list';
 import { OfflineBanner } from '../components/OfflineBanner';
 import { FeedTabsHeader } from '../components/FeedTabsHeader';
 import { router } from 'expo-router';
+import type { Post } from '../types';
+
+const EMPTY_POSTS: Post[] = [];
 
 export const FeedScreen: React.FC = () => {
+  const posts = useFeedStore((state) => state.posts[state.activeTab] ?? EMPTY_POSTS);
   const { 
-    posts, 
     isLoading, 
     isLoadingMore, 
     isRefreshing, 

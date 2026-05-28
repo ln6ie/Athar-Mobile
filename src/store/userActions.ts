@@ -15,7 +15,9 @@ export const fetchNotificationsAction = async (set: any, get: any) => {
     const user = useAuthStore.getState().user;
     if (user) {
       const { posts } = get();
-      const myPosts = posts.filter((p: Post) => p.anonymousName === user.anonymousName);
+      const allPosts = [...(posts.recent || []), ...(posts.trending || [])];
+      const deduped = allPosts.filter((p: Post, i: number, self: Post[]) => self.findIndex((x: Post) => x.id === p.id) === i);
+      const myPosts = deduped.filter((p: Post) => p.anonymousName === user.anonymousName);
       const totalLikes = myPosts.reduce((sum: number, p: Post) => sum + p.likesCount, 0);
       set({ lastViewedLikesCount: totalLikes });
     }
@@ -68,7 +70,10 @@ export const blockUserAction = async (set: any, get: any, anonymousName: string)
 
   set({
     blockedUsers: [...blockedUsers, anonymousName],
-    posts: posts.filter((p: Post) => p.anonymousName !== anonymousName),
+    posts: {
+      recent: (posts.recent || []).filter((p: Post) => p.anonymousName !== anonymousName),
+      trending: (posts.trending || []).filter((p: Post) => p.anonymousName !== anonymousName),
+    },
     myPosts: myPosts.filter((p: Post) => p.anonymousName !== anonymousName),
     likedPosts: likedPosts.filter((p: Post) => p.anonymousName !== anonymousName),
   });
