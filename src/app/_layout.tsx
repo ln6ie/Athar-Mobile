@@ -13,7 +13,6 @@ import { forceArabicLayout } from '../utils/rtl';
 import { IntroScreen } from '../screens/IntroScreen';
 import { useConfigStore } from '../store/useConfigStore';
 import { ForceUpdateModal } from '../components/ForceUpdateModal';
-import { TOKENS } from '../constants/tokens';
 
 export default function RootLayout() {
   const { isAuthenticated, isInitialized, initialize } = useAuthStore();
@@ -38,24 +37,19 @@ export default function RootLayout() {
     return () => clearTimeout(timer);
   }, []);
 
-  if (showSplash || !isInitialized) {
-    return (
-      <SafeAreaProvider>
-        <IntroScreen />
-        <StatusBar style={isDark ? 'light' : 'dark'} />
-      </SafeAreaProvider>
-    );
-  }
+  const shouldShowIntro = showSplash || !isInitialized;
 
   return (
     <SafeAreaProvider>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <ForceUpdateModal />
-      {isAuthenticated ? (
-        <View style={[styles.container, { backgroundColor: colors.background.default }]}>
-          <Slot />
-          
-          {/* Real System Navigation overlay for Premium Floating Add Button */}
+
+      {/* Main router tree is always mounted to ensure Expo Router resolves correctly */}
+      <View style={[styles.container, { backgroundColor: colors.background.default }]}>
+        <Slot />
+        
+        {/* Real System Navigation overlay for Premium Floating Add Button */}
+        {isAuthenticated && !shouldShowIntro && (
           <TouchableOpacity
             onPress={() => setModalVisible(true)}
             style={[
@@ -69,17 +63,31 @@ export default function RootLayout() {
               <View style={styles.plusBarVertical} />
             </View>
           </TouchableOpacity>
+        )}
 
+        {isAuthenticated && (
           <PostModal
             visible={modalVisible}
             onClose={() => setModalVisible(false)}
             onSubmit={createPost}
           />
+        )}
+      </View>
+
+      {/* Login Screen Overlay when not authenticated */}
+      {!isAuthenticated && isInitialized && !showSplash && (
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.background.default, zIndex: 500 }]}>
+          <SafeAreaView style={styles.container}>
+            <LoginScreen onSuccess={() => {}} />
+          </SafeAreaView>
         </View>
-      ) : (
-        <SafeAreaView style={[styles.container, { backgroundColor: colors.background.default }]}>
-          <LoginScreen onSuccess={() => {}} />
-        </SafeAreaView>
+      )}
+
+      {/* Intro Animated Screen Overlay during loading */}
+      {shouldShowIntro && (
+        <View style={[StyleSheet.absoluteFill, { zIndex: 9999 }]}>
+          <IntroScreen />
+        </View>
       )}
     </SafeAreaProvider>
   );
