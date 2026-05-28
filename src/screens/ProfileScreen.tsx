@@ -191,10 +191,11 @@ export const ProfileScreen: React.FC = () => {
             </View>
           );
         }}
-        contentContainerStyle={[
-          styles.listContent,
-          { paddingTop: 0, paddingHorizontal: 0 }
-        ]}
+        contentContainerStyle={{
+          paddingTop: 0,
+          paddingBottom: 140,
+          paddingHorizontal: 0,
+        }}
         ListHeaderComponent={
           <View>
             {/* Native Dynamic iOS 26 Material Header Card */}
