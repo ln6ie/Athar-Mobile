@@ -1,5 +1,6 @@
 import React from 'react';
 import { Platform, Alert, ActionSheetIOS, Pressable } from 'react-native';
+import Constants from 'expo-constants';
 
 interface ContextMenuOption {
   label: string;
@@ -19,7 +20,10 @@ let ContextMenu: any = null;
 let ContextButton: any = null;
 let isNativeMenuAvailable = false;
 
-if (Platform.OS === 'ios') {
+// Omit SwiftUI components when running inside Expo Go to avoid missing native view manager warnings
+const isRunningInExpoGo = Constants.appOwnership === 'expo';
+
+if (Platform.OS === 'ios' && !isRunningInExpoGo) {
   try {
     const expoUiSwiftUi = require('@expo/ui/swift-ui');
     Host = expoUiSwiftUi.Host || React.Fragment;

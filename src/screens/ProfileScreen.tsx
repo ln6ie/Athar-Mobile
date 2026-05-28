@@ -13,11 +13,11 @@ import { SupportSubScreen } from '../components/SupportSubScreen';
 import { AboutSubScreen } from '../components/AboutSubScreen';
 import { PrivacySubScreen } from '../components/PrivacySubScreen';
 import { BlockedUsersSubScreen } from '../components/BlockedUsersSubScreen';
-import { AnonymousAvatar } from '../components/AnonymousAvatar';
 import { ThemeSelector } from '../components/ThemeSelector';
 import { useProfileStyles } from '../styles/ProfileStyles';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { GlassicView } from '../components/GlassicView';
+import { ProfileHeaderCard } from '../components/ProfileHeaderCard';
+import { ProfileOptionsCard } from '../components/ProfileOptionsCard';
 
 export const ProfileScreen: React.FC = () => {
   const { user, logout, deleteAccount } = useAuthStore();
@@ -30,8 +30,10 @@ export const ProfileScreen: React.FC = () => {
     fetchMyPosts, 
     fetchLikedPosts 
   } = useFeedStore();
+  
   const { colors } = useTheme();
   const styles = useProfileStyles();
+  
   const [activeSubScreen, setActiveSubScreen] = useState<'main' | 'change-email' | 'support' | 'about' | 'privacy' | 'blocked-users'>('main');
   const [activeTab, setActiveTab] = useState<'my-posts' | 'likes'>('my-posts');
   const insets = useSafeAreaInsets();
@@ -111,105 +113,23 @@ export const ProfileScreen: React.FC = () => {
         ]}
         ListHeaderComponent={
           <View>
-            <View style={styles.profileHeaderCard}>
-              <View style={styles.profileMainRow}>
-                <View style={{ marginLeft: 16 }}>
-                  <AnonymousAvatar size={72} />
-                </View>
+            {/* Native Dynamic iOS 26 Material Header Card */}
+            <ProfileHeaderCard
+              anonymousName={anonymousName}
+              userEmail={userEmail}
+              postsCount={myPosts.length}
+            />
 
-                <View style={styles.profileInfoColumn}>
-                  <Text style={styles.profileName} numberOfLines={1} ellipsizeMode="tail">
-                    {anonymousName}
-                  </Text>
-                  
-                  <View style={styles.profileMetaRow}>
-                    <View style={styles.inlineStatsBox}>
-                      <Text style={styles.statVal}>{myPosts.length}</Text>
-                      <Text style={styles.statLabel}>منشور</Text>
-                    </View>
-                  </View>
-
-                  <Text style={styles.profileEmail}>{userEmail}</Text>
-                </View>
-              </View>
-            </View>
-            <View style={styles.optionsCard}>
-              <Text style={styles.optionsTitle}>إعدادات الحساب والدعم</Text>
-              
-              <TouchableOpacity style={styles.optionRow} onPress={() => setActiveSubScreen('change-email')}>
-                <Text style={styles.chevron}>‹</Text>
-                <View style={styles.optionRightContainer}>
-                  <Text style={styles.optionLabel}>تغيير البريد الإلكتروني</Text>
-                  <View style={styles.optionIconWrapper}>
-                    <Ionicons name="mail" size={20} color={colors.brand.gold} />
-                  </View>
-                </View>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.optionRow} onPress={() => setActiveSubScreen('blocked-users')}>
-                <Text style={styles.chevron}>‹</Text>
-                <View style={styles.optionRightContainer}>
-                  <Text style={styles.optionLabel}>المستخدمون المحظورون</Text>
-                  <View style={styles.optionIconWrapper}>
-                    <Ionicons name="ban" size={20} color={colors.brand.gold} />
-                  </View>
-                </View>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.optionRow} onPress={() => setActiveSubScreen('support')}>
-                <Text style={styles.chevron}>‹</Text>
-                <View style={styles.optionRightContainer}>
-                  <Text style={styles.optionLabel}>مراسلة الدعم الفني</Text>
-                  <View style={styles.optionIconWrapper}>
-                    <Ionicons name="chatbubbles" size={20} color={colors.brand.gold} />
-                  </View>
-                </View>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.optionRow} onPress={() => setActiveSubScreen('privacy')}>
-                <Text style={styles.chevron}>‹</Text>
-                <View style={styles.optionRightContainer}>
-                  <Text style={styles.optionLabel}>سياسة الخصوصية</Text>
-                  <View style={styles.optionIconWrapper}>
-                    <Ionicons name="shield-checkmark" size={20} color={colors.brand.gold} />
-                  </View>
-                </View>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.optionRow} onPress={() => setActiveSubScreen('about')}>
-                <Text style={styles.chevron}>‹</Text>
-                <View style={styles.optionRightContainer}>
-                  <Text style={styles.optionLabel}>عن التطبيق والفكرة</Text>
-                  <View style={styles.optionIconWrapper}>
-                    <Ionicons name="information-circle" size={20} color={colors.brand.gold} />
-                  </View>
-                </View>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.optionRow} onPress={handleLogout}>
-                <Text style={styles.chevronRed}>‹</Text>
-                <View style={styles.optionRightContainer}>
-                  <Text style={styles.optionLabelRed}>تسجيل الخروج</Text>
-                  <View style={styles.optionIconWrapper}>
-                    <Ionicons name="log-out" size={20} color="#DC2626" />
-                  </View>
-                </View>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={[styles.optionRow, styles.lastOptionRow]} onPress={handleDeleteAccount}>
-                <Text style={styles.chevronRed}>‹</Text>
-                <View style={styles.optionRightContainer}>
-                  <Text style={styles.optionLabelRed}>حذف الحساب بشكل نهائي</Text>
-                  <View style={styles.optionIconWrapper}>
-                    <Ionicons name="trash" size={20} color="#DC2626" />
-                  </View>
-                </View>
-              </TouchableOpacity>
-
-            </View>
+            {/* Native Dynamic iOS 26 Material Options Card */}
+            <ProfileOptionsCard
+              onSubScreenNavigate={(screen) => setActiveSubScreen(screen)}
+              onLogout={handleLogout}
+              onDeleteAccount={handleDeleteAccount}
+            />
 
             <ThemeSelector />
 
+            {/* Segment Toggle Tab Bar */}
             <GlassicView
               cornerRadius={20}
               style={styles.tabContainer}
@@ -273,5 +193,3 @@ export const ProfileScreen: React.FC = () => {
     </View>
   );
 };
-
-

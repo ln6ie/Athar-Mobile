@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTheme } from '../hooks/useTheme';
 import { ThemeMode } from '../store/useThemeStore';
+import { GlassicView } from './GlassicView';
 
 interface ThemeSelectorProps {
   minimal?: boolean;
@@ -16,27 +17,8 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ minimal = false })
     { mode: 'light', label: 'الفاتح' },
   ];
 
-  return (
-    <View
-      style={
-        !minimal
-          ? [
-              styles.container,
-              {
-                backgroundColor: colors.background.card,
-                borderRadius: 24,
-                borderWidth: 1,
-                borderColor: colors.border.muted,
-                shadowColor: '#000000',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: isDark ? 0 : 0.04,
-                shadowRadius: 12,
-                elevation: 2,
-              },
-            ]
-          : [styles.minimalContainer, { borderTopColor: colors.border.muted }]
-      }
-    >
+  const renderContent = () => (
+    <>
       <Text style={[styles.title, { color: colors.brand.gold }]}>مظهر التطبيق</Text>
       
       <View style={[styles.segmentContainer, { backgroundColor: isDark ? '#000000' : colors.background.input }]}>
@@ -73,7 +55,21 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ minimal = false })
           );
         })}
       </View>
-    </View>
+    </>
+  );
+
+  if (minimal) {
+    return (
+      <View style={[styles.minimalContainer, { borderTopColor: colors.border.muted }]}>
+        {renderContent()}
+      </View>
+    );
+  }
+
+  return (
+    <GlassicView cornerRadius={24} style={styles.container}>
+      {renderContent()}
+    </GlassicView>
   );
 };
 

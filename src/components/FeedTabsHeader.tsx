@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { GlassicView } from './GlassicView';
 import { BellIcon } from './BellIcon';
 import { useTheme } from '../hooks/useTheme';
@@ -24,16 +25,25 @@ export const FeedTabsHeader: React.FC<FeedTabsHeaderProps> = ({
   const globalStyles = useGlobalStyles();
 
   const tabWrapperBg = isDark ? '#000000' : colors.background.input;
-  const activeTabStyle = [
-    styles.activeTabButton,
-    {
-      backgroundColor: isDark ? '#2C2C2E' : '#FFFFFF',
-      borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
-      borderWidth: isDark ? 1 : 0.5,
-    }
-  ];
   const tabTextColor = colors.text.secondary;
   const activeTabTextColor = colors.brand.gold;
+
+  // Apple Segmented Control UI Thread Slide Physics
+  const slideTranslation = useSharedValue(0);
+
+  useEffect(() => {
+    // In RTL, Trending is on the right (0), Recent is on the left (-81px)
+    slideTranslation.value = withSpring(
+      activeTab === 'trending' ? 0 : -81,
+      { damping: 15, stiffness: 150, mass: 0.6 }
+    );
+  }, [activeTab]);
+
+  const sliderAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: slideTranslation.value }],
+    };
+  });
 
   return (
     <View style={[styles.topHeaderRow, { top: topOffset }]}>
@@ -42,8 +52,21 @@ export const FeedTabsHeader: React.FC<FeedTabsHeaderProps> = ({
         style={styles.centeredTabsCard}
       >
         <View style={[styles.tabsWrapper, { backgroundColor: tabWrapperBg }]}>
+          {/* Spring-Driven Premium Sliding Backdrop Capsule */}
+          <Animated.View
+            style={[
+              styles.activeSlider,
+              {
+                backgroundColor: isDark ? '#2C2C2E' : '#FFFFFF',
+                borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
+                borderWidth: isDark ? 1 : 0.5,
+              },
+              sliderAnimatedStyle
+            ]}
+          />
+
           <TouchableOpacity
-            style={[styles.tabButton, activeTab === 'trending' && activeTabStyle]}
+            style={styles.tabButton}
             onPress={() => onTabChange('trending')}
             activeOpacity={0.8}
           >
@@ -51,8 +74,9 @@ export const FeedTabsHeader: React.FC<FeedTabsHeaderProps> = ({
               الرائجة
             </Text>
           </TouchableOpacity>
+
           <TouchableOpacity
-            style={[styles.tabButton, activeTab === 'recent' && activeTabStyle]}
+            style={styles.tabButton}
             onPress={() => onTabChange('recent')}
             activeOpacity={0.8}
           >
@@ -102,7 +126,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row-reverse',
     flex: 1,
     borderRadius: 20,
-    overflow: 'hidden',
+    position: 'relative',
   },
   tabButton: {
     flex: 1,
@@ -110,13 +134,21 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 2,
   },
-  activeTabButton: {
+  activeSlider: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    width: 82,
+    height: 38,
+    borderRadius: 18,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 3.5,
     elevation: 2,
+    zIndex: 1,
   },
   tabText: {
     fontSize: 13.5,
