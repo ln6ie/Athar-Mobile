@@ -94,9 +94,9 @@ function MainLayout() {
       {/* Login Screen Overlay when not authenticated */}
       {!isAuthenticated && isInitialized && !showSplash && (
         <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.background.default, zIndex: 500 }]}>
-          <SafeAreaView style={styles.container}>
+          <View style={styles.container}>
             <LoginScreen onSuccess={() => {}} />
-          </SafeAreaView>
+          </View>
         </View>
       )}
 
