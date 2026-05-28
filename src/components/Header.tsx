@@ -77,21 +77,21 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Sub-screens Left Side: Native iOS Circular Close Button (Perfect for Arabic RTL) */}
             <View style={styles.leftContainer}>
               {onLeftPress ? (
-                <BouncyPressable
-                  onPress={onLeftPress}
-                  style={[
-                    styles.circularCloseButton,
-                    {
-                      backgroundColor: colors.background.input,
-                    }
-                  ]}
+                <GlassicView
+                  cornerRadius={14}
+                  style={styles.circularCloseButton}
                 >
-                  <SymbolView
-                    name={{ ios: 'xmark', android: 'close' }}
-                    size={12}
-                    tintColor={colors.text.secondary}
-                  />
-                </BouncyPressable>
+                  <BouncyPressable
+                    onPress={onLeftPress}
+                    style={{ width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}
+                  >
+                    <SymbolView
+                      name={{ ios: 'xmark', android: 'close' }}
+                      size={11}
+                      tintColor={colors.text.secondary}
+                    />
+                  </BouncyPressable>
+                </GlassicView>
               ) : (
                 <View style={styles.placeholder} />
               )}
@@ -128,8 +128,7 @@ export const Header: React.FC<HeaderProps> = ({
 const styles = StyleSheet.create({
   headerContainer: {
     backgroundColor: TOKENS.colors.background.default,
-    borderBottomWidth: 1,
-    borderBottomColor: TOKENS.colors.border.muted,
+    borderBottomWidth: 0,
   },
   header: {
     paddingHorizontal: 24,
