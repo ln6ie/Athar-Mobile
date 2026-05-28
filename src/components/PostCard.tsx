@@ -1,11 +1,16 @@
-import React, { useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, TouchableWithoutFeedback, StyleSheet, Animated, Alert } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, Platform, Share, Alert, Pressable } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Post } from '../types';
 import { isArabicText } from '../utils/rtl';
 import { useTheme } from '../hooks/useTheme';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { useAuthStore } from '../store/useAuthStore';
 import { useFeedStore } from '../store/useFeedStore';
+import { NativeContextMenu } from './NativeContextMenu';
+import { getRemainingTimeText } from '../utils/time';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface PostCardProps {
   post: Post;
@@ -15,15 +20,15 @@ interface PostCardProps {
 export const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
   const isArabic = isArabicText(post.content);
   const { colors, isDark } = useTheme();
+  
   const formattedDate = new Date(post.createdAt).toLocaleTimeString('ar-EG', {
     hour: '2-digit',
     minute: '2-digit',
   });
 
-  const lastTapRef = useRef<number>(0);
-  
-  // Animated value for clean and light bounce pulse animation
-  const scaleAnim = useRef(new Animated.Value(1)).current;
+  // Reanimated UI Thread Spring Shared Values
+  const cardScale = useSharedValue(1);
+  const likeScale = useSharedValue(1);
 
   const currentUser = useAuthStore((state) => state.user);
   const blockUser = useFeedStore((state) => state.blockUser);
@@ -32,154 +37,138 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
 
   const isOwnPost = currentUser?.anonymousName === post.anonymousName;
 
-  const handleMenuPress = () => {
-    if (isOwnPost) {
-      Alert.alert(
-        'خيارات المنشور',
-        'هل ترغب في حذف هذا الأثر نهائياً وفوراً؟',
-        [
-          { text: 'إلغاء', style: 'cancel' },
-          {
-            text: 'حذف المنشور فوراً',
-            style: 'destructive',
-            onPress: async () => {
-              try {
-                await deletePost(post.id);
-                Alert.alert('تم', 'تم حذف منشورك بنجاح.');
-              } catch (err) {
-                Alert.alert('خطأ', 'تعذر حذف المنشور حالياً.');
-              }
-            }
-          }
-        ],
-        { cancelable: true }
-      );
-    } else {
-      Alert.alert(
-        'خيارات المنشور',
-        'الرجاء اختيار أحد الإجراءات التالية للمساعدة في الحفاظ على مجتمع آمن:',
-        [
-          { text: 'إلغاء', style: 'cancel' },
-          {
-            text: 'إبلاغ عن محتوى غير لائق',
-            style: 'destructive',
-            onPress: async () => {
-              try {
-                await reportPost(post.id);
-                Alert.alert('شكرًا لك', 'تم استلام الإبلاغ بنجاح، وسيتخذ فريق الدعم الإجراء المناسب خلال 24 ساعة.');
-              } catch (err) {
-                Alert.alert('خطأ', 'تعذر إرسال الإبلاغ حالياً.');
-              }
-            }
-          },
-          {
-            text: 'حظر هذا الكاتب',
-            style: 'destructive',
-            onPress: () => {
-              Alert.alert(
-                'تأكيد الحظر',
-                `هل أنت متأكد من رغبتك في حظر ${post.anonymousName}؟ لن تظهر لك أي منشورات منه مجدداً.`,
-                [
-                  { text: 'إلغاء', style: 'cancel' },
-                  {
-                    text: 'نعم، حظره',
-                    style: 'destructive',
-                    onPress: async () => {
-                      await blockUser(post.anonymousName);
-                      Alert.alert('تم الحظر', 'تم حظر المستخدم بنجاح ولن تظهر لك أي من مشاركاته.');
-                    }
-                  }
-                ]
-              );
-            }
-          }
-        ],
-        { cancelable: true }
-      );
-    }
-  };
+  // React Native Reanimated: UI Thread Apple Spring Physics Spring Equation
+  const cardAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: cardScale.value }],
+    };
+  });
+
+  const likeAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: likeScale.value }],
+    };
+  });
 
   useEffect(() => {
     if (post.isLiked) {
-      Animated.sequence([
-        Animated.timing(scaleAnim, {
-          toValue: 1.3,
-          duration: 100,
-          useNativeDriver: true,
-        }),
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          friction: 4,
-          tension: 40,
-          useNativeDriver: true,
-        })
-      ]).start();
+      likeScale.value = 1.3;
+      likeScale.value = withSpring(1, { damping: 10, stiffness: 180 });
+    } else {
+      likeScale.value = 1;
     }
   }, [post.isLiked]);
 
-  const handleCardPress = () => {
-    const now = Date.now();
-    const DOUBLE_PRESS_DELAY = 300;
-    if (now - lastTapRef.current < DOUBLE_PRESS_DELAY) {
-      onLike(post.id);
-    } else {
-      lastTapRef.current = now;
+  const handlePressIn = () => {
+    'worklet';
+    cardScale.value = withSpring(0.96, { damping: 15, stiffness: 150, mass: 0.6 });
+  };
+
+  const handlePressOut = () => {
+    'worklet';
+    cardScale.value = withSpring(1, { damping: 15, stiffness: 150, mass: 0.6 });
+  };
+
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        message: `أثر: ${post.content}\n\nعبر بالمجهول عبر تطبيق أثر`,
+      });
+    } catch (err) {
+      console.error('Error sharing post', err);
     }
   };
 
-  const getRemainingTimeText = (createdAtStr: string): string => {
-    const createdAt = new Date(createdAtStr).getTime();
-    const expiresAt = createdAt + 24 * 60 * 60 * 1000; // 24 hours
-    const now = Date.now();
-    const diffMs = expiresAt - now;
-
-    if (diffMs <= 0) {
-      return 'انتهى المنشور';
-    }
-
-    const diffMinutes = Math.floor(diffMs / (1000 * 60));
-    const diffHours = Math.floor(diffMinutes / 60);
-    const remainingMinutes = diffMinutes % 60;
-
-    if (diffHours > 0) {
-      if (diffHours === 1) {
-        return remainingMinutes > 0 
-          ? `ينتهي بعد ساعة و ${remainingMinutes} دقيقة`
-          : 'ينتهي بعد ساعة';
-      }
-      if (diffHours === 2) {
-        return remainingMinutes > 0 
-          ? `ينتهي بعد ساعتين و ${remainingMinutes} دقيقة`
-          : 'ينتهي بعد ساعتين';
-      }
-      if (diffHours >= 3 && diffHours <= 10) {
-        return remainingMinutes > 0
-          ? `ينتهي بعد ${diffHours} ساعات و ${remainingMinutes} دقيقة`
-          : `ينتهي بعد ${diffHours} ساعات`;
-      }
-      return remainingMinutes > 0
-        ? `ينتهي بعد ${diffHours} ساعة و ${remainingMinutes} دقيقة`
-        : `ينتهي بعد ${diffHours} ساعة`;
-    } else {
-      if (diffMinutes === 1) {
-        return 'ينتهي بعد دقيقة';
-      }
-      if (diffMinutes === 2) {
-        return 'ينتهي بعد دقيقتين';
-      }
-      if (diffMinutes >= 3 && diffMinutes <= 10) {
-        return `ينتهي  بعد ${diffMinutes} دقائق`;
-      }
-      return `ينتهي بعد ${diffMinutes} دقيقة`;
+  const handleDelete = async () => {
+    try {
+      await deletePost(post.id);
+      Alert.alert('تم الحذف', 'تم حذف منشورك بنجاح.');
+    } catch (err) {
+      Alert.alert('خطأ', 'تعذر حذف المنشور حالياً.');
     }
   };
+
+  const handleReport = async () => {
+    try {
+      await reportPost(post.id);
+      Alert.alert('شكرًا لك', 'تم استلام الإبلاغ بنجاح، وسيتخذ فريق الدعم الإجراء المناسب خلال 24 ساعة.');
+    } catch (err) {
+      Alert.alert('خطأ', 'تعذر إرسال الإبلاغ حالياً.');
+    }
+  };
+
+  const handleBlock = () => {
+    Alert.alert(
+      'تأكيد الحظر',
+      `هل أنت متأكد من رغبتك في حظر ${post.anonymousName}؟ لن تظهر لك أي منشورات منه مجدداً.`,
+      [
+        { text: 'إلغاء', style: 'cancel' },
+        {
+          text: 'نعم، حظره',
+          style: 'destructive',
+          onPress: async () => {
+            await blockUser(post.anonymousName);
+            Alert.alert('تم الحظر', 'تم حظر المستخدم بنجاح ولن تظهر لك أي من مشاركاته.');
+          }
+        }
+      ]
+    );
+  };
+
+  // Define options for SwiftUI and Android context menu
+  const menuOptions = [
+    {
+      label: post.isLiked ? 'إزالة الإعجاب' : 'إعجاب بالمنشور',
+      onPress: () => onLike(post.id),
+      style: 'default' as const,
+    },
+    {
+      label: 'مشاركة الأثر',
+      onPress: handleShare,
+      style: 'default' as const,
+    },
+    ...(isOwnPost
+      ? [
+          {
+            label: 'حذف المنشور فوراً',
+            onPress: handleDelete,
+            style: 'destructive' as const,
+          },
+        ]
+      : [
+          {
+            label: 'إبلاغ عن محتوى غير لائق',
+            onPress: handleReport,
+            style: 'destructive' as const,
+          },
+          {
+            label: `حظر كاتب المنشور (${post.anonymousName})`,
+            onPress: handleBlock,
+            style: 'destructive' as const,
+          },
+        ]),
+    {
+      label: 'إلغاء',
+      onPress: () => {},
+      style: 'cancel' as const,
+    },
+  ];
 
   const expiryText = getRemainingTimeText(post.createdAt);
 
   return (
-    <TouchableWithoutFeedback onPress={handleCardPress}>
-      <View style={[styles.card, { borderBottomColor: colors.border.muted }]}>
-        {/* Header: Name + Time on right, Menu on left */}
+    <NativeContextMenu options={menuOptions} title="خيارات الأثر">
+      <AnimatedPressable
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        onPress={() => onLike(post.id)}
+        style={[
+          styles.card, 
+          cardAnimatedStyle, 
+          { borderBottomColor: colors.border.muted }
+        ]}
+      >
+        {/* Header: Name + Time on right, Menu icon on left */}
         <View style={styles.header}>
           <View style={{ flexDirection: 'row-reverse', alignItems: 'center' }}>
             <Text style={[styles.anonymousName, { color: colors.brand.gold, marginLeft: 8 }]}>
@@ -189,9 +178,9 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
               {formattedDate}
             </Text>
           </View>
-          <TouchableOpacity onPress={handleMenuPress} style={{ padding: 4 }} activeOpacity={0.6}>
+          <View style={{ padding: 4 }}>
             <Ionicons name="ellipsis-horizontal" size={16} color={colors.text.secondary} />
-          </TouchableOpacity>
+          </View>
         </View>
 
         {/* Post content */}
@@ -206,11 +195,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
 
         {/* Footer: Like + Expiry */}
         <View style={styles.footer}>
-          <TouchableOpacity
-            onPress={() => onLike(post.id)}
-            style={styles.likeContainer}
-            activeOpacity={0.7}
-          >
+          <View style={styles.likeContainer}>
             <Animated.View
               style={[
                 styles.rippleOuterRing,
@@ -226,7 +211,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
                       elevation: 2,
                     }
                   : { borderColor: colors.border.muted },
-                { transform: [{ scale: scaleAnim }] }
+                likeAnimatedStyle
               ]}
             >
               <View
@@ -248,14 +233,14 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
             >
               {post.likesCount}
             </Text>
-          </TouchableOpacity>
+          </View>
 
           <Text style={[styles.expiryText, { color: colors.text.disabled }]}>
             {expiryText}
           </Text>
         </View>
-      </View>
-    </TouchableWithoutFeedback>
+      </AnimatedPressable>
+    </NativeContextMenu>
   );
 };
 
