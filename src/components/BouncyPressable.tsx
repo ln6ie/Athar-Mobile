@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, PressableProps, StyleProp, ViewStyle } from 'react-native';
+import { Pressable, PressableProps, StyleProp, ViewStyle, StyleSheet } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -11,6 +11,46 @@ interface BouncyPressableProps extends Omit<PressableProps, 'style'> {
   style?: StyleProp<ViewStyle>;
   shrinkTo?: number;
 }
+
+// Separate layout styles for the outer Animated.View from visual styles for Pressable
+const splitStyles = (style: any) => {
+  const flattened = StyleSheet.flatten(style) || {};
+  const layoutKeys = [
+    'flex',
+    'flexGrow',
+    'flexShrink',
+    'flexBasis',
+    'width',
+    'height',
+    'margin',
+    'marginTop',
+    'marginBottom',
+    'marginLeft',
+    'marginRight',
+    'marginHorizontal',
+    'marginVertical',
+    'position',
+    'top',
+    'bottom',
+    'left',
+    'right',
+    'zIndex',
+    'alignSelf',
+  ];
+
+  const layoutStyle: any = {};
+  const innerStyle: any = {};
+
+  Object.keys(flattened).forEach((key) => {
+    if (layoutKeys.includes(key)) {
+      layoutStyle[key] = flattened[key];
+    } else {
+      innerStyle[key] = flattened[key];
+    }
+  });
+
+  return { layoutStyle, innerStyle };
+};
 
 export const BouncyPressable: React.FC<BouncyPressableProps> = ({
   children,
@@ -36,13 +76,22 @@ export const BouncyPressable: React.FC<BouncyPressableProps> = ({
     scale.value = withSpring(1, { damping: 15, stiffness: 150, mass: 0.6 });
   };
 
+  const { layoutStyle, innerStyle } = splitStyles(style);
+
   return (
-    <Animated.View style={animatedStyle}>
+    <Animated.View style={[layoutStyle, animatedStyle]}>
       <Pressable
         {...pressableProps}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
-        style={style}
+        style={[
+          innerStyle,
+          {
+            width: layoutStyle.width ? '100%' : undefined,
+            height: layoutStyle.height ? '100%' : undefined,
+          },
+          layoutStyle.flex ? { width: '100%' } : null,
+        ]}
       >
         {children}
       </Pressable>

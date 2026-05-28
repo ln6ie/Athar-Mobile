@@ -1,19 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  View, 
-  Text, 
-  Modal, 
-  TextInput, 
-  TouchableOpacity, 
-  KeyboardAvoidingView, 
-  Platform, 
-  ActivityIndicator, 
-  StyleSheet
+import {
+  View,
+  Text,
+  Modal,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  ActivityIndicator,
+  StyleSheet,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../hooks/useTheme';
 import { GlassicView } from './GlassicView';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { BouncyPressable } from './BouncyPressable';
+import { SymbolView } from 'expo-symbols';
 
 interface PostModalProps {
   visible: boolean;
@@ -35,7 +35,6 @@ export const PostModal: React.FC<PostModalProps> = ({ visible, onClose, onSubmit
     if (visible) {
       setContent('');
       setValidationError(null);
-      // Autofocus input on open for instant typing
       setTimeout(() => {
         inputRef.current?.focus();
       }, 100);
@@ -69,67 +68,68 @@ export const PostModal: React.FC<PostModalProps> = ({ visible, onClose, onSubmit
   const isPublishDisabled = isSubmitting || !content.trim();
 
   return (
-    <Modal 
-      visible={visible} 
-      animationType="slide" 
-      presentationStyle="pageSheet" 
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined} 
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 48 : 0}
         style={[styles.container, { backgroundColor: colors.background.default }]}
       >
-        {/* Sheet Top Header */}
-        <View style={[styles.header, { 
-          paddingTop: Math.max(insets.top, 16), 
-          borderBottomColor: colors.border.muted 
-        }]}>
-          {/* Left Side: Publish button inside a glass capsule */}
-          <View style={styles.leftSideContainer}>
-            <GlassicView
-              cornerRadius={18}
-              style={[
-                styles.publishGlassBtn,
-                isPublishDisabled && styles.publishGlassBtnDisabled
-              ]}
-            >
-              <TouchableOpacity 
-                onPress={handlePublish}
-                disabled={isPublishDisabled}
-                style={styles.publishTapArea}
-                activeOpacity={0.8}
+        {/* Sheet Top Header (Unified Premium Borderless RTL Design) */}
+        <View style={[styles.header, { paddingTop: Math.max(insets.top, 10) }]}>
+          {/* Left Side: Circular Glass Close Button (Perfect for Arabic RTL) */}
+          <View style={styles.leftContainer}>
+            <GlassicView cornerRadius={14} style={styles.circularCloseButton}>
+              <BouncyPressable
+                onPress={onClose}
+                style={styles.centerAll}
               >
-                {isSubmitting ? (
-                  <ActivityIndicator size="small" color={colors.brand.gold} />
-                ) : (
-                  <Text style={[
-                    styles.publishButtonText, 
-                    { color: colors.brand.gold },
-                    isPublishDisabled && { color: colors.text.disabled }
-                  ]}>نشر</Text>
-                )}
-              </TouchableOpacity>
+                <SymbolView
+                  name={{ ios: 'xmark', android: 'close' }}
+                  size={11}
+                  tintColor={colors.text.secondary}
+                />
+              </BouncyPressable>
             </GlassicView>
           </View>
 
           {/* Center: Title */}
-          <View style={styles.headerTitleContainer}>
-            <Text style={[styles.headerTitle, { color: colors.text.primary }]}> بوست جديد</Text>
+          <View style={styles.titleContainer}>
+            <Text style={[styles.titleText, { color: colors.text.primary }]}>بوست جديد</Text>
           </View>
 
-          {/* Right Side: Circular Glass Close X button */}
-          <View style={styles.rightSideContainer}>
+          {/* Right Side: Publish Button in a Glass Capsule */}
+          <View style={styles.rightContainer}>
             <GlassicView
               cornerRadius={18}
-              style={styles.closeIconButton}
+              style={[
+                styles.publishGlassBtn,
+                isPublishDisabled && styles.publishGlassBtnDisabled,
+              ]}
             >
-              <TouchableOpacity 
-                onPress={onClose}
-                style={styles.closeTapArea}
-                activeOpacity={0.7}
+              <BouncyPressable
+                onPress={handlePublish}
+                disabled={isPublishDisabled}
+                style={styles.publishTapArea}
               >
-                <Ionicons name="close" size={20} color={colors.brand.gold} />
-              </TouchableOpacity>
+                {isSubmitting ? (
+                  <ActivityIndicator size="small" color={colors.brand.gold} />
+                ) : (
+                  <Text
+                    style={[
+                      styles.publishButtonText,
+                      { color: colors.brand.gold },
+                      isPublishDisabled && { color: colors.text.disabled },
+                    ]}
+                  >
+                    نشر
+                  </Text>
+                )}
+              </BouncyPressable>
             </GlassicView>
           </View>
         </View>
@@ -142,11 +142,11 @@ export const PostModal: React.FC<PostModalProps> = ({ visible, onClose, onSubmit
             placeholder="اكتب فكرتك هنا..."
             placeholderTextColor={colors.text.disabled}
             value={content}
-            onChangeText={(txt) => { 
-              if (txt.length <= characterLimit) { 
-                setContent(txt); 
-                setValidationError(null); 
-              } 
+            onChangeText={(txt) => {
+              if (txt.length <= characterLimit) {
+                setContent(txt);
+                setValidationError(null);
+              }
             }}
             textAlign="right"
             style={[styles.textInput, { color: colors.text.primary }]}
@@ -154,18 +154,30 @@ export const PostModal: React.FC<PostModalProps> = ({ visible, onClose, onSubmit
         </View>
 
         {/* Bottom bar */}
-        <View style={[styles.bottomBar, { 
-          paddingBottom: Math.max(insets.bottom, 16),
-          borderTopColor: colors.border.muted 
-        }]}>
+        <View
+          style={[
+            styles.bottomBar,
+            {
+              paddingBottom: Math.max(insets.bottom, 16),
+              borderTopColor: colors.border.muted,
+            },
+          ]}
+        >
           <View style={styles.infoContainer}>
             <Text style={[styles.anonymousNote, { color: colors.text.disabled }]}>
               سينشر بحسابك مجهول الهوية بالكامل
             </Text>
-            <Text style={[
-              styles.counterText, 
-              { color: content.length >= characterLimit - 20 ? colors.feedback.error : colors.text.disabled }
-            ]}>
+            <Text
+              style={[
+                styles.counterText,
+                {
+                  color:
+                    content.length >= characterLimit - 20
+                      ? colors.feedback.error
+                      : colors.text.disabled,
+                },
+              ]}
+            >
               {content.length} / {characterLimit}
             </Text>
           </View>
@@ -173,7 +185,9 @@ export const PostModal: React.FC<PostModalProps> = ({ visible, onClose, onSubmit
 
         {validationError && (
           <View style={styles.errorContainer}>
-            <Text style={[styles.errorText, { color: colors.feedback.error }]}>{validationError}</Text>
+            <Text style={[styles.errorText, { color: colors.feedback.error }]}>
+              {validationError}
+            </Text>
           </View>
         )}
       </KeyboardAvoidingView>
@@ -190,45 +204,48 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 24,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
+    paddingBottom: 8,
+    paddingTop: 4,
+    borderBottomWidth: 0,
   },
-  leftSideContainer: {
-    width: 70,
+  leftContainer: {
+    width: 60,
     alignItems: 'flex-start',
     justifyContent: 'center',
   },
-  rightSideContainer: {
-    width: 70,
+  rightContainer: {
+    width: 60,
     alignItems: 'flex-end',
     justifyContent: 'center',
   },
-  headerTitleContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  closeIconButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+  circularCloseButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  closeTapArea: {
+  centerAll: {
     width: '100%',
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
   },
+  titleContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  titleText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    lineHeight: 22,
+    textAlign: 'center',
+  },
   publishGlassBtn: {
-    height: 36,
-    minWidth: 64,
-    borderRadius: 18,
+    height: 32,
+    minWidth: 60,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -240,7 +257,7 @@ const styles = StyleSheet.create({
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
   },
   publishButtonText: {
     fontWeight: 'bold',

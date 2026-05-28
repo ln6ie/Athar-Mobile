@@ -13,6 +13,10 @@ import { forceArabicLayout } from '../utils/rtl';
 import { IntroScreen } from '../screens/IntroScreen';
 import { useConfigStore } from '../store/useConfigStore';
 import { ForceUpdateModal } from '../components/ForceUpdateModal';
+import { GlassicView } from '../components/GlassicView';
+import { BouncyPressable } from '../components/BouncyPressable';
+import { SymbolView } from 'expo-symbols';
+
 
 export default function RootLayout() {
   const { isAuthenticated, isInitialized, initialize } = useAuthStore();
@@ -50,19 +54,26 @@ export default function RootLayout() {
         
         {/* Real System Navigation overlay for Premium Floating Add Button */}
         {isAuthenticated && !shouldShowIntro && (
-          <TouchableOpacity
-            onPress={() => setModalVisible(true)}
+          <GlassicView
+            cornerRadius={30}
             style={[
-              styles.standaloneAddButton, 
-              { backgroundColor: colors.brand.gold, shadowColor: colors.brand.gold }
+              styles.standaloneAddButton,
+              {
+                backgroundColor: colors.brand.gold,
+              }
             ]}
-            activeOpacity={0.85}
           >
-            <View style={styles.plusIconContainer}>
-              <View style={styles.plusBarHorizontal} />
-              <View style={styles.plusBarVertical} />
-            </View>
-          </TouchableOpacity>
+            <BouncyPressable
+              onPress={() => setModalVisible(true)}
+              style={{ width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}
+            >
+              <SymbolView
+                name={{ ios: 'plus', android: 'add' }}
+                size={24}
+                tintColor="#FFFFFF"
+              />
+            </BouncyPressable>
+          </GlassicView>
         )}
 
         {isAuthenticated && (
@@ -99,44 +110,11 @@ const styles = StyleSheet.create({
   },
   standaloneAddButton: {
     position: 'absolute',
-    bottom: 34,
+    bottom: 28, // Mathematically centered with native tab bar items!
     right: 24,
     width: 60,
     height: 60,
     borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
     zIndex: 999,
-    ...Platform.select({
-      ios: {
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.22,
-        shadowRadius: 10,
-      },
-      android: {
-        elevation: 6,
-      },
-    }),
-  },
-  plusIconContainer: {
-    width: 24,
-    height: 24,
-    position: 'relative',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  plusBarHorizontal: {
-    position: 'absolute',
-    width: 22,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#FFFFFF',
-  },
-  plusBarVertical: {
-    position: 'absolute',
-    width: 4,
-    height: 22,
-    borderRadius: 2,
-    backgroundColor: '#FFFFFF',
   },
 });
