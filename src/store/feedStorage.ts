@@ -61,5 +61,9 @@ export const feedPersistConfig = {
     posts: state.posts,
     unreadLikesCount: state.unreadLikesCount,
     blockedUsers: state.blockedUsers,
+    recentPosts: state.recentPosts,
+    recentCursor: state.recentCursor,
+    trendingPosts: state.trendingPosts,
+    trendingCursor: state.trendingCursor,
   }),
 };

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Platform, Share, Alert, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Platform, Share, Alert, Pressable, ActionSheetIOS } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Post } from '../types';
@@ -72,7 +72,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `أثر: ${post.content}\n\nعبر بالمجهول عبر تطبيق أثر`,
+        message: ` ${post.content}\n\nعبر بالمجهول عبر تطبيق أثر`,
       });
     } catch (err) {
       console.error('Error sharing post', err);
@@ -123,7 +123,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
       style: 'default' as const,
     },
     {
-      label: 'مشاركة الأثر',
+      label: 'مشاركة المنشور',
       onPress: handleShare,
       style: 'default' as const,
     },
@@ -154,10 +154,44 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
     },
   ];
 
+  const showMenu = () => {
+    if (Platform.OS === 'ios') {
+      const labels = menuOptions.map((o) => o.label);
+      const cancelIndex = menuOptions.findIndex((o) => o.style === 'cancel');
+      const destructiveIndex = menuOptions.findIndex((o) => o.style === 'destructive');
+
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: labels,
+          title: 'خيارات المنشور',
+          cancelButtonIndex: cancelIndex >= 0 ? cancelIndex : undefined,
+          destructiveButtonIndex: destructiveIndex >= 0 ? destructiveIndex : undefined,
+        },
+        (buttonIndex) => {
+          if (buttonIndex !== cancelIndex && menuOptions[buttonIndex]) {
+            menuOptions[buttonIndex].onPress();
+          }
+        }
+      );
+    } else {
+      const activeOptions = menuOptions.filter((o) => o.style !== 'cancel');
+      Alert.alert(
+        'خيارات المنشور',
+        'الرجاء اختيار أحد الإجراءات التالية:',
+        activeOptions.map((o) => ({
+          text: o.label,
+          style: o.style === 'destructive' ? 'destructive' : 'default',
+          onPress: o.onPress,
+        })),
+        { cancelable: true }
+      );
+    }
+  };
+
   const expiryText = getRemainingTimeText(post.createdAt);
 
   return (
-    <NativeContextMenu options={menuOptions} title="خيارات الأثر">
+    <NativeContextMenu options={menuOptions} title="خيارات المنشور">
       <Pressable
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
@@ -178,9 +212,16 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
                 {formattedDate}
               </Text>
             </View>
-            <View style={{ padding: 4 }}>
+            <Pressable 
+              onPress={showMenu}
+              style={({ pressed }) => [
+                { padding: 8, margin: -4, borderRadius: 12 },
+                pressed && { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)' }
+              ]}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            >
               <Ionicons name="ellipsis-horizontal" size={16} color={colors.text.secondary} />
-            </View>
+            </Pressable>
           </View>
 
           {/* Post content */}

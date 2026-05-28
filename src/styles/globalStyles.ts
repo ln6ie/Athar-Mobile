@@ -2,7 +2,7 @@ import { StyleSheet, Platform } from 'react-native';
 import { TOKENS, LIGHT_COLORS } from '../constants/tokens';
 import { useTheme } from '../hooks/useTheme';
 
-export const getGlobalStyles = (colors: typeof LIGHT_COLORS) =>
+export const getGlobalStyles = (colors: typeof LIGHT_COLORS, isDark: boolean = false) =>
   StyleSheet.create({
     container: {
       flex: 1,
@@ -21,8 +21,8 @@ export const getGlobalStyles = (colors: typeof LIGHT_COLORS) =>
       paddingVertical: 0, // Reset vertical padding to let height and textAlignVertical govern centering
       paddingHorizontal: 20,
       borderRadius: TOKENS.borderRadius.lg,
-      borderWidth: 1,
-      borderColor: colors.border.muted,
+      borderWidth: 0.6, // Extremely thin, elegant iOS outline
+      borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
       marginBottom: 20,
       textAlign: 'left',
       textAlignVertical: 'center', // Explicit vertical centering on Android
@@ -180,9 +180,9 @@ export const getGlobalStyles = (colors: typeof LIGHT_COLORS) =>
   });
 
 export const useGlobalStyles = () => {
-  const { colors } = useTheme();
-  return getGlobalStyles(colors);
+  const { colors, isDark } = useTheme();
+  return getGlobalStyles(colors, isDark);
 };
 
-export const globalStyles = getGlobalStyles(LIGHT_COLORS);
+export const globalStyles = getGlobalStyles(LIGHT_COLORS, false);
 

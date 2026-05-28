@@ -13,6 +13,7 @@ import { useGlobalStyles } from '../styles/globalStyles';
 import { FlashList } from '@shopify/flash-list';
 import { OfflineBanner } from '../components/OfflineBanner';
 import { FeedTabsHeader } from '../components/FeedTabsHeader';
+import { router } from 'expo-router';
 
 export const FeedScreen: React.FC = () => {
   const { 
@@ -37,9 +38,51 @@ export const FeedScreen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const isOffline = isConnected === false;
 
+  // Swipe gesture detection (Optimized for RTL default behavior, completely insulated from vertical list scrolling)
+  const touchStartX = React.useRef(0);
+  const touchStartY = React.useRef(0);
+  const touchStartTime = React.useRef(0);
+
+  const handleTouchStart = (e: any) => {
+    touchStartX.current = e.nativeEvent.pageX;
+    touchStartY.current = e.nativeEvent.pageY;
+    touchStartTime.current = Date.now();
+  };
+
+  const handleTouchEnd = (e: any) => {
+    if (modalVisible) return; // Prevent navigation when notification sheet is open
+
+    const deltaX = e.nativeEvent.pageX - touchStartX.current;
+    const deltaY = e.nativeEvent.pageY - touchStartY.current;
+    const timeDelta = Date.now() - touchStartTime.current;
+
+    // Strict parameters for high-precision swipe classification:
+    // 1. Time must be short (< 350ms) to ensure it's a fast flick, not a drag or scroll.
+    // 2. Horizontal distance must exceed the threshold (> 90px).
+    // 3. The horizontal movement must be at least 3.5x the vertical drift to completely ignore vertical scrolling.
+    if (timeDelta < 350 && Math.abs(deltaX) > 90 && Math.abs(deltaX) > 3.5 * Math.abs(deltaY)) {
+      if (deltaX < -90) {
+        // Swipe Left (finger moves right-to-left): Move to the left tab (Trending) or screen (Profile)
+        if (activeTab === 'recent') {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          handleTabChange('trending');
+        } else if (activeTab === 'trending') {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          router.push('/profile');
+        }
+      } else if (deltaX > 90) {
+        // Swipe Right (finger moves left-to-right): Move to the right tab (Recent)
+        if (activeTab === 'trending') {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          handleTabChange('recent');
+        }
+      }
+    }
+  };
+
   useEffect(() => {
     // Stale-While-Revalidate: render cached posts instantly. Only trigger fetch if online.
-    if (isConnected !== false) {
+    if (isConnected === true) {
       const hasCache = posts.length > 0;
       fetchFeed(true, hasCache);
     }
@@ -61,7 +104,7 @@ export const FeedScreen: React.FC = () => {
   };
 
   const handleLoadMore = () => {
-    if (isConnected !== false) {
+    if (isConnected === true) {
       fetchFeed(false);
     }
   };
@@ -80,8 +123,6 @@ export const FeedScreen: React.FC = () => {
     
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setActiveTab(tab);
-    
-    useFeedStore.setState({ posts: [], nextCursor: null, isLoading: true });
   };
 
   if (error && posts.length === 0) {
@@ -95,7 +136,11 @@ export const FeedScreen: React.FC = () => {
   const topPadding = insets.top + 74 + (isOffline ? 38 : 0);
 
   return (
-    <View style={globalStyles.container}>
+    <View 
+      style={globalStyles.container}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Floating Top Header Row */}
       <FeedTabsHeader
         topOffset={insets.top + 8}
@@ -129,7 +174,7 @@ export const FeedScreen: React.FC = () => {
         contentOffset={Platform.OS === 'ios' ? { x: 0, y: -topPadding } : undefined}
         automaticallyAdjustContentInsets={false}
         refreshControl={
-          isConnected !== false ? (
+          isConnected === true ? (
             <RefreshControl
               refreshing={isRefreshing}
               onRefresh={handleRefresh}
@@ -139,7 +184,7 @@ export const FeedScreen: React.FC = () => {
             />
           ) : undefined
         }
-        onEndReached={isConnected !== false ? handleLoadMore : undefined}
+        onEndReached={isConnected === true ? handleLoadMore : undefined}
         onEndReachedThreshold={0.2}
         ListEmptyComponent={isSkeletonLoading ? null : <EmptyState />}
         ListFooterComponent={

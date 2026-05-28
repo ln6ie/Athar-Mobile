@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, TouchableOpacity, Platform } from 'react-native';
+import { StyleSheet, View, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Slot } from 'expo-router';
 import { useAuthStore } from '../store/useAuthStore';
 import { useFeedStore } from '../store/useFeedStore';
@@ -16,9 +16,9 @@ import { ForceUpdateModal } from '../components/ForceUpdateModal';
 import { GlassicView } from '../components/GlassicView';
 import { BouncyPressable } from '../components/BouncyPressable';
 import { SymbolView } from 'expo-symbols';
+import { Snackbar } from '../components/Snackbar';
 
-
-export default function RootLayout() {
+function MainLayout() {
   const { isAuthenticated, isInitialized, initialize } = useAuthStore();
   const { initializeTheme } = useThemeStore();
   const { colors, isDark } = useTheme();
@@ -26,6 +26,7 @@ export default function RootLayout() {
   const { checkAppVersion } = useConfigStore();
   const [modalVisible, setModalVisible] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     forceArabicLayout();
@@ -43,8 +44,11 @@ export default function RootLayout() {
 
   const shouldShowIntro = showSplash || !isInitialized;
 
+  // Mathematically calculated bounded formula to perfectly align and center the add button with the tab items
+  const buttonBottom = Math.max(insets.bottom - 12, 10);
+
   return (
-    <SafeAreaProvider>
+    <>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <ForceUpdateModal />
 
@@ -60,6 +64,7 @@ export default function RootLayout() {
               styles.standaloneAddButton,
               {
                 backgroundColor: colors.brand.gold,
+                bottom: buttonBottom, // Dynamically centered centered vertically on all iOS & Android screens
               }
             ]}
           >
@@ -100,6 +105,17 @@ export default function RootLayout() {
           <IntroScreen />
         </View>
       )}
+
+      {/* Global premium sliding frosted glass notification Snackbar */}
+      <Snackbar />
+    </>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <SafeAreaProvider>
+      <MainLayout />
     </SafeAreaProvider>
   );
 }
@@ -110,7 +126,6 @@ const styles = StyleSheet.create({
   },
   standaloneAddButton: {
     position: 'absolute',
-    bottom: 28, // Mathematically centered with native tab bar items!
     right: 24,
     width: 60,
     height: 60,

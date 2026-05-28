@@ -1,6 +1,7 @@
 import { api } from '../services/api';
 import { Post } from '../types';
 import { useAuthStore } from './useAuthStore';
+import { useToastStore } from './useToastStore';
 
 export const fetchFeedAction = async (set: any, get: any, reset = false, silent = false) => {
   const { nextCursor, posts, isLoading, isLoadingMore, isRefreshing, isFetchingFeed, activeTab } = get();
@@ -67,10 +68,13 @@ export const fetchFeedAction = async (set: any, get: any, reset = false, silent 
       isFetchingFeed: false,
     });
 
-    if (isNetworkError && get().posts.length > 0) {
+    const hasCache = get().posts.length > 0;
+    const errMsg = error.response?.data?.message || 'عذراً، تعذر الاتصال بالخادم حالياً. يرجى المحاولة لاحقاً';
+
+    if (hasCache) {
       set({ error: null });
+      useToastStore.getState().show(errMsg);
     } else {
-      const errMsg = error.response?.data?.message || 'تعذر تحميل جدار الأثر. يرجى سحب الصفحة للمحاولة مجدداً.';
       set({ error: errMsg });
     }
   }
@@ -96,12 +100,21 @@ export const createPostAction = async (set: any, get: any, content: string) => {
   }
 };
 
-export const toggleLikeAction = async (set: any, get: any, postId: string) => {
-  const { posts, myPosts, likedPosts } = get();
-  const previousPosts = [...posts];
-  const previousMyPosts = [...myPosts];
-  const previousLikedPosts = [...likedPosts];
+const likeDebounceTimers = new Map<string, NodeJS.Timeout>();
+const likeOriginalStates = new Map<string, { isLiked: boolean; likesCount: number }>();
 
+export const toggleLikeAction = async (set: any, get: any, postId: string) => {
+  const { posts } = get();
+  
+  // 1. Capture the original stable server state before any rapid clicking started
+  if (!likeOriginalStates.has(postId)) {
+    const post = posts.find((p: Post) => p.id === postId);
+    if (post) {
+      likeOriginalStates.set(postId, { isLiked: post.isLiked, likesCount: post.likesCount });
+    }
+  }
+
+  // Helper function to calculate optimistic UI toggle
   const updatePostHelper = (post: Post) => {
     if (post.id === postId) {
       return {
@@ -113,40 +126,80 @@ export const toggleLikeAction = async (set: any, get: any, postId: string) => {
     return post;
   };
 
-  set({ 
-    posts: posts.map(updatePostHelper),
-    myPosts: myPosts.map(updatePostHelper),
-    likedPosts: likedPosts.map(updatePostHelper),
-  });
+  // 2. Perform absolute instantaneous Optimistic UI Update for maximum user fluid responsiveness
+  set((state: any) => ({ 
+    posts: state.posts.map(updatePostHelper),
+    myPosts: state.myPosts.map(updatePostHelper),
+    likedPosts: state.likedPosts.map(updatePostHelper),
+  }));
 
-  try {
-    const response = await api.post(`/posts/${postId}/like`);
-    const { liked, likesCount } = response.data;
-
-    const applyStrictUpdate = (post: Post) => {
-      if (post.id === postId) {
-        return { ...post, isLiked: liked, likesCount };
-      }
-      return post;
-    };
-
-    set((state: any) => {
-      const newLikedPosts = state.likedPosts.map(applyStrictUpdate);
-      const finalLikedPosts = liked ? newLikedPosts : newLikedPosts.filter((p: Post) => p.id !== postId);
-      return {
-        posts: state.posts.map(applyStrictUpdate),
-        myPosts: state.myPosts.map(applyStrictUpdate),
-        likedPosts: finalLikedPosts,
-      };
-    });
-  } catch (error) {
-    console.error('Failed to toggle like on API, rolling back UI', error);
-    set({ 
-      posts: previousPosts,
-      myPosts: previousMyPosts,
-      likedPosts: previousLikedPosts,
-    });
+  // 3. Clear any active pending timers to throttle rapid clicks
+  if (likeDebounceTimers.has(postId)) {
+    clearTimeout(likeDebounceTimers.get(postId)!);
   }
+
+  // 4. Set debounced sync trigger (500ms) to bundle all clicks into one final state sync call
+  const timer = setTimeout(async () => {
+    likeDebounceTimers.delete(postId);
+    
+    const currentPost = get().posts.find((p: Post) => p.id === postId);
+    const original = likeOriginalStates.get(postId);
+    likeOriginalStates.delete(postId); // Clean up original state reference
+    
+    if (!currentPost || !original) return;
+    
+    // SPAM SHIELD: If final state matches the original server state (even number of rapid clicks),
+    // then net change is exactly 0. Abort network call entirely to save bandwidth & prevent 429s!
+    if (currentPost.isLiked === original.isLiked) {
+      return;
+    }
+    
+    try {
+      // Synchronize with the server
+      const response = await api.post(`/posts/${postId}/like`);
+      const { liked, likesCount } = response.data;
+      
+      const applyStrictUpdate = (post: Post) => {
+        if (post.id === postId) {
+          return { ...post, isLiked: liked, likesCount };
+        }
+        return post;
+      };
+      
+      set((state: any) => {
+        const newLikedPosts = state.likedPosts.map(applyStrictUpdate);
+        const finalLikedPosts = liked ? newLikedPosts : newLikedPosts.filter((p: Post) => p.id !== postId);
+        return {
+          posts: state.posts.map(applyStrictUpdate),
+          myPosts: state.myPosts.map(applyStrictUpdate),
+          likedPosts: finalLikedPosts,
+        };
+      });
+    } catch (error) {
+      console.error('[feedActions] Debounced like sync failed. Rolling back UI.', error);
+      
+      // Roll back UI to original server state
+      const rollbackUpdate = (post: Post) => {
+        if (post.id === postId) {
+          return { ...post, isLiked: original.isLiked, likesCount: original.likesCount };
+        }
+        return post;
+      };
+      
+      set((state: any) => ({
+        posts: state.posts.map(rollbackUpdate),
+        myPosts: state.myPosts.map(rollbackUpdate),
+        likedPosts: original.isLiked 
+          ? state.likedPosts.map(rollbackUpdate)
+          : state.likedPosts.filter((p: Post) => p.id !== postId),
+      }));
+
+      // Display our beautiful non-intrusive bottom global Snackbar
+      useToastStore.getState().show('عذراً، تعذر الاتصال بالخادم حالياً. يرجى المحاولة لاحقاً');
+    }
+  }, 500);
+
+  likeDebounceTimers.set(postId, timer);
 };
 
 export const deletePostAction = async (set: any, get: any, postId: string) => {

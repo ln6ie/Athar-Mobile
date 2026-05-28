@@ -24,6 +24,8 @@ import { GlassicView } from '../components/GlassicView';
 import { ProfileHeaderCard } from '../components/ProfileHeaderCard';
 import { ProfileOptionsCard } from '../components/ProfileOptionsCard';
 import { BouncyPressable } from '../components/BouncyPressable';
+import { router } from 'expo-router';
+import * as Haptics from 'expo-haptics';
 
 
 export const ProfileScreen: React.FC = () => {
@@ -44,6 +46,37 @@ export const ProfileScreen: React.FC = () => {
   const [activeSubScreen, setActiveSubScreen] = useState<'main' | 'change-email' | 'support' | 'about' | 'privacy' | 'blocked-users'>('main');
   const [activeTab, setActiveTab] = useState<'my-posts' | 'likes'>('my-posts');
   const insets = useSafeAreaInsets();
+
+  // Swipe gesture detection (Swipe left-to-right to return to the feed tab, insulated from vertical scrolling)
+  const touchStartX = React.useRef(0);
+  const touchStartY = React.useRef(0);
+  const touchStartTime = React.useRef(0);
+
+  const handleTouchStart = (e: any) => {
+    touchStartX.current = e.nativeEvent.pageX;
+    touchStartY.current = e.nativeEvent.pageY;
+    touchStartTime.current = Date.now();
+  };
+
+  const handleTouchEnd = (e: any) => {
+    if (activeSubScreen !== 'main') return; // Prevent swipe gestures when deep inside settings modals
+
+    const deltaX = e.nativeEvent.pageX - touchStartX.current;
+    const deltaY = e.nativeEvent.pageY - touchStartY.current;
+    const timeDelta = Date.now() - touchStartTime.current;
+
+    // Strict parameters for high-precision swipe classification:
+    // 1. Time must be short (< 350ms) to ensure it's a fast flick, not a drag or scroll.
+    // 2. Horizontal distance must exceed the threshold (> 90px).
+    // 3. The horizontal movement must be at least 3.5x the vertical drift to completely ignore vertical scrolling.
+    if (timeDelta < 350 && Math.abs(deltaX) > 90 && Math.abs(deltaX) > 3.5 * Math.abs(deltaY)) {
+      if (deltaX > 90) {
+        // Swipe Right (finger moves left-to-right): Switch to Feed tab (on the right)
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        router.push('/feed');
+      }
+    }
+  };
 
   // Dynamic layout measurements for Profile active tab spring slide
   const tabContainerWidth = useSharedValue(0);
@@ -128,7 +161,11 @@ export const ProfileScreen: React.FC = () => {
   };
 
   return (
-    <View style={[globalStyles.container, { backgroundColor: colors.background.default }]}>
+    <View 
+      style={[globalStyles.container, { backgroundColor: colors.background.default }]}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       <FlashList
         data={displayedData}
         keyExtractor={(item) => `profile-${item.id}`}

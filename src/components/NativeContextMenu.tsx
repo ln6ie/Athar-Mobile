@@ -1,6 +1,5 @@
 import React from 'react';
 import { Platform, Alert, ActionSheetIOS, Pressable } from 'react-native';
-import Constants from 'expo-constants';
 
 interface ContextMenuOption {
   label: string;
@@ -13,29 +12,6 @@ interface NativeContextMenuProps {
   options: ContextMenuOption[];
   title?: string;
   message?: string;
-}
-
-let Host: any = React.Fragment;
-let ContextMenu: any = null;
-let ContextButton: any = null;
-let isNativeMenuAvailable = false;
-
-// Omit SwiftUI components when running inside Expo Go to avoid missing native view manager warnings
-const isRunningInExpoGo = Constants.appOwnership === 'expo';
-
-if (Platform.OS === 'ios' && !isRunningInExpoGo) {
-  try {
-    const expoUiSwiftUi = require('@expo/ui/swift-ui');
-    Host = expoUiSwiftUi.Host || React.Fragment;
-    ContextMenu = expoUiSwiftUi.ContextMenu;
-    ContextButton = expoUiSwiftUi.Button;
-    if (ContextMenu && ContextButton) {
-      isNativeMenuAvailable = true;
-    }
-  } catch (e) {
-    // Fail-safe fallback to ActionSheetIOS if Swift UI components are not fully linked yet
-    isNativeMenuAvailable = false;
-  }
 }
 
 export const NativeContextMenu: React.FC<NativeContextMenuProps> = ({
@@ -80,34 +56,7 @@ export const NativeContextMenu: React.FC<NativeContextMenuProps> = ({
     }
   };
 
-  // iOS 26+ Genuine SwiftUI Pop-Out Context Menu
-  if (Platform.OS === 'ios' && isNativeMenuAvailable && ContextMenu) {
-    const nonCancelOptions = options.filter((o) => o.style !== 'cancel');
-
-    return (
-      <Host matchContents>
-        <ContextMenu>
-          <ContextMenu.Trigger>
-            <Pressable onLongPress={triggerFallbackMenu}>
-              {children}
-            </Pressable>
-          </ContextMenu.Trigger>
-          <ContextMenu.Items>
-            {nonCancelOptions.map((opt, idx) => (
-              <ContextButton
-                key={idx}
-                label={opt.label}
-                onPress={opt.onPress}
-                role={opt.style === 'destructive' ? 'destructive' : 'normal'}
-              />
-            ))}
-          </ContextMenu.Items>
-        </ContextMenu>
-      </Host>
-    );
-  }
-
-  // Universal fallback (ActionSheetIOS on iOS, Native Dialog Alert on Android)
+  // Universal stable native sheet trigger on long press
   return (
     <Pressable onLongPress={triggerFallbackMenu} delayLongPress={450}>
       {children}

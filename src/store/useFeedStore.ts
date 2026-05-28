@@ -24,6 +24,10 @@ interface FeedState {
   likedPosts: Post[];
   blockedUsers: string[];
   nextCursor: string | null;
+  recentPosts: Post[];
+  trendingPosts: Post[];
+  recentCursor: string | null;
+  trendingCursor: string | null;
   isLoading: boolean;
   isLoadingMyPosts: boolean;
   isLoadingLikedPosts: boolean;
@@ -63,6 +67,10 @@ export const useFeedStore = create<FeedState>()(
       likedPosts: [],
       blockedUsers: [],
       nextCursor: null,
+      recentPosts: [],
+      trendingPosts: [],
+      recentCursor: null,
+      trendingCursor: null,
       isLoading: false,
       isLoadingMyPosts: false,
       isLoadingLikedPosts: false,
@@ -79,7 +87,25 @@ export const useFeedStore = create<FeedState>()(
       notificationsError: null,
       activeTab: 'recent',
       
-      setActiveTab: (tab) => set({ activeTab: tab }),
+      setActiveTab: (tab) => {
+        const { posts, nextCursor, activeTab, recentPosts, recentCursor, trendingPosts, trendingCursor } = get();
+        
+        // 1. Save current active tab's posts and cursor to cache
+        const cacheSave = activeTab === 'recent'
+          ? { recentPosts: posts, recentCursor: nextCursor }
+          : { trendingPosts: posts, trendingCursor: nextCursor };
+        
+        // 2. Load target tab's posts and cursor from cache
+        const targetLoad = tab === 'recent'
+          ? { posts: recentPosts, nextCursor: recentCursor }
+          : { posts: trendingPosts, nextCursor: trendingCursor };
+
+        set({
+          activeTab: tab,
+          ...cacheSave,
+          ...targetLoad,
+        });
+      },
 
       initializeFeed: async () => {
         console.log('[useFeedStore] Offline cache restored successfully via Zustand persist.');

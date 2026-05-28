@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TextInput, ScrollView, ActivityIndicator } from 'react-native';
 import { Header } from './Header';
 import { api } from '../services/api';
 import { useTheme } from '../hooks/useTheme';
+import { BouncyPressable } from './BouncyPressable';
 
 interface SupportSubScreenProps {
   currentEmail: string;
@@ -43,7 +44,7 @@ export const SupportSubScreen: React.FC<SupportSubScreenProps> = ({ currentEmail
     styles.input,
     { 
       backgroundColor: colors.background.input,
-      borderColor: colors.border.muted,
+      borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
       color: colors.text.primary 
     }
   ];
@@ -102,18 +103,21 @@ export const SupportSubScreen: React.FC<SupportSubScreenProps> = ({ currentEmail
             placeholderTextColor={colors.text.disabled}
           />
 
-          <TouchableOpacity
-            style={[styles.submitButton, { backgroundColor: colors.brand.gold }, loading && { backgroundColor: colors.text.disabled }]}
+          <BouncyPressable
+            style={[
+              styles.submitButton,
+              { backgroundColor: colors.brand.gold },
+              loading && { backgroundColor: colors.text.disabled }
+            ]}
             onPress={handleSubmit}
             disabled={loading}
-            activeOpacity={0.8}
           >
             {loading ? (
               <ActivityIndicator color="#FFFFFF" size="small" />
             ) : (
               <Text style={styles.submitText}>إرسال الرسالة</Text>
             )}
-          </TouchableOpacity>
+          </BouncyPressable>
         </View>
       </ScrollView>
     </View>
@@ -129,7 +133,7 @@ const styles = StyleSheet.create({
   input: {
     width: '100%',
     height: 48,
-    borderWidth: 1,
+    borderWidth: 0.6, // Extremely thin, elegant iOS border
     borderRadius: 24,
     paddingHorizontal: 16,
     fontSize: 13,
@@ -145,38 +149,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 10,
   },
-  submitText: { color: '#FFFFFF', fontSize: 14, fontWeight: 'bold', marginRight: 8 },
-  buttonContent: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center' },
-  iconContainer: { width: 18, height: 14, position: 'relative', justifyContent: 'center', alignItems: 'center' },
-  envelopeBody: {
-    position: 'absolute',
-    width: 18,
-    height: 14,
-    borderWidth: 2.5,
-    borderColor: '#FFFFFF',
-    borderRadius: 3,
-  },
-  envelopeFlapLeft: {
-    position: 'absolute',
-    width: 9,
-    height: 2.5,
-    backgroundColor: '#FFFFFF',
-    transform: [{ rotate: '30deg' }],
-    top: 4.5,
-    left: 2,
-  },
-  envelopeFlapRight: {
-    position: 'absolute',
-    width: 9,
-    height: 2.5,
-    backgroundColor: '#FFFFFF',
-    transform: [{ rotate: '-30deg' }],
-    top: 4.5,
-    right: 2,
-  },
+  submitText: { color: '#FFFFFF', fontSize: 14, fontWeight: 'bold' },
   errorBox: { borderWidth: 1, borderRadius: 12, padding: 16, marginBottom: 20 },
   errorText: { fontSize: 12, textAlign: 'center', lineHeight: 18 },
   successBox: { borderWidth: 1, borderRadius: 12, padding: 16, marginBottom: 20 },
   successText: { fontSize: 12, textAlign: 'center', lineHeight: 18 },
 });
-

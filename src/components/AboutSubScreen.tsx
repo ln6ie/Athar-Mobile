@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking } from 'r
 import { Header } from './Header';
 import { Logo } from './Logo';
 import { useTheme } from '../hooks/useTheme';
+import { GlassicView } from './GlassicView';
+
 
 interface AboutSubScreenProps {
   onBack: () => void;
@@ -35,7 +37,7 @@ export const AboutSubScreen: React.FC<AboutSubScreenProps> = ({ onBack }) => {
           </Text>
         </View>
 
-        <View style={[styles.developerCard, { backgroundColor: colors.background.card, borderColor: colors.border.muted }]}>
+        <GlassicView cornerRadius={16} style={styles.developerCard}>
           <Text style={[styles.developerTitle, { color: colors.brand.gold }]}>معلومات المطور</Text>
           <View style={[styles.divider, { backgroundColor: colors.border.muted }]} />
           
@@ -48,7 +50,7 @@ export const AboutSubScreen: React.FC<AboutSubScreenProps> = ({ onBack }) => {
             <Text style={[styles.infoLabel, { color: colors.text.secondary }]}>حساب الإنستغرام:</Text>
             <Text style={[styles.infoValue, styles.linkText, { color: colors.brand.gold }]}>@elcom.lab</Text>
           </TouchableOpacity>
-        </View>
+        </GlassicView>
       </ScrollView>
     </View>
   );
@@ -97,9 +99,7 @@ const styles = StyleSheet.create({
   },
   developerCard: {
     width: '100%',
-    borderRadius: 16,
     padding: 20,
-    borderWidth: 1,
   },
   developerTitle: {
     fontSize: 14,

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useGlobalStyles } from '../styles/globalStyles';
 import { useTheme } from '../hooks/useTheme';
+import { EulaModal } from './EulaModal';
 
 interface EmailFormProps {
   email: string;
@@ -21,6 +22,7 @@ export const EmailForm: React.FC<EmailFormProps> = ({
   const globalStyles = useGlobalStyles();
   const { colors } = useTheme();
   const [agreed, setAgreed] = useState(false);
+  const [showEula, setShowEula] = useState(false);
 
   return (
     <View>
@@ -65,9 +67,17 @@ export const EmailForm: React.FC<EmailFormProps> = ({
           {agreed ? <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: 'bold' }}>✓</Text> : null}
         </View>
         <Text style={{ fontSize: 11, color: colors.text.secondary, flex: 1, textAlign: 'right', lineHeight: 16 }}>
-          أوافق على شروط الاستخدام <Text style={{ color: colors.brand.gold, fontWeight: 'bold' }}>(EULA)</Text> وأقر بأنه لا تهاون مع أي محتوى مسيء أو مستخدمين مسيئين.
+          أوافق على{' '}
+          <Text 
+            onPress={() => setShowEula(true)}
+            style={{ color: colors.brand.gold, fontWeight: 'bold', textDecorationLine: 'underline' }}
+          >
+            شروط الاستخدام وسياسة المحتوى (EULA)
+          </Text>
         </Text>
       </TouchableOpacity>
+
+      <EulaModal visible={showEula} onClose={() => setShowEula(false)} />
 
       <TouchableOpacity
         onPress={onSubmit}
