@@ -1,3 +1,4 @@
+import 'react-native-reanimated';
 import React from 'react';
 import RootLayout from './src/app/_layout';
 

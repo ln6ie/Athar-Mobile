@@ -1,26 +1,48 @@
 import React from 'react';
-import { NativeTabs, Icon, Label } from 'expo-router/unstable-native-tabs';
+import { Tabs } from 'expo-router';
+import { useTheme } from '../../hooks/useTheme';
+import { MaterialIcons } from '@expo/vector-icons';
 
 export default function TabLayout() {
-  // Pass dynamic screen options and background blurs directly to the native tab host
-  const tabsProps = {
-    initialRouteName: 'feed', // Home feed is always loaded first when the app opens!
-    screenOptions: {
-      backgroundBlurEffect: 'systemChromeMaterialDark',
-      headerShown: false,
-    },
-  } as any;
+  const { colors } = useTheme();
 
   return (
-    <NativeTabs {...tabsProps}>
-      <NativeTabs.Trigger name="profile">
-        <Icon sf="person.crop.circle.fill" />
-        <Label>الملف الشخصي</Label>
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="feed">
-        <Icon sf="house.fill" />
-        <Label>الرئيسية</Label>
-      </NativeTabs.Trigger>
-    </NativeTabs>
+    <Tabs
+      initialRouteName="feed"
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: colors.brand.gold as any,
+        tabBarInactiveTintColor: colors.text.secondary as any,
+        tabBarStyle: {
+          backgroundColor: colors.background.default,
+          borderTopColor: colors.border.muted,
+          height: 60,
+          paddingBottom: 8,
+          paddingTop: 8,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+        },
+      }}
+    >
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'الملف الشخصي',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="person" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="feed"
+        options={{
+          title: 'الرئيسية',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="home" size={size} color={color} />
+          ),
+        }}
+      />
+    </Tabs>
   );
 }

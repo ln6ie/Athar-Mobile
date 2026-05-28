@@ -9,7 +9,7 @@ import { useTheme } from '../hooks/useTheme';
 import { Logo } from '../components/Logo';
 import { GlassicView } from '../components/GlassicView';
 import { BouncyPressable } from '../components/BouncyPressable';
-import { SymbolView } from 'expo-symbols';
+import { SymbolView } from '../components/SymbolView';
 
 
 interface NotificationsScreenProps {

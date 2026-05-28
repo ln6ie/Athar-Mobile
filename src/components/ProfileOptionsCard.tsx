@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, View } from 'react-native';
-import { SymbolView } from 'expo-symbols';
+import { SymbolView } from './SymbolView';
 import { GlassicView } from './GlassicView';
 import { BouncyPressable } from './BouncyPressable';
 import { useProfileStyles } from '../styles/ProfileStyles';

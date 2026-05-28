@@ -9,7 +9,7 @@ import { Logo } from './Logo';
 import { NotificationsScreen } from '../screens/NotificationsScreen';
 import { GlassicView } from './GlassicView';
 import { BouncyPressable } from './BouncyPressable';
-import { SymbolView } from 'expo-symbols';
+import { SymbolView } from './SymbolView';
 
 
 interface HeaderProps {

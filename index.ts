@@ -1,3 +1,4 @@
+import 'react-native-reanimated';
 import { registerRootComponent } from 'expo';
 import { enableScreens } from 'react-native-screens';
 

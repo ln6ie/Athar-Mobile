@@ -1,3 +1,4 @@
+import 'react-native-reanimated';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
@@ -15,7 +16,7 @@ import { useConfigStore } from '../store/useConfigStore';
 import { ForceUpdateModal } from '../components/ForceUpdateModal';
 import { GlassicView } from '../components/GlassicView';
 import { BouncyPressable } from '../components/BouncyPressable';
-import { SymbolView } from 'expo-symbols';
+import { SymbolView } from '../components/SymbolView';
 import { Snackbar } from '../components/Snackbar';
 
 function MainLayout() {

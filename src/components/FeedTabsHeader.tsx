@@ -5,7 +5,7 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
-import { SymbolView } from 'expo-symbols';
+import { SymbolView } from './SymbolView';
 import { GlassicView } from './GlassicView';
 import { BouncyPressable } from './BouncyPressable';
 import { useTheme } from '../hooks/useTheme';

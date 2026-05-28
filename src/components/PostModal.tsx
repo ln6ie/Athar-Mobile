@@ -13,7 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../hooks/useTheme';
 import { GlassicView } from './GlassicView';
 import { BouncyPressable } from './BouncyPressable';
-import { SymbolView } from 'expo-symbols';
+import { SymbolView } from './SymbolView';
 
 interface PostModalProps {
   visible: boolean;
