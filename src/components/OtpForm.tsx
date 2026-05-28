@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, TextInput, ActivityIndicator, StyleSheet, Pressable } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, TextInput, ActivityIndicator, StyleSheet, Pressable, Clipboard } from 'react-native';
 import { useGlobalStyles } from '../styles/globalStyles';
 import { useTheme } from '../hooks/useTheme';
 import { BouncyPressable } from './BouncyPressable';
@@ -20,6 +20,7 @@ export const OtpForm: React.FC<OtpFormProps> = ({
   error,
 }) => {
   const [otpCode, setOtpCode] = useState('');
+  const [clipboardCode, setClipboardCode] = useState<string | null>(null);
   const globalStyles = useGlobalStyles();
   const { colors, isDark } = useTheme();
   const inputRef = useRef<TextInput>(null);
@@ -27,8 +28,44 @@ export const OtpForm: React.FC<OtpFormProps> = ({
   const codeLength = 6;
   const digits = Array.from({ length: codeLength }, (_, i) => otpCode[i] || '');
 
+  // Check clipboard on mount and focus to see if there is an active OTP to suggest
+  const checkClipboardForOTP = async () => {
+    try {
+      const content = await Clipboard.getString();
+      if (content && /^[0-9]{6}$/.test(content.trim())) {
+        setClipboardCode(content.trim());
+      } else {
+        setClipboardCode(null);
+      }
+    } catch (err) {
+      console.log('Clipboard access error', err);
+    }
+  };
+
+  useEffect(() => {
+    checkClipboardForOTP();
+  }, []);
+
   const handleVerify = () => {
     onSubmit(otpCode.trim());
+  };
+
+  const handlePressBoxes = async () => {
+    inputRef.current?.focus();
+    await checkClipboardForOTP();
+    
+    // Smart magic auto-paste: if there is a 6-digit OTP in the clipboard, auto-fill & login instantly on tap!
+    if (clipboardCode) {
+      setOtpCode(clipboardCode);
+      onSubmit(clipboardCode);
+    }
+  };
+
+  const handleQuickPaste = () => {
+    if (clipboardCode) {
+      setOtpCode(clipboardCode);
+      onSubmit(clipboardCode);
+    }
   };
 
   const isSubmitDisabled = isLoading || otpCode.length !== codeLength;
@@ -40,64 +77,68 @@ export const OtpForm: React.FC<OtpFormProps> = ({
         أدخل الرمز المرسل إلى {email}
       </Text>
 
-      {/* Container holding both the hidden interactive overlay and visual cards */}
-      <View style={styles.otpInputContainer}>
-        {/* Row of 6 Gorgeous Individual Styled Rounded Square Digit Boxes */}
-        <View style={styles.otpBoxesRow} pointerEvents="none">
-          {digits.map((digit, idx) => {
-            const isFocused = otpCode.length === idx;
-            return (
-              <View
-                key={idx}
-                style={[
-                  styles.digitBox,
-                  {
-                    backgroundColor: colors.background.input,
-                    borderColor: isFocused
-                      ? colors.brand.gold
-                      : isDark
-                      ? 'rgba(255, 255, 255, 0.08)'
-                      : 'rgba(0, 0, 0, 0.06)',
-                    borderWidth: isFocused ? 1.5 : 0.6,
-                  },
-                ]}
-              >
-                <Text style={[styles.digitText, { color: colors.text.primary }]}>
-                  {digit}
-                </Text>
-                {isFocused && (
-                  <View style={[styles.activeCursor, { backgroundColor: colors.brand.gold }]} />
-                )}
-              </View>
-            );
-          })}
-        </View>
+      {/* Stable, off-screen native TextInput that NEVER loses focus or hides keyboard */}
+      <TextInput
+        ref={inputRef}
+        keyboardType="number-pad"
+        textContentType="oneTimeCode"
+        autoComplete="one-time-code"
+        maxLength={codeLength}
+        value={otpCode}
+        onChangeText={(txt) => {
+          const cleaned = txt.replace(/[^0-9]/g, '');
+          setOtpCode(cleaned);
+          if (cleaned.length === codeLength) {
+            onSubmit(cleaned); // Auto submit on full input
+          }
+        }}
+        style={styles.hiddenInput}
+        underlineColorAndroid="transparent"
+        autoFocus
+      />
 
-        {/* 
-          Invisibly overlaying real text input over the boxes.
-          Receives all touch, long-press gestures to summon clipboard Paste, 
-          and enables seamless native OS autocomplete suggestions (SMS OTP code).
-        */}
-        <TextInput
-          ref={inputRef}
-          keyboardType="number-pad"
-          textContentType="oneTimeCode" // iOS Auto-fill OTP from SMS
-          autoComplete="one-time-code" // Android Auto-fill OTP from SMS
-          maxLength={codeLength}
-          value={otpCode}
-          onChangeText={(txt) => {
-            const cleaned = txt.replace(/[^0-9]/g, '');
-            setOtpCode(cleaned);
-            if (cleaned.length === codeLength) {
-              onSubmit(cleaned); // Direct Auto-Submit on paste or full input!
-            }
-          }}
-          style={styles.hiddenInput}
-          underlineColorAndroid="transparent"
-          caretHidden={true} // Hide cursor inside the transparent overlay
-          autoFocus
-        />
-      </View>
+      {/* Row of 6 Gorgeous Individual Styled Rounded Square Digit Boxes */}
+      <Pressable style={styles.otpBoxesRow} onPress={handlePressBoxes}>
+        {digits.map((digit, idx) => {
+          const isFocused = otpCode.length === idx;
+          return (
+            <View
+              key={idx}
+              style={[
+                styles.digitBox,
+                {
+                  backgroundColor: colors.background.input,
+                  borderColor: isFocused
+                    ? colors.brand.gold
+                    : isDark
+                    ? 'rgba(255, 255, 255, 0.08)'
+                    : 'rgba(0, 0, 0, 0.06)',
+                  borderWidth: isFocused ? 1.5 : 0.6,
+                },
+              ]}
+            >
+              <Text style={[styles.digitText, { color: colors.text.primary }]}>
+                {digit}
+              </Text>
+              {isFocused && (
+                <View style={[styles.activeCursor, { backgroundColor: colors.brand.gold }]} />
+              )}
+            </View>
+          );
+        })}
+      </Pressable>
+
+      {/* Premium Quick Paste Hint Box (Only appears if a valid 6-digit OTP is in the clipboard) */}
+      {clipboardCode && (
+        <BouncyPressable
+          onPress={handleQuickPaste}
+          style={[styles.quickPasteContainer, { backgroundColor: isDark ? 'rgba(59, 130, 246, 0.15)' : 'rgba(0, 85, 165, 0.08)' }]}
+        >
+          <Text style={[styles.quickPasteText, { color: colors.brand.gold }]}>
+            📋 لصق الرمز من الحافظة: {clipboardCode}
+          </Text>
+        </BouncyPressable>
+      )}
 
       {error ? (
         <Text style={[styles.errorText, { color: colors.feedback.error }]}>
@@ -131,25 +172,19 @@ export const OtpForm: React.FC<OtpFormProps> = ({
 };
 
 const styles = StyleSheet.create({
-  otpInputContainer: {
-    width: '100%',
-    height: 48,
-    position: 'relative',
-    marginVertical: 20,
-  },
   hiddenInput: {
-    ...StyleSheet.absoluteFillObject,
-    opacity: 0.01, // Practically transparent but catches gestures for paste
-    fontSize: 24,
-    color: 'transparent',
-    backgroundColor: 'transparent',
-    zIndex: 10,
+    position: 'absolute',
+    top: -100,
+    left: -100,
+    width: 1,
+    height: 1,
+    opacity: 0,
   },
   otpBoxesRow: {
     flexDirection: 'row', // Left-to-right number layout even in Arabic
     justifyContent: 'space-between',
     width: '100%',
-    height: '100%',
+    marginVertical: 20,
     paddingHorizontal: 2,
   },
   digitBox: {
@@ -176,6 +211,19 @@ const styles = StyleSheet.create({
     width: 12,
     height: 2.5,
     borderRadius: 1.25,
+  },
+  quickPasteContainer: {
+    width: '100%',
+    paddingVertical: 10,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  quickPasteText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   otpSublabel: {
     fontSize: 12,
