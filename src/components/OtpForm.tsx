@@ -135,7 +135,7 @@ export const OtpForm: React.FC<OtpFormProps> = ({
           style={[styles.quickPasteContainer, { backgroundColor: isDark ? 'rgba(59, 130, 246, 0.15)' : 'rgba(0, 85, 165, 0.08)' }]}
         >
           <Text style={[styles.quickPasteText, { color: colors.brand.gold }]}>
-            📋 لصق الرمز من الحافظة: {clipboardCode}
+             لصق الرمز من الحافظة: {clipboardCode}
           </Text>
         </BouncyPressable>
       )}
