@@ -4,11 +4,25 @@ import { useAuthStore } from './useAuthStore';
 import { useToastStore } from './useToastStore';
 
 export const fetchFeedAction = async (set: any, get: any, reset = false, silent = false) => {
-  const { nextCursor, posts, isLoading, isLoadingMore, isRefreshing, isFetchingFeed, activeTab } = get();
+  const { nextCursor, posts, isLoading, isLoadingMore, isRefreshing, isFetchingFeed, activeTab, lastFetchTime } = get();
   
   if (!reset && (isLoading || isLoadingMore || isRefreshing || isFetchingFeed)) return;
   if (reset && (isRefreshing || isFetchingFeed)) return;
   if (!reset && !nextCursor) return;
+
+  // FETCH THROTTLING SPAM SHIELD:
+  // If this is a category swap / app init (reset = true AND silent = true)
+  // AND we already have cached posts for this category,
+  // AND the time elapsed since the last successful fetch is less than 30 seconds (30000ms):
+  // We completely abort the network fetch and rely on cached posts (Cache-First).
+  // This is only bypassed if the user triggers a manual pull-to-refresh (reset = true AND silent = false) or paginates.
+  const now = Date.now();
+  const lastFetched = lastFetchTime?.[activeTab] || 0;
+  const timeElapsed = now - lastFetched;
+
+  if (reset && silent && posts.length > 0 && timeElapsed < 30000) {
+    return;
+  }
 
   set({ isFetchingFeed: true });
 
@@ -41,6 +55,10 @@ export const fetchFeedAction = async (set: any, get: any, reset = false, silent 
       isRefreshing: false,
       isFetchingFeed: false,
       error: null,
+      lastFetchTime: {
+        ...get().lastFetchTime,
+        [activeTab]: Date.now(),
+      }
     });
 
     const user = useAuthStore.getState().user;

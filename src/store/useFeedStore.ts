@@ -28,6 +28,7 @@ interface FeedState {
   trendingPosts: Post[];
   recentCursor: string | null;
   trendingCursor: string | null;
+  lastFetchTime: { recent: number; trending: number };
   isLoading: boolean;
   isLoadingMyPosts: boolean;
   isLoadingLikedPosts: boolean;
@@ -71,6 +72,7 @@ export const useFeedStore = create<FeedState>()(
       trendingPosts: [],
       recentCursor: null,
       trendingCursor: null,
+      lastFetchTime: { recent: 0, trending: 0 },
       isLoading: false,
       isLoadingMyPosts: false,
       isLoadingLikedPosts: false,

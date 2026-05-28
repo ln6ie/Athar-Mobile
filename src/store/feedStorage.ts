@@ -65,5 +65,6 @@ export const feedPersistConfig = {
     recentCursor: state.recentCursor,
     trendingPosts: state.trendingPosts,
     trendingCursor: state.trendingCursor,
+    lastFetchTime: state.lastFetchTime,
   }),
 };
