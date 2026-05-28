@@ -179,13 +179,21 @@ export const ProfileScreen: React.FC = () => {
         refreshing={activeTab === 'my-posts' ? isLoadingMyPosts : isLoadingLikedPosts}
         renderItem={({ item }) => {
           if (isSkeletonLoading) {
-            return <PostCardSkeleton />;
+            return (
+              <View style={{ paddingHorizontal: 24 }}>
+                <PostCardSkeleton />
+              </View>
+            );
           }
-          return <PostCard post={item as any} onLike={toggleLike} />;
+          return (
+            <View style={{ paddingHorizontal: 24 }}>
+              <PostCard post={item as any} onLike={toggleLike} />
+            </View>
+          );
         }}
         contentContainerStyle={[
           styles.listContent,
-          { paddingTop: Math.max(insets.top, 24) }
+          { paddingTop: 0, paddingHorizontal: 0 }
         ]}
         ListHeaderComponent={
           <View>
@@ -196,64 +204,66 @@ export const ProfileScreen: React.FC = () => {
               postsCount={myPosts.length}
             />
 
-            {/* Native Dynamic iOS 26 Material Options Card */}
-            <ProfileOptionsCard
-              onSubScreenNavigate={(screen) => setActiveSubScreen(screen)}
-              onLogout={handleLogout}
-              onDeleteAccount={handleDeleteAccount}
-            />
+            <View style={{ paddingHorizontal: 24 }}>
+              {/* Native Dynamic iOS 26 Material Options Card */}
+              <ProfileOptionsCard
+                onSubScreenNavigate={(screen) => setActiveSubScreen(screen)}
+                onLogout={handleLogout}
+                onDeleteAccount={handleDeleteAccount}
+              />
 
-            <ThemeSelector />
+              <ThemeSelector />
 
-            {/* Segment Toggle Tab Bar */}
-            <GlassicView
-              cornerRadius={24}
-              style={styles.tabContainer}
-            >
-              <View
-                style={[StyleSheet.absoluteFill, { flexDirection: 'row-reverse', padding: 4 }]}
-                onLayout={onTabContainerLayout}
-                pointerEvents="box-none"
+              {/* Segment Toggle Tab Bar */}
+              <GlassicView
+                cornerRadius={24}
+                style={styles.tabContainer}
               >
-                <Animated.View
-                  style={[
-                    styles.tabToggleActive,
-                    {
-                      position: 'absolute',
-                      right: 4,
-                      top: 4,
-                      height: 36,
-                      zIndex: 1,
-                    },
-                    tabSliderAnimatedStyle,
-                  ]}
-                />
-              </View>
+                <View
+                  style={[StyleSheet.absoluteFill, { flexDirection: 'row-reverse', padding: 4 }]}
+                  onLayout={onTabContainerLayout}
+                  pointerEvents="box-none"
+                >
+                  <Animated.View
+                    style={[
+                      styles.tabToggleActive,
+                      {
+                        position: 'absolute',
+                        right: 4,
+                        top: 4,
+                        height: 36,
+                        zIndex: 1,
+                      },
+                      tabSliderAnimatedStyle,
+                    ]}
+                  />
+                </View>
 
-              <BouncyPressable
-                style={[styles.tabToggle, { zIndex: 2 }]}
-                onPress={() => {
-                  setActiveTab('my-posts');
-                  fetchMyPosts();
-                }}
-              >
-                <Text style={[styles.tabToggleText, activeTab === 'my-posts' && styles.tabToggleTextActive]}>
-                  منشوراتي
-                </Text>
-              </BouncyPressable>
+                <BouncyPressable
+                  style={[styles.tabToggle, { zIndex: 2 }]}
+                  onPress={() => {
+                    setActiveTab('my-posts');
+                    fetchMyPosts();
+                  }}
+                >
+                  <Text style={[styles.tabToggleText, activeTab === 'my-posts' && styles.tabToggleTextActive]}>
+                    منشوراتي
+                  </Text>
+                </BouncyPressable>
 
-              <BouncyPressable
-                style={[styles.tabToggle, { zIndex: 2 }]}
-                onPress={() => {
-                  setActiveTab('likes');
-                  fetchLikedPosts();
-                }}
-              >
-                <Text style={[styles.tabToggleText, activeTab === 'likes' && styles.tabToggleTextActive]}>
-                  المفضلة
-                </Text>
-              </BouncyPressable>
-            </GlassicView>
+                <BouncyPressable
+                  style={[styles.tabToggle, { zIndex: 2 }]}
+                  onPress={() => {
+                    setActiveTab('likes');
+                    fetchLikedPosts();
+                  }}
+                >
+                  <Text style={[styles.tabToggleText, activeTab === 'likes' && styles.tabToggleTextActive]}>
+                    المفضلة
+                  </Text>
+                </BouncyPressable>
+              </GlassicView>
+            </View>
 
           </View>
         }
