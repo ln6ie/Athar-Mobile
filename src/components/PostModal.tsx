@@ -21,6 +21,11 @@ interface PostModalProps {
   onSubmit: (content: string) => Promise<void>;
 }
 
+const OBJECTIONABLE_WORDS = [
+  'كس', 'شرموط', 'منيوك', 'قحبة', 'نيك', 'ديوث', 'تيز', 'خرة', 'تف عليك',
+  'fuck', 'shit', 'bitch', 'asshole', 'dick', 'pussy', 'whore', 'bastard'
+];
+
 export const PostModal: React.FC<PostModalProps> = ({ visible, onClose, onSubmit }) => {
   const { colors, isDark } = useTheme();
   const [content, setContent] = useState('');
@@ -49,6 +54,16 @@ export const PostModal: React.FC<PostModalProps> = ({ visible, onClose, onSubmit
     }
     if (trimmed.length > characterLimit) {
       setValidationError(`لا يمكن أن يتجاوز الأثر ${characterLimit} حرفاً`);
+      return;
+    }
+
+    // Apple UGC Content Filtering check
+    const hasObjectionable = OBJECTIONABLE_WORDS.some(word => 
+      trimmed.toLowerCase().includes(word)
+    );
+
+    if (hasObjectionable) {
+      setValidationError('عذراً، تم حظر النشر لاحتواء النص على كلمات غير لائقة. يلتزم تطبيق أثر بسياسة صارمة وخالية من التسامح تجاه الإساءة (Zero-Tolerance Policy) وفقاً لاتفاقية الاستخدام (EULA).');
       return;
     }
 

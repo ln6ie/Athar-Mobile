@@ -28,4 +28,13 @@ export interface Notification {
   };
   likerName: string;
 }
-
+export interface UserReport {
+  id: string;
+  postId: string;
+  postContent: string;
+  postAuthor: string;
+  reason: string;
+  status: 'pending' | 'resolved' | 'rejected';
+  adminNote?: string;
+  createdAt: string;
+}

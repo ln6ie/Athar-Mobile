@@ -248,9 +248,9 @@ export const deletePostAction = async (set: any, get: any, postId: string) => {
   }
 };
 
-export const reportPostAction = async (postId: string) => {
+export const reportPostAction = async (postId: string, reason?: string) => {
   try {
-    await api.post(`/posts/${postId}/report`);
+    await api.post(`/posts/${postId}/report`, { reason });
   } catch (error) {
     console.log('[feedActions] reportPost error:', error);
   }

@@ -7,7 +7,7 @@ import { useProfileStyles } from '../styles/ProfileStyles';
 import { useTheme } from '../hooks/useTheme';
 
 interface ProfileOptionsCardProps {
-  onSubScreenNavigate: (screen: 'change-email' | 'blocked-users' | 'support' | 'privacy' | 'about') => void;
+  onSubScreenNavigate: (screen: 'change-email' | 'blocked-users' | 'support' | 'privacy' | 'about' | 'reports') => void;
   onLogout: () => void;
   onDeleteAccount: () => void;
 }
@@ -45,6 +45,20 @@ export const ProfileOptionsCard: React.FC<ProfileOptionsCardProps> = ({
           <View style={styles.optionIconWrapper}>
             <SymbolView
               name={{ ios: 'nosign', android: 'block' }}
+              size={20}
+              tintColor={colors.brand.gold}
+            />
+          </View>
+        </View>
+      </BouncyPressable>
+
+      <BouncyPressable style={styles.optionRow} onPress={() => onSubScreenNavigate('reports')}>
+        <Text style={styles.chevron}>‹</Text>
+        <View style={styles.optionRightContainer}>
+          <Text style={styles.optionLabel}>سجل البلاغات والتقارير</Text>
+          <View style={styles.optionIconWrapper}>
+            <SymbolView
+              name={{ ios: 'exclamationmark.shield.fill', android: 'security' }}
               size={20}
               tintColor={colors.brand.gold}
             />

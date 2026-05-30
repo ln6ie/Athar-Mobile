@@ -79,5 +79,6 @@ export const feedPersistConfig = {
     unreadLikesCount: state.unreadLikesCount,
     blockedUsers: state.blockedUsers,
     lastFetchTime: state.lastFetchTime,
+    reports: state.reports,
   }),
 };

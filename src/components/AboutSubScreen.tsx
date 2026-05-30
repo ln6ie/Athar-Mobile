@@ -38,13 +38,18 @@ export const AboutSubScreen: React.FC<AboutSubScreenProps> = ({ onBack }) => {
         </View>
 
         <GlassicView cornerRadius={16} style={styles.developerCard}>
-          <Text style={[styles.developerTitle, { color: colors.brand.gold }]}>معلومات المطور</Text>
+          <Text style={[styles.developerTitle, { color: colors.brand.gold }]}>معلومات المطور والدعم</Text>
           <View style={[styles.divider, { backgroundColor: colors.border.muted }]} />
           
           <View style={styles.infoRow}>
             <Text style={[styles.infoLabel, { color: colors.text.secondary }]}>المبرمج والمطور:</Text>
             <Text style={[styles.infoValue, { color: colors.text.primary }]}>عبدالله كريم</Text>
           </View>
+
+          <TouchableOpacity style={styles.infoRow} onPress={() => Linking.openURL('mailto:support@athar-app.com').catch(e => console.log(e))} activeOpacity={0.7}>
+            <Text style={[styles.infoLabel, { color: colors.text.secondary }]}>بريد الإبلاغ والدعم:</Text>
+            <Text style={[styles.infoValue, styles.linkText, { color: colors.brand.gold }]}>elcom.lab.iq@gmail.com</Text>
+          </TouchableOpacity>
 
           <TouchableOpacity style={styles.infoRow} onPress={handleOpenInstagram} activeOpacity={0.7}>
             <Text style={[styles.infoLabel, { color: colors.text.secondary }]}>حساب الإنستغرام:</Text>

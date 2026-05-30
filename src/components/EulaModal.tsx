@@ -5,14 +5,37 @@ import { Header } from './Header';
 import { GlassicView } from './GlassicView';
 import { useTheme } from '../hooks/useTheme';
 
+import { BouncyPressable } from './BouncyPressable';
+
 interface EulaModalProps {
   visible: boolean;
   onClose: () => void;
+  onAccept?: () => void;
+  onDecline?: () => void;
 }
 
-export const EulaModal: React.FC<EulaModalProps> = ({ visible, onClose }) => {
+export const EulaModal: React.FC<EulaModalProps> = ({ 
+  visible, 
+  onClose,
+  onAccept,
+  onDecline
+}) => {
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
+
+  const handleAccept = () => {
+    if (onAccept) {
+      onAccept();
+    }
+    onClose();
+  };
+
+  const handleDecline = () => {
+    if (onDecline) {
+      onDecline();
+    }
+    onClose();
+  };
 
   return (
     <Modal
@@ -27,7 +50,7 @@ export const EulaModal: React.FC<EulaModalProps> = ({ visible, onClose }) => {
         <ScrollView 
           contentContainerStyle={[
             styles.scrollContent, 
-            { paddingBottom: Math.max(insets.bottom, 40) }
+            { paddingBottom: Math.max(insets.bottom, 40) + 100 }
           ]}
           showsVerticalScrollIndicator={false}
         >
@@ -76,6 +99,23 @@ export const EulaModal: React.FC<EulaModalProps> = ({ visible, onClose }) => {
               • <Text style={{ fontWeight: 'bold', color: colors.text.primary }}>زر الحجب (Block):</Text> يتيح لك حظر كاتب أي منشور فوراً، وبمجرد الحظر لن تتمكن من رؤية أي منشورات مستقبلية من هذا الكاتب نهائياً، كما لن يتمكن هو من رؤية آثارك.
             </Text>
           </GlassicView>
+
+          {/* Action buttons inside ScrollView to satisfy Apple explicit agreement review */}
+          <View style={styles.actionButtonsContainer}>
+            <BouncyPressable
+              onPress={handleAccept}
+              style={[styles.acceptButton, { backgroundColor: colors.brand.gold }]}
+            >
+              <Text style={styles.acceptButtonText}>أوافق وأقبل الشروط</Text>
+            </BouncyPressable>
+
+            <BouncyPressable
+              onPress={handleDecline}
+              style={[styles.declineButton, { borderColor: colors.feedback.error }]}
+            >
+              <Text style={[styles.declineButtonText, { color: colors.feedback.error }]}>أرفض الشروط</Text>
+            </BouncyPressable>
+          </View>
 
           <Text style={[styles.footerNote, { color: colors.text.disabled }]}>
             آخر تحديث للاتفاقية: مايو 2026
@@ -130,5 +170,36 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
     marginBottom: 10,
+  },
+  actionButtonsContainer: {
+    marginTop: 24,
+    marginBottom: 12,
+    gap: 12,
+    width: '100%',
+  },
+  acceptButton: {
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+  },
+  acceptButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  declineButton: {
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    backgroundColor: 'transparent',
+  },
+  declineButtonText: {
+    fontSize: 14,
+    fontWeight: 'bold',
   },
 });

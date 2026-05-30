@@ -18,6 +18,7 @@ import { SupportSubScreen } from '../components/SupportSubScreen';
 import { AboutSubScreen } from '../components/AboutSubScreen';
 import { PrivacySubScreen } from '../components/PrivacySubScreen';
 import { BlockedUsersSubScreen } from '../components/BlockedUsersSubScreen';
+import { MyReportsSubScreen } from '../components/MyReportsSubScreen';
 import { ThemeSelector } from '../components/ThemeSelector';
 import { useProfileStyles } from '../styles/ProfileStyles';
 import { GlassicView } from '../components/GlassicView';
@@ -44,7 +45,7 @@ export const ProfileScreen: React.FC = () => {
   const { colors } = useTheme();
   const styles = useProfileStyles();
   
-  const [activeSubScreen, setActiveSubScreen] = useState<'main' | 'change-email' | 'support' | 'about' | 'privacy' | 'blocked-users'>('main');
+  const [activeSubScreen, setActiveSubScreen] = useState<'main' | 'change-email' | 'support' | 'about' | 'privacy' | 'blocked-users' | 'reports'>('main');
   const [activeTab, setActiveTab] = useState<'my-posts' | 'likes'>('my-posts');
   const [userInfoVisible, setUserInfoVisible] = useState(false);
   const insets = useSafeAreaInsets();
@@ -297,6 +298,7 @@ export const ProfileScreen: React.FC = () => {
           {activeSubScreen === 'privacy' && <PrivacySubScreen onBack={() => setActiveSubScreen('main')} />}
           {activeSubScreen === 'about' && <AboutSubScreen onBack={() => setActiveSubScreen('main')} />}
           {activeSubScreen === 'blocked-users' && <BlockedUsersSubScreen onBack={() => setActiveSubScreen('main')} />}
+          {activeSubScreen === 'reports' && <MyReportsSubScreen onBack={() => setActiveSubScreen('main')} />}
         </Modal>
       )}
 

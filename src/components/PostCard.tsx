@@ -88,12 +88,68 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
     }
   };
 
-  const handleReport = async () => {
-    try {
-      await reportPost(post.id);
-      Alert.alert('شكرًا لك', 'تم استلام الإبلاغ بنجاح، وسيتخذ فريق الدعم الإجراء المناسب خلال 24 ساعة.');
-    } catch (err) {
-      Alert.alert('خطأ', 'تعذر إرسال الإبلاغ حالياً.');
+  const handleReport = () => {
+    const reasons = [
+      'مضايقة أو إساءة شخصية',
+      'كراهية وعنصرية',
+      'محتوى غير لائق أو إباحي',
+      'إعلانات وسبام',
+      'عنف أو تهديد',
+      'أخرى',
+    ];
+
+    const submitReport = async (reason: string) => {
+      try {
+        await reportPost(post.id, reason);
+        Alert.alert('شكرًا لك', 'تم استلام الإبلاغ بنجاح، وسيتخذ فريق الدعم الإجراء المناسب خلال 24 ساعة.');
+      } catch (err) {
+        Alert.alert('خطأ', 'تعذر إرسال الإبلاغ حالياً.');
+      }
+    };
+
+    if (Platform.OS === 'ios') {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: [...reasons, 'إلغاء'],
+          cancelButtonIndex: reasons.length,
+          title: 'ما هو سبب الإبلاغ عن هذا الأثر؟',
+        },
+        (buttonIndex) => {
+          if (buttonIndex !== reasons.length) {
+            submitReport(reasons[buttonIndex]);
+          }
+        }
+      );
+    } else {
+      Alert.alert(
+        'سبب الإبلاغ',
+        'الرجاء اختيار السبب الرئيسي للإبلاغ عن هذا الأثر لكي يتسنى للإدارة مراجعته بسرعة:',
+        [
+          ...reasons.slice(0, 3).map((r) => ({
+            text: r,
+            onPress: () => submitReport(r),
+          })),
+          {
+            text: 'أسباب أخرى...',
+            onPress: () => {
+              Alert.alert(
+                'أسباب إضافية للإبلاغ',
+                'اختر أحد الأسباب التالية:',
+                [
+                  ...reasons.slice(3).map((r) => ({
+                    text: r,
+                    onPress: () => submitReport(r),
+                  })),
+                  { text: 'إلغاء', style: 'cancel' },
+                ],
+                { cancelable: true }
+              );
+            },
+          },
+          { text: 'إلغاء', style: 'cancel' },
+        ],
+        { cancelable: true }
+      );
     }
   };
 
@@ -234,7 +290,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
             {post.content}
           </Text>
 
-          {/* Footer: Like + Expiry */}
+          {/* Footer: Like + Flag + Expiry */}
           <View style={styles.footer}>
             <View style={styles.likeContainer}>
               <Animated.View style={likeAnimatedStyle}>
@@ -275,6 +331,23 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
               >
                 {post.likesCount}
               </Text>
+
+              {/* Direct Reporting Flag for Apple UGC Compliance */}
+              {!isOwnPost && (
+                <Pressable
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    handleReport();
+                  }}
+                  style={({ pressed }) => [
+                    { marginLeft: 16, padding: 4, borderRadius: 8 },
+                    pressed && { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)' }
+                  ]}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Ionicons name="flag-outline" size={15} color={colors.text.disabled} />
+                </Pressable>
+              )}
             </View>
 
             <Text style={[styles.expiryText, { color: colors.text.disabled }]}>

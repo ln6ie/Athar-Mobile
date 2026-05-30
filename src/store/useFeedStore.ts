@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Post, Notification } from '../types';
+import { Post, Notification, UserReport } from '../types';
 import { useAuthStore } from './useAuthStore';
 import { feedPersistConfig } from './feedStorage';
 import {
@@ -16,6 +16,7 @@ import {
   fetchLikedPostsAction,
   blockUserAction,
   unblockUserAction,
+  fetchMyReportsAction,
 } from './userActions';
 
 interface FeedState {
@@ -39,6 +40,9 @@ interface FeedState {
   notifications: Notification[];
   isLoadingNotifications: boolean;
   notificationsError: string | null;
+  reports: UserReport[];
+  isLoadingReports: boolean;
+  reportsError: string | null;
   activeTab: 'recent' | 'trending';
   setActiveTab: (tab: 'recent' | 'trending') => void;
   fetchFeed: (reset?: boolean, silent?: boolean) => Promise<void>;
@@ -51,8 +55,9 @@ interface FeedState {
   fetchLikedPosts: () => Promise<void>;
   blockUser: (anonymousName: string) => Promise<void>;
   unblockUser: (anonymousName: string) => Promise<void>;
-  reportPost: (postId: string) => Promise<void>;
+  reportPost: (postId: string, reason?: string) => Promise<void>;
   deletePost: (postId: string) => Promise<void>;
+  fetchMyReports: () => Promise<void>;
   initializeFeed: () => Promise<void>;
 }
 
@@ -79,8 +84,11 @@ export const useFeedStore = create<FeedState>()(
       notifications: [],
       isLoadingNotifications: false,
       notificationsError: null,
+      reports: [],
+      isLoadingReports: false,
+      reportsError: null,
       activeTab: 'recent',
-      
+
       setActiveTab: (tab) => {
         set({ activeTab: tab });
       },
@@ -111,9 +119,9 @@ export const useFeedStore = create<FeedState>()(
           const deduped = allPosts.filter((p: Post, i: number, self: Post[]) => self.findIndex((x: Post) => x.id === p.id) === i);
           const myPosts = deduped.filter((p: Post) => p.anonymousName === user.anonymousName);
           const totalLikes = myPosts.reduce((sum: number, p: Post) => sum + p.likesCount, 0);
-          set({ 
+          set({
             lastViewedLikesCount: totalLikes,
-            unreadLikesCount: 0 
+            unreadLikesCount: 0
           });
         }
       },
@@ -138,21 +146,31 @@ export const useFeedStore = create<FeedState>()(
         await unblockUserAction(set, get, anonymousName);
       },
 
-      reportPost: async (postId) => {
-        // Apple Safety Guideline 1.2: Immediately filter out reported posts locally
-        set((state: any) => ({
-          posts: {
-            ...state.posts,
-            recent: (state.posts.recent || []).filter((p: Post) => p.id !== postId),
-            trending: (state.posts.trending || []).filter((p: Post) => p.id !== postId),
-          },
-          likedPosts: (state.likedPosts || []).filter((p: Post) => p.id !== postId),
-        }));
-        await reportPostAction(postId);
+      reportPost: async (postId, reason) => {
+        // Immediate local removal from UI state for perfect Apple UGC compliance
+        const { posts, myPosts, likedPosts } = get();
+        
+        const filteredRecent = (posts.recent || []).filter((p) => p.id !== postId);
+        const filteredTrending = (posts.trending || []).filter((p) => p.id !== postId);
+        const filteredMyPosts = (myPosts || []).filter((p) => p.id !== postId);
+        const filteredLikedPosts = (likedPosts || []).filter((p) => p.id !== postId);
+
+        set({
+          posts: { recent: filteredRecent, trending: filteredTrending },
+          myPosts: filteredMyPosts,
+          likedPosts: filteredLikedPosts,
+        });
+
+        // Fire request in the background
+        await reportPostAction(postId, reason);
       },
 
       deletePost: async (postId) => {
         await deletePostAction(set, get, postId);
+      },
+
+      fetchMyReports: async () => {
+        await fetchMyReportsAction(set, get);
       },
     }),
     feedPersistConfig as any

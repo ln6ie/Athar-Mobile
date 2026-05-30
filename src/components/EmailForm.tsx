@@ -77,7 +77,12 @@ export const EmailForm: React.FC<EmailFormProps> = ({
         </Text>
       </TouchableOpacity>
 
-      <EulaModal visible={showEula} onClose={() => setShowEula(false)} />
+      <EulaModal 
+        visible={showEula} 
+        onClose={() => setShowEula(false)} 
+        onAccept={() => setAgreed(true)}
+        onDecline={() => setAgreed(false)}
+      />
 
       <TouchableOpacity
         onPress={onSubmit}
