@@ -110,7 +110,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onSuccess }) => {
                 {/* Brand text on the right (Arabic RTL) */}
                 <View style={styles.brandTextColumn}>
                   <Text style={styles.brandTitle}>أثر</Text>
-                  <Text style={styles.brandSubtitle}>أبْقِ أثرك في هذا العالم</Text>
+                  <Text style={styles.brandSubtitle}>أنشر بالمجهول وبكل حرية ! </Text>
                 </View>
               </View>
             </View>

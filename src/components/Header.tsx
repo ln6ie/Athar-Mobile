@@ -21,8 +21,8 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  title = 'الأثر',
-  subtitle = 'الآثار النشطة',
+  title = 'المنشورات',
+  subtitle = 'المنشورات النشطة',
   leftText,
   onLeftPress,
 }) => {
