@@ -104,38 +104,7 @@ export const fetchMyReportsAction = async (set: any, get: any) => {
       isLoadingReports: false,
     });
   } catch (error: any) {
-    // Intelligent Resilient Fallback for Apple App Review / Dev offline state
-    if (!error.response || error.response.status === 404) {
-      setTimeout(() => {
-        set({
-          reports: [
-            {
-              id: 'rep_1',
-              postId: 'post_100',
-              postContent: 'لقد تم نشر إساءة واضحة في الفيد العام.',
-              postAuthor: 'مجهول_5482',
-              reason: 'مضايقة ومحتوى مسيء',
-              status: 'resolved',
-              adminNote: 'تم تأكيد البلاغ بواسطة الإدارة، وحذف المنشور المخالف فوراً، وحظر حساب الكاتب وجهازه بالكامل من التطبيق.',
-              createdAt: new Date(Date.now() - 3600000 * 3).toISOString(),
-            },
-            {
-              id: 'rep_2',
-              postId: 'post_101',
-              postContent: 'رابط خارجي مريب يدعو لزيارة مواقع إعلانية.',
-              postAuthor: 'مجهول_9901',
-              reason: 'روابط أو محتوى ترويجي سبام',
-              status: 'pending',
-              createdAt: new Date(Date.now() - 3600000 * 6).toISOString(),
-            }
-          ],
-          isLoadingReports: false,
-        });
-      }, 500);
-      return;
-    }
-
-    const errMsg = error.response?.data?.message || 'تعذر تحميل الإبلاغات. يرجى المحاولة لاحقاً.';
+    const errMsg = error.response?.data?.message || 'تعذر تحميل الإبلاغات من الخادم الفعلي. يرجى المحاولة لاحقاً.';
     set({
       isLoadingReports: false,
       reportsError: errMsg,
