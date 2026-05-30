@@ -51,7 +51,7 @@ export const MyReportsSubScreen: React.FC<MyReportsSubScreenProps> = ({ onBack }
   return (
     <View style={[styles.container, { backgroundColor: colors.background.default }]}>
       <Header title="سجل البلاغات والشكاوى" subtitle="" leftText="رجوع" onLeftPress={onBack} />
-      
+
       {isLoading ? (
         <View style={styles.centerAll}>
           <ActivityIndicator size="large" color={colors.brand.gold} />
@@ -82,16 +82,9 @@ export const MyReportsSubScreen: React.FC<MyReportsSubScreenProps> = ({ onBack }
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          <View style={[styles.infoBanner, { backgroundColor: isDark ? 'rgba(245, 158, 11, 0.06)' : '#FFFDF5', borderColor: isDark ? 'rgba(245, 158, 11, 0.15)' : 'rgba(245, 158, 11, 0.25)' }]}>
-            <SymbolView
-              name={{ ios: 'exclamationmark.shield.fill', android: 'security' }}
-              size={15}
-              tintColor={colors.brand.gold}
-            />
-            <Text style={[styles.infoBannerText, { color: colors.text.secondary }]}>
-              تتابع هنا حالة الآثار التي أبلغت عنها لعدم ملاءمتها، وإجراءات الدعم الفني المتخذة بشأنها.
-            </Text>
-          </View>
+          <Text style={[styles.topDescription, { color: colors.text.secondary }]}>
+              تتابع هنا حالة المنشورات التي أبلغت عنها لعدم ملاءمتها، وإجراءات الدعم الفني المتخذة بشأنها.
+          </Text>
 
           {reports.map((report) => {
             const badge = getStatusBadge(report.status);
@@ -107,7 +100,7 @@ export const MyReportsSubScreen: React.FC<MyReportsSubScreenProps> = ({ onBack }
                     />
                     <Text style={[styles.badgeText, { color: badge.color }]}>{badge.text}</Text>
                   </View>
-                  
+
                   <Text style={[styles.reportDate, { color: colors.text.disabled }]}>
                     {new Date(report.createdAt).toLocaleDateString('ar-EG', {
                       month: 'short',
@@ -165,21 +158,11 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingBottom: 60,
   },
-  infoBanner: {
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 16,
-    borderWidth: 1,
-    gap: 10,
+  topDescription: {
+    fontSize: 12,
+    lineHeight: 20,
+    textAlign: 'center',
     marginBottom: 20,
-  },
-  infoBannerText: {
-    fontSize: 11.5,
-    lineHeight: 18,
-    textAlign: 'right',
-    flex: 1,
   },
   errorText: {
     fontSize: 13,
