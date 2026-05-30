@@ -74,6 +74,7 @@ export const EmailForm: React.FC<EmailFormProps> = ({
           >
             شروط الاستخدام وسياسة المحتوى (EULA)
           </Text>
+          {' '}وأؤكد أن عمري 18 عاماً أو أكبر
         </Text>
       </TouchableOpacity>
 
