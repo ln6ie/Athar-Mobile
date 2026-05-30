@@ -82,9 +82,16 @@ export const MyReportsSubScreen: React.FC<MyReportsSubScreenProps> = ({ onBack }
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          <Text style={[styles.topDescription, { color: colors.text.secondary }]}>
-            شفافية تامة: هنا تتابع حالة كافة منشورات الفيد التي قمت بالإبلاغ عنها لعدم ملاءمتها، مع إفادة الدعم الفني الفورية.
-          </Text>
+          <View style={[styles.infoBanner, { backgroundColor: isDark ? 'rgba(245, 158, 11, 0.06)' : '#FFFDF5', borderColor: isDark ? 'rgba(245, 158, 11, 0.15)' : 'rgba(245, 158, 11, 0.25)' }]}>
+            <SymbolView
+              name={{ ios: 'exclamationmark.shield.fill', android: 'security' }}
+              size={15}
+              tintColor={colors.brand.gold}
+            />
+            <Text style={[styles.infoBannerText, { color: colors.text.secondary }]}>
+              تتابع هنا حالة الآثار التي أبلغت عنها لعدم ملاءمتها، وإجراءات الدعم الفني المتخذة بشأنها.
+            </Text>
+          </View>
 
           {reports.map((report) => {
             const badge = getStatusBadge(report.status);
@@ -158,11 +165,21 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingBottom: 60,
   },
-  topDescription: {
-    fontSize: 12,
-    lineHeight: 20,
-    textAlign: 'center',
+  infoBanner: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    gap: 10,
     marginBottom: 20,
+  },
+  infoBannerText: {
+    fontSize: 11.5,
+    lineHeight: 18,
+    textAlign: 'right',
+    flex: 1,
   },
   errorText: {
     fontSize: 13,
