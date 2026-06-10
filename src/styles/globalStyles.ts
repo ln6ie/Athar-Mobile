@@ -1,0 +1,189 @@
+// أنماط عامة للتطبيق - حاويات وأزرار ونصوص أساسية
+import { StyleSheet, Platform } from 'react-native';
+import { TOKENS, LIGHT_COLORS } from '../constants/tokens';
+import { useTheme } from '../hooks/useTheme';
+
+export const getGlobalStyles = (colors: typeof LIGHT_COLORS, isDark: boolean = false) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background.default,
+    },
+    keyboardAvoid: {
+      flex: 1,
+      justifyContent: 'center',
+    },
+    input: {
+      width: '100%',
+      height: 54, // ارتفاع ثابت للتمركز المثالي
+      backgroundColor: colors.background.input,
+      color: colors.text.primary,
+      fontSize: 14,
+      paddingVertical: 0, // إلغاء الحشوة الرأسية للسماح بالتمركز عبر height
+      paddingHorizontal: 20,
+      borderRadius: TOKENS.borderRadius.lg,
+      borderWidth: 0.6, // حد iOS رفيع وأنيق
+      borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
+      marginBottom: 20,
+      textAlign: 'left',
+      textAlignVertical: 'center', // تمركز رأسي صريح لأندرويد
+    },
+    button: {
+      width: '100%',
+      paddingVertical: 16,
+      borderRadius: TOKENS.borderRadius.lg,
+      backgroundColor: colors.brand.gold,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    buttonDisabled: {
+      opacity: 0.6,
+    },
+    buttonText: {
+      color: '#FFFFFF',
+      fontWeight: 'bold',
+      fontSize: 14,
+      textAlign: 'center',
+      lineHeight: 22,
+    },
+    errorContainer: {
+      backgroundColor: '#FEF2F2',
+      borderRadius: TOKENS.borderRadius.lg,
+      padding: 16,
+      marginTop: 20,
+      borderWidth: 1,
+      borderColor: '#FEE2E2',
+    },
+    errorText: {
+      color: colors.feedback.error,
+      fontSize: 12,
+      textAlign: 'center',
+      fontWeight: '600',
+      lineHeight: 20,
+    },
+    headerContainer: {
+      alignItems: 'center',
+      marginBottom: 48,
+    },
+    brandTitle: {
+      fontSize: 48,
+      fontWeight: '900',
+      color: colors.brand.gold,
+      marginBottom: 8,
+      textAlign: 'center',
+      lineHeight: 60,
+    },
+    brandSubtitle: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text.secondary,
+      textAlign: 'center',
+      lineHeight: 22,
+    },
+    label: {
+      fontSize: 12,
+      fontWeight: 'bold',
+      color: colors.text.primary,
+      textAlign: 'right',
+      marginBottom: 12,
+      paddingHorizontal: 4,
+      lineHeight: 20,
+    },
+    secondaryButton: {
+      marginTop: 24,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    secondaryButtonText: {
+      color: colors.brand.gold,
+      fontSize: 12,
+      fontWeight: 'bold',
+      textAlign: 'center',
+      lineHeight: 20,
+    },
+    overlay: {
+      flex: 1,
+      justifyContent: 'flex-end',
+      backgroundColor: 'transparent',
+      width: '100%',
+      alignItems: 'stretch',
+    },
+    modalContainer: {
+      backgroundColor: colors.background.default,
+      borderTopLeftRadius: TOKENS.borderRadius.xl,
+      borderTopRightRadius: TOKENS.borderRadius.xl,
+      borderWidth: 1,
+      borderColor: colors.border.muted,
+      borderBottomWidth: 0,
+      padding: 24,
+      paddingBottom: 40,
+      width: '100%',
+      alignSelf: 'stretch',
+      overflow: 'hidden',
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: -6 },
+      shadowOpacity: 0.05,
+      shadowRadius: 10,
+      elevation: 8,
+    },
+    fab: {
+      position: 'absolute',
+      bottom: 32,
+      right: 24,
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: colors.brand.gold,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
+      elevation: 8,
+    },
+    fabText: {
+      color: '#FFFFFF',
+      fontSize: 28,
+      fontWeight: 'normal',
+      textAlign: 'center',
+      lineHeight: 32,
+    },
+    bellButton: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: 'transparent',
+      justifyContent: 'center',
+      alignItems: 'center',
+      position: 'relative',
+    },
+    badgeContainer: {
+      position: 'absolute',
+      top: -2,
+      right: -2,
+      backgroundColor: colors.feedback.error,
+      minWidth: 14,
+      height: 14,
+      borderRadius: 7,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 2,
+      borderWidth: 1,
+      borderColor: '#FFFFFF',
+    },
+    badgeText: {
+      color: '#FFFFFF',
+      fontSize: 8,
+      fontWeight: 'bold',
+      lineHeight: 10,
+    },
+  });
+
+export const useGlobalStyles = () => {
+  const { colors, isDark } = useTheme();
+  return getGlobalStyles(colors, isDark);
+};
+
+export const globalStyles = getGlobalStyles(LIGHT_COLORS, false);
+
