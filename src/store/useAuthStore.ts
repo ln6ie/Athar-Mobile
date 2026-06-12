@@ -75,9 +75,16 @@ export const useAuthStore = create<AuthState>((set) => ({
       // Register FCM push notification token safely
       initializeNotifications()
         .then((token) => {
-          if (token) registerFcmTokenWithBackend().catch(() => {});
+          if (token) {
+            console.log('[useAuthStore] FCM initialization success, registering token:', token.slice(0, 15) + '...');
+            registerFcmTokenWithBackend().catch((err) => {
+              console.error('[useAuthStore] registerFcmTokenWithBackend promise failed', err);
+            });
+          } else {
+            console.warn('[useAuthStore] FCM initialization returned null token');
+          }
         })
-        .catch((err) => console.error('[useAuthStore] FCM registration failed', err));
+        .catch((err) => console.error('[useAuthStore] FCM initialization rejected with error', err));
     } catch (error: any) {
       console.error('[useAuthStore] خطأ في التحقق من API:', {
         message: error.message,
