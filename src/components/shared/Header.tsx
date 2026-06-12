@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../hooks/useTheme';
@@ -37,7 +37,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <View style={{
-      paddingTop: !leftText ? Math.max(insets.top, 10) : 0,
+      paddingTop: !leftText ? Math.max(insets.top, 10) : (Platform.OS === 'android' ? Math.max(insets.top, 10) : 0),
       backgroundColor: colors.background.default,
     }}>
       <View style={{ paddingHorizontal: 20, paddingBottom: 4, paddingTop: 4, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
