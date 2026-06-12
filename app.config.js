@@ -1,8 +1,31 @@
+const fs = require('fs');
+const path = require('path');
+
+try {
+  const envPath = path.resolve(__dirname, '.env');
+  if (fs.existsSync(envPath)) {
+    const envFile = fs.readFileSync(envPath, 'utf-8');
+    envFile.split('\n').forEach((line) => {
+      const trimmed = line.trim();
+      if (trimmed && !trimmed.startsWith('#') && trimmed.includes('=')) {
+        const [key, ...valueParts] = trimmed.split('=');
+        const val = valueParts.join('=').trim();
+        const cleanKey = key.trim();
+        if (cleanKey && !process.env[cleanKey]) {
+          process.env[cleanKey] = val;
+        }
+      }
+    });
+  }
+} catch (e) {
+  // Ignored
+}
+
 module.exports = {
   expo: {
     name: "Athar",
     slug: "athar",
-    version: "1.2.5",
+    version: "1.2.6",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "automatic",
@@ -16,7 +39,9 @@ module.exports = {
             useFrameworks: "static"
           },
           android: {
-            enableMinifyInReleaseBuilds: true
+            enableMinifyInReleaseBuilds: true,
+            enableShrinkResourcesInReleaseBuilds: true,
+            buildArchs: ["arm64-v8a"]
           }
         }
       ],
@@ -35,7 +60,8 @@ module.exports = {
       supportsTablet: true,
       bundleIdentifier: "com.athar.iq.app",
       entitlements: {
-        "com.apple.developer.applesignin": ["Default"]
+        "com.apple.developer.applesignin": ["Default"],
+        "aps-environment": process.env.EXPO_PUBLIC_APP_ENV === "production" ? "production" : "development"
       },
       icon: {
         light: "./assets/icon-light.png",
@@ -43,12 +69,13 @@ module.exports = {
         tinted: "./assets/icon-tinted.png"
       },
       infoPlist: {
-        UIDesignRequiresCompatibility: false
+        UIDesignRequiresCompatibility: false,
+        UIBackgroundModes: ["remote-notification"]
       },
       googleServicesFile: process.env.GOOGLE_SERVICES_PLIST || "./GoogleService-Info.plist"
     },
     android: {
-      package: "com.athar.app",
+      package: "com.athar.iq.app",
       adaptiveIcon: {
         foregroundImage: "./assets/adaptive-icon.png",
         backgroundColor: "#ffffff",

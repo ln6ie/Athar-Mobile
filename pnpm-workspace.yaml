@@ -1,6 +1,8 @@
 allowBuilds:
+  '@firebase/util': set this to true or false
   '@shopify/react-native-skia': set this to true or false
   msgpackr-extract: true
+  protobufjs: set this to true or false
   sharp: true
 
 minimumReleaseAge: 0

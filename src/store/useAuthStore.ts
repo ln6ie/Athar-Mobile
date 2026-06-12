@@ -72,10 +72,12 @@ export const useAuthStore = create<AuthState>((set) => ({
         isLoading: false,
       });
 
-      // Register FCM push notification token in background
-      registerFcmTokenWithBackend().catch((err) =>
-        console.error('[useAuthStore] FCM registration failed', err),
-      );
+      // Register FCM push notification token safely
+      initializeNotifications()
+        .then((token) => {
+          if (token) registerFcmTokenWithBackend().catch(() => {});
+        })
+        .catch((err) => console.error('[useAuthStore] FCM registration failed', err));
     } catch (error: any) {
       console.error('[useAuthStore] خطأ في التحقق من API:', {
         message: error.message,
@@ -107,7 +109,11 @@ export const useAuthStore = create<AuthState>((set) => ({
         isLoading: false,
       });
 
-      registerFcmTokenWithBackend().catch(() => {});
+      initializeNotifications()
+        .then((token) => {
+          if (token) registerFcmTokenWithBackend().catch(() => {});
+        })
+        .catch(() => {});
     } catch (error: any) {
       console.error('[useAuthStore] Google login error:', {
         message: error.message,
@@ -139,7 +145,11 @@ export const useAuthStore = create<AuthState>((set) => ({
         isLoading: false,
       });
 
-      registerFcmTokenWithBackend().catch(() => {});
+      initializeNotifications()
+        .then((token) => {
+          if (token) registerFcmTokenWithBackend().catch(() => {});
+        })
+        .catch(() => {});
     } catch (error: any) {
       console.error('[useAuthStore] Apple login error:', {
         message: error.message,

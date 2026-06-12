@@ -30,6 +30,9 @@ export async function requestNotificationPermission(): Promise<boolean> {
 
 export async function getFcmToken(): Promise<string | null> {
   try {
+    if (!messaging().isDeviceRegisteredForRemoteMessages()) {
+      await messaging().registerDeviceForRemoteMessages();
+    }
     const token = await messaging().getToken();
     if (token) {
       fcmToken = token;

@@ -1,4 +1,5 @@
 import 'react-native-reanimated';
+(globalThis as any).RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
 import { registerRootComponent } from 'expo';
 import { enableScreens } from 'react-native-screens';
 import messaging from '@react-native-firebase/messaging';

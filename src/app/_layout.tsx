@@ -57,12 +57,6 @@ function MainLayout() {
       });
     });
 
-    // تهيئة الإشعارات الدفعية (FCM)
-    initializeNotifications().then((token) => {
-      if (token && isAuthenticated) {
-        registerFcmTokenWithBackend();
-      }
-    });
     handleNotificationOpenedApp();
     const unsubscribeForeground = setupForegroundMessageHandler();
 
@@ -73,6 +67,19 @@ function MainLayout() {
       clearTimeout(timer);
       unsubscribeForeground();
     };
+  }, []);
+
+  // تهيئة الإشعارات فقط عند تسجيل الدخول أو تغير حالة المصادقة
+  useEffect(() => {
+    if (isAuthenticated) {
+      initializeNotifications().then((token) => {
+        if (token) {
+          registerFcmTokenWithBackend().catch((err) => 
+            console.error('[RootLayout] Failed to register token on auth change', err)
+          );
+        }
+      });
+    }
   }, [isAuthenticated]);
 
   const shouldShowIntro = showSplash || !isInitialized;

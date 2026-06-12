@@ -1,45 +1,48 @@
-// خدمة الاتصال بالخادم - دوال الطلبات الآمنة
-import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || '';
 const GATEWAY_KEY = process.env.EXPO_PUBLIC_GATEWAY_KEY || '';
 
-export const api = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+interface FetchOptions extends RequestInit {
+  timeout?: number;
+}
 
-// إضافة توكن JWT و Gateway Key تلقائياً إلى رؤوس الطلبات
-api.interceptors.request.use(
-  async (config) => {
-    try {
-      const token = await SecureStore.getItemAsync('athar_jwt_token');
-      if (token && config.headers) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    } catch (error) {
-      console.error('فشل استرجاع التوكن من التخزين الآمن', error);
-    }
-
-    if (GATEWAY_KEY && config.headers) {
-      config.headers['x-athar-gateway-key'] = GATEWAY_KEY;
-    }
-
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
+// دالة الطلبات العامة المبنية على Fetch
+async function request(path: string, options: FetchOptions = {}) {
+  const url = `${API_BASE_URL}${path}`;
+  const headers = new Headers(options.headers || {});
+  const method = options.method || 'GET';
+  
+  if (['POST', 'PUT', 'PATCH'].includes(method) && options.body && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
   }
-);
 
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    if (error.response?.status === 403) {
+  try {
+    const token = await SecureStore.getItemAsync('athar_jwt_token');
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+  } catch (error) {
+    console.error('فشل استرجاع التوكن من التخزين الآمن', error);
+  }
+
+  if (GATEWAY_KEY) {
+    headers.set('x-athar-gateway-key', GATEWAY_KEY);
+  }
+
+  const timeout = options.timeout || 10000;
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers,
+      signal: controller.signal,
+    });
+    clearTimeout(id);
+
+    if (response.status === 403) {
       try {
         const { useToastStore } = require('../store/useToastStore');
         useToastStore.getState().show('يرجى تحديث التطبيق إلى أحدث إصدار للمتابعة');
@@ -48,7 +51,7 @@ api.interceptors.response.use(
       }
     }
 
-    if (error.response?.status === 401) {
+    if (response.status === 401) {
       try {
         const { useAuthStore } = require('../store/useAuthStore');
         const store = useAuthStore.getState();
@@ -59,6 +62,38 @@ api.interceptors.response.use(
         console.error('فشل معالجة انتهاء الجلسة', e);
       }
     }
-    return Promise.reject(error);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const error = new Error(errorData.message || 'طلب غير صالح');
+      (error as any).response = { status: response.status, data: errorData };
+      throw error;
+    }
+
+    const data = await response.json().catch(() => ({}));
+    return { data, status: response.status };
+  } catch (error: any) {
+    clearTimeout(id);
+    throw error;
   }
-);
+}
+
+export const api = {
+  get: (path: string, options?: FetchOptions) => request(path, { ...options, method: 'GET' }),
+  post: (path: string, data: any = {}, options?: FetchOptions) => request(path, {
+    ...options,
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  put: (path: string, data: any = {}, options?: FetchOptions) => request(path, {
+    ...options,
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+  patch: (path: string, data: any = {}, options?: FetchOptions) => request(path, {
+    ...options,
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  }),
+  delete: (path: string, options?: FetchOptions) => request(path, { ...options, method: 'DELETE' }),
+};
