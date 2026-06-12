@@ -69,18 +69,7 @@ function MainLayout() {
     };
   }, []);
 
-  // تهيئة الإشعارات فقط عند تسجيل الدخول أو تغير حالة المصادقة
-  useEffect(() => {
-    if (isAuthenticated) {
-      initializeNotifications().then((token) => {
-        if (token) {
-          registerFcmTokenWithBackend().catch((err) => 
-            console.error('[RootLayout] Failed to register token on auth change', err)
-          );
-        }
-      });
-    }
-  }, [isAuthenticated]);
+
 
   const shouldShowIntro = showSplash || !isInitialized;
   const isPad = Platform.select({ ios: (Platform as any).isPad, default: false });

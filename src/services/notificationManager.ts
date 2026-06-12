@@ -27,7 +27,7 @@ export async function requestNotificationPermission(): Promise<boolean> {
 export async function getFcmToken(): Promise<string | null> {
   try {
     console.log('[NotificationManager] Checking if device is registered for remote messages...');
-    const isRegistered = messaging().isDeviceRegisteredForRemoteMessages();
+    const isRegistered = messaging().isDeviceRegisteredForRemoteMessages;
     console.log('[NotificationManager] Device registration status:', isRegistered);
     
     if (!isRegistered) {
