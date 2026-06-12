@@ -8,6 +8,7 @@ import {
   Platform,
   StyleSheet,
 } from 'react-native';
+import { Header } from '../shared/Header';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../constants/locales';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -96,28 +97,16 @@ export const PostModal: React.FC<PostModalProps> = ({ visible, onClose, onSubmit
       onRequestClose={onClose}
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior="padding"
         keyboardVerticalOffset={Platform.OS === 'ios' ? 48 : 0}
         style={[styles.container, { backgroundColor: colors.background.default }]}
       >
-        {/* الشريط العلوي: زر الإغلاق + العنوان */}
-        <View style={[styles.topBar, { flexDirection: layoutArabic ? 'row-reverse' : 'row' }]}>
-          <View style={styles.topBarRight}>
-            <BouncyPressable onPress={onClose} style={[styles.closeButton, { backgroundColor: colors.brand.gold, marginTop: 8 }]}>
-              <SymbolView
-                name={{ ios: 'xmark', android: 'close' }}
-                size={16}
-                tintColor="#FFFFFF"
-              />
-            </BouncyPressable>
-          </View>
-
-          <View style={styles.topBarCenter}>
-            <Text style={[styles.topBarTitle, { color: colors.text.primary }]}>{t('feed.new_post')}</Text>
-          </View>
-
-          <View style={styles.topBarLeft} />
-        </View>
+        {/* الشريط العلوي الموحد مع هوامش الأمان */}
+        <Header
+          title={t('feed.new_post')}
+          leftText={t('common.back')}
+          onLeftPress={onClose}
+        />
 
         {/* منطقة الإدخال */}
         <View style={styles.inputContainer}>

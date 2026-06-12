@@ -39,14 +39,7 @@ export const EmailForm: React.FC<EmailFormProps> = ({
   const handleGooglePress = () => {
     if (!agreed) {
       setPendingProvider('google');
-      Alert.alert(
-        t('auth.agreement_required_title'),
-        t('auth.agreement_required_desc'),
-        [
-          { text: t('auth.cancel'), onPress: () => setPendingProvider(null), style: 'cancel' },
-          { text: t('auth.show_eula'), onPress: () => setShowEula(true) }
-        ]
-      );
+      setShowEula(true);
       return;
     }
     onGoogleLogin?.();
@@ -55,14 +48,7 @@ export const EmailForm: React.FC<EmailFormProps> = ({
   const handleApplePress = () => {
     if (!agreed) {
       setPendingProvider('apple');
-      Alert.alert(
-        t('auth.agreement_required_title'),
-        t('auth.agreement_required_desc'),
-        [
-          { text: t('auth.cancel'), onPress: () => setPendingProvider(null), style: 'cancel' },
-          { text: t('auth.show_eula'), onPress: () => setShowEula(true) }
-        ]
-      );
+      setShowEula(true);
       return;
     }
     onAppleLogin?.();

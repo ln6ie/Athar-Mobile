@@ -30,6 +30,18 @@ module.exports = {
     icon: "./assets/icon.png",
     userInterfaceStyle: "automatic",
     plugins: [
+      [
+        "expo-splash-screen",
+        {
+          backgroundColor: "#0A0A0C",
+          image: "./assets/splash-icon.png",
+          imageWidth: 200,
+          resizeMode: "contain",
+          android: {
+            backgroundColor: "#0A0A0C"
+          }
+        }
+      ],
       "expo-router",
       [
         "expo-build-properties",
@@ -59,6 +71,7 @@ module.exports = {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.athar.iq.app",
+      buildNumber: "16", // يمثل رقم البناء (+15)
       entitlements: {
         "com.apple.developer.applesignin": ["Default"],
         "aps-environment": process.env.EXPO_PUBLIC_APP_ENV === "production" ? "production" : "development"
@@ -76,9 +89,14 @@ module.exports = {
     },
     android: {
       package: "com.athar.iq.app",
+      versionCode: 16, // يمثل رقم البناء (+15) لتحديث المتجر تلقائياً
       permissions: [
         "android.permission.POST_NOTIFICATIONS"
       ],
+      metaData: {
+        "com.google.firebase.messaging.default_notification_channel_id": "athar_default"
+      },
+      softwareKeyboardLayoutMode: "adjustResize",
       adaptiveIcon: {
         foregroundImage: "./assets/adaptive-icon.png",
         backgroundColor: "#ffffff",
@@ -86,6 +104,10 @@ module.exports = {
       },
       predictiveBackGestureEnabled: false,
       googleServicesFile: process.env.GOOGLE_SERVICES_JSON || "./google-services.json"
+    },
+    splash: {
+      backgroundColor: "#0A0A0C",
+      resizeMode: "contain"
     },
     web: {
       favicon: "./assets/favicon.png"

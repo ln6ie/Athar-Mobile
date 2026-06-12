@@ -154,6 +154,7 @@ export const FeedScreen: React.FC = () => {
         keyExtractor={(item) => item.id}
         bounces={true}
         overScrollMode="never"
+        showsVerticalScrollIndicator={false}
         contentInsetAdjustmentBehavior="automatic"
         renderItem={({ item }) => {
           if (isSkeletonLoading) {

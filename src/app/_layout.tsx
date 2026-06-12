@@ -4,6 +4,7 @@ import '../constants/locales';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Slot } from 'expo-router';
 import { useAuthStore } from '../store/useAuthStore';
@@ -30,6 +31,9 @@ import {
   handleNotificationOpenedApp,
   setupForegroundMessageHandler,
 } from '../services/notificationManager';
+
+// إبقاء الـ native splash حتى نخفيه يدوياً
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 function MainLayout() {
   const { isAuthenticated, isInitialized, initialize } = useAuthStore();
@@ -62,6 +66,8 @@ function MainLayout() {
 
     const timer = setTimeout(() => {
       setShowSplash(false);
+      // إخفاء الـ native splash بعد انتهاء الـ intro
+      SplashScreen.hideAsync().catch(() => {});
     }, 2500);
     return () => {
       clearTimeout(timer);
@@ -125,7 +131,9 @@ function MainLayout() {
       {!isAuthenticated && isInitialized && !showSplash && (
         <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.background.default, zIndex: 500 }]}>
           <View style={globalStyles.container}>
-            <LoginScreen onSuccess={() => {}} />
+            <LoginScreen onSuccess={() => {
+              initializeFeed();
+            }} />
           </View>
         </View>
       )}
