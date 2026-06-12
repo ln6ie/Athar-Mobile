@@ -30,18 +30,6 @@ module.exports = {
     icon: "./assets/icon.png",
     userInterfaceStyle: "automatic",
     plugins: [
-      [
-        "expo-splash-screen",
-        {
-          backgroundColor: "#0A0A0C",
-          image: "./assets/splash-icon.png",
-          imageWidth: 200,
-          resizeMode: "contain",
-          android: {
-            backgroundColor: "#0A0A0C"
-          }
-        }
-      ],
       "expo-router",
       [
         "expo-build-properties",
@@ -106,8 +94,7 @@ module.exports = {
       googleServicesFile: process.env.GOOGLE_SERVICES_JSON || "./google-services.json"
     },
     splash: {
-      backgroundColor: "#0A0A0C",
-      resizeMode: "contain"
+      backgroundColor: "#0A0A0C"
     },
     web: {
       favicon: "./assets/favicon.png"
